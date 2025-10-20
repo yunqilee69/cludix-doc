@@ -1,4 +1,5 @@
 {
+  "name": "@cludix/cludix-doc",
   "devDependencies": {
     "vitepress": "^1.6.4"
   },
