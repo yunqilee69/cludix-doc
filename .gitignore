@@ -1,0 +1,44 @@
+# -------------- 系统级 --------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# -------------- 依赖 --------------
+node_modules/
+.pnpm-store/          # pnpm 虚拟存储（若用 pnpm）
+.npm
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# -------------- VitePress 构建产物 --------------
+.vitepress/dist/
+.vitepress/cache/
+.vitepress/temp/
+
+# -------------- 日志 & 锁文件（可选） --------------
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# -------------- 编辑器 --------------
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# -------------- 其他常见构建工具（若后续扩展） --------------
+dist/
+build/
+out/
