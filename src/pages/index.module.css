@@ -21,3 +21,29 @@
   align-items: center;
   justify-content: center;
 }
+
+/* 全屏背景 */
+.hero {
+  height: calc(100vh - 60px);
+  background: linear-gradient(135deg, #1677ff 0%, #0052cc 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 向下箭头弹跳 */
+.bounce {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: bounce 2s infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-10px); }
+}
+
+/* 让页面整体支持平滑滚动 */
+html {
+  scroll-behavior: smooth;
+}
