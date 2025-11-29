@@ -1,3 +1,9 @@
+---
+tags:
+  - vscode
+  - extensions
+---
+
 docusaurus集成tailwindcss
 
 ## 好处
