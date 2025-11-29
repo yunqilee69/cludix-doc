@@ -18,15 +18,14 @@ docusaurus集成tailwindcss
 
 ```js
 
+// 安装依赖
 pnpm add -D tailwindcss@^3.4.1 postcss@^8.4.41 autoprefixer@^10.4.20
-
-npx tailwindcss init --ts
 
 ```
 
-### 2. 修改tailwind.config.ts
+### 2. 创建tailwind.config.ts
 
-参考下面的内容进行修改
+直接放在项目根目录下即可
 
 ``` ts
 import type { Config } from 'tailwindcss'

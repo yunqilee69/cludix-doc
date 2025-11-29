@@ -82,7 +82,7 @@ const config: Config = {
       title: "云星",
       logo: {
         alt: "My Site Logo",
-        src: "img/logo.svg",
+        src: "img/logo.png",
       },
       items: [
         {
@@ -100,12 +100,6 @@ const config: Config = {
           sidebarId: 'techNotesSidebar',
           position: "right",
           label: '技术文档'
-        },
-        {
-          type: "docSidebar",
-          sidebarId: "tutorialSidebar",
-          position: "right",
-          label: "Tutorial",
         },
         {
           type: "docSidebar",
