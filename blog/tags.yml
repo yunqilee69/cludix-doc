@@ -17,3 +17,13 @@ hola:
   label: Hola
   permalink: /hola
   description: Hola tag description
+
+Debian:
+  label: Debian
+  permalink: /debian
+  description: Debian System
+
+VMware:
+  label: VMware
+  permalink: /VMware
+  description: VMware Workstation

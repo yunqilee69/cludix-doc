@@ -4,7 +4,9 @@
       "Bash(npm run start:*)",
       "Bash(dir:*)",
       "Bash(npm start)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(git ls-tree:*)",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []
