@@ -134,10 +134,8 @@ lsmod | grep -E 'overlay|br_netfilter'
 ```bash
 # 创建Kubernetes内核参数配置文件
 cat <<EOF | tee /etc/sysctl.d/99-k8s.conf
-# 启用bridge网卡的iptables过滤
 net.bridge.bridge-nf-call-iptables  = 1
 net.bridge.bridge-nf-call-ip6tables = 1
-# 启用IP转发
 net.ipv4.ip_forward                 = 1
 EOF
 
@@ -158,29 +156,17 @@ sysctl net.bridge.bridge-nf-call-iptables \
 
 Containerd 是 Kubernetes 1.33 推荐的容器运行时，替代了之前的 Docker。
 
-### 4.1 安装 Containerd 2.1.1
+### 4.1 安装 Containerd
 
 ```bash
 # 更新软件包索引
 apt update
 
-# 添加Docker官方GPG密钥（containerd官方仓库）
-curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-
-# 添加Docker APT仓库（包含containerd）
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-# 再次更新软件包索引以获取新仓库的包
-apt update
-
-# 查看可用的containerd版本
-apt-cache policy containerd.io
-
-# 安装指定版本的containerd（2.1.1）
-apt install -y containerd.io=2.1.1-1 curl gpg
+# 安装containerd
+apt install -y containerd
 
 # 锁定containerd版本，防止意外升级
-apt-mark hold containerd.io
+apt-mark hold containerd
 
 # 创建containerd配置目录
 mkdir -p /etc/containerd
@@ -192,16 +178,12 @@ containerd config default | sudo tee /etc/containerd/config.toml
 systemctl enable --now containerd
 ```
 
-**版本说明**:
-- 直接安装 containerd **v2.1.1** 版本
-- 使用 Docker 官方仓库获取指定版本
-- 通过 `apt-mark hold` 锁定版本，防止意外升级
 
 **安装验证**:
 ```bash
 # 验证安装的版本
 containerd --version
-# 期望输出：containerd github.com/containerd/containerd v2.1.1
+# 期望输出：containerd github.com/containerd/containerd vx.x.x
 ```
 
 ### 4.2 关键配置详解
@@ -265,29 +247,6 @@ grep -E "SystemdCgroup|sandbox_image" /etc/containerd/config.toml
 # 期望输出：
 # SystemdCgroup = true
 # sandbox_image = "registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.10"
-```
-
-### 4.4 配置验证命令
-
-```bash
-# 检查containerd版本
-containerd --version
-# 推荐版本：containerd github.com/containerd/containerd v2.1.1 或更高版本
-
-# 检查containerd服务状态
-systemctl is-active containerd
-systemctl is-enabled containerd
-
-# 查看containerd配置（可选）
-containerd config dump
-
-# 检查containerd客户端和服务端版本（更详细信息）
-containerd version
-# 期望输出包含：
-# containerd github.com/containerd/containerd v2.1.x
-#   commit: xxx
-#   runc: version x.x.x
-#   spec: 1.x.x
 ```
 
 ## 5. 安装 Kubernetes 组件
@@ -355,22 +314,326 @@ kubectl version --client
 # 期望：输出kubectl客户端版本信息
 ```
 
-## 6. 集群初始化
+## 6. 主节点高可用架构
 
-### 6.1 主节点初始化（k8s-m1）
+### 6.1 高可用架构概述
 
-```bash
-# 在第一个主节点（k8s-m1）上执行
-kubeadm init \
-  --apiserver-advertise-address=192.168.100.10 \
-  --image-repository registry.aliyuncs.com/google_containers \
-  --kubernetes-version=v1.33.0 \
-  --service-cidr=10.96.0.0/12 \
-  --pod-network-cidr=10.244.0.0/16 \
-  --ignore-preflight-errors=all
+在多主节点的 Kubernetes 集群中，主节点高可用是确保集群稳定运行的关键。由于 Kubernetes 集群对外暴露的 API Server 地址只有一个，当存在多个主节点时，需要通过虚拟 IP（VIP）技术实现负载均衡和故障转移。
+
+#### 高可用架构组件
+
+- **Keepalived**: VRRP协议实现，负责虚拟IP的抢占和故障转移
+- **HAProxy**: 高性能负载均衡器，负责将流量分发到多个主节点的API Server
+- **虚拟IP（VIP）**: 集群对外提供的统一访问入口
+
+#### 架构设计原理
+
+```
+客户端请求
+    ↓
+   VIP (192.168.100.7)
+    ↓
+  Keepalived (故障检测)
+    ↓
+  HAProxy (负载均衡)
+    ↓
+┌─────────────────────────────────┐
+│  Master节点1 (k8s-m1:6443)    │ ← 主节点
+│  Master节点2 (k8s-m2:6443)    │ ← 备节点
+└─────────────────────────────────┘
 ```
 
-### 6.2 配置 kubectl
+### 6.2 网络规划
+
+除了现有的节点IP外，我们需要为高可用架构分配一个虚拟IP：
+
+| 组件 | IP地址 | 端口 | 说明 |
+|------|--------|------|------|
+| k8s-m1 | 192.168.100.10 | 6443 | Master节点1 API Server |
+| k8s-m2 | 192.168.100.11 | 6443 | Master节点2 API Server |
+| **VIP** | **192.168.100.7** | 8443 | 集群统一访问入口 |
+
+> 💡 **注意**: VIP (192.168.100.7) 是一个虚拟IP，不实际分配给任何物理网卡，由Keepalived管理。
+
+### 6.3 安装和配置 Keepalived
+
+#### 6.3.1 在所有主节点上安装 Keepalived
+
+```bash
+# 在 k8s-m1 和 k8s-m2 上执行
+apt update
+apt install -y keepalived
+
+# 设置开机自启动
+systemctl start keepalived
+systemctl enable --now keepalived
+```
+
+#### 6.3.2 配置 Keepalived
+
+**主节点（k8s-m1）配置**:
+```bash
+# 创建 Keepalived 配置文件
+cat > /etc/keepalived/keepalived.conf << 'EOF'
+! Configuration File for keepalived
+global_defs {
+   router_id k8s-m1                    # 路由器标识，需要唯一
+   script_user root                    # 执行脚本的用户
+   enable_script_security              # 启用脚本安全检查
+}
+
+vrrp_script chk_haproxy {
+   script "/usr/local/bin/check_haproxy.sh"  # 检查HAProxy状态的脚本
+   interval 2                             # 检查间隔（秒）
+   weight -20                            # 检查失败时权重减少
+   fall 3                                # 连续失败3次才认为失败
+   rise 2                                # 连续成功2次才认为恢复
+}
+
+vrrp_instance VI_1 {
+    state MASTER                        # 初始状态：主节点
+    interface ens33                     # 绑定的网络接口（根据实际网卡名称调整）
+    virtual_router_id 51                # 虚拟路由ID，同一集群必须一致
+    priority 110                        # 优先级（主节点更高）
+    advert_int 1                        # VRRP广播间隔（秒）
+
+    authentication {
+        auth_type PASS                  # 认证类型
+        auth_pass k8s@2025              # 认证密码
+    }
+
+    virtual_ipaddress {
+        192.168.100.7                 # 虚拟IP地址
+    }
+
+    track_script {
+        chk_haproxy                     # 跟踪HAProxy健康状态
+    }
+
+    # 状态切换时的通知脚本
+    notify_master "/usr/local/bin/notify_master.sh"
+    notify_backup "/usr/local/bin/notify_backup.sh"
+    notify_fault "/usr/local/bin/notify_fault.sh"
+}
+EOF
+```
+
+**备节点（k8s-m2）配置**:
+```bash
+# 创建 Keepalived 配置文件
+cat > /etc/keepalived/keepalived.conf << 'EOF'
+! Configuration File for keepalived
+global_defs {
+   router_id k8s-m2
+   script_user root
+   enable_script_security
+}
+
+vrrp_script chk_haproxy {
+   script "/usr/local/bin/check_haproxy.sh"
+   interval 2
+   weight -20
+   fall 3
+   rise 2
+}
+
+vrrp_instance VI_1 {
+    state BACKUP                       # 初始状态：备节点
+    interface ens33
+    virtual_router_id 51
+    priority 100                        # 优先级（备节点较低）
+    advert_int 1
+
+    authentication {
+        auth_type PASS
+        auth_pass k8s@2025
+    }
+
+    virtual_ipaddress {
+        192.168.100.7
+    }
+
+    track_script {
+        chk_haproxy
+    }
+
+    notify_master "/usr/local/bin/notify_master.sh"
+    notify_backup "/usr/local/bin/notify_backup.sh"
+    notify_fault "/usr/local/bin/notify_fault.sh"
+}
+EOF
+```
+
+#### 6.3.3 创建健康检查和通知脚本
+
+**HAProxy健康检查脚本**:
+```bash
+# 在所有主节点上创建健康检查脚本
+cat > /usr/local/bin/check_haproxy.sh << 'EOF'
+#!/bin/bash
+
+# 检查HAProxy进程是否存在
+if ! pgrep haproxy > /dev/null; then
+    echo "HAProxy process not found"
+    exit 1
+fi
+
+# 检查HAProxy是否在监听端口
+if ! netstat -tlnp | grep -q ":8443"; then
+    echo "HAProxy not listening on port 8443"
+    exit 1
+fi
+
+# 通过HAProxy管理接口检查后端服务器状态
+curl -s -f http://127.0.0.1:8404/stats > /dev/null
+if [ $? -ne 0 ]; then
+    echo "HAProxy stats interface not accessible"
+    exit 1
+fi
+
+echo "HAProxy is healthy"
+exit 0
+EOF
+
+chmod +x /usr/local/bin/check_haproxy.sh
+```
+
+**状态通知脚本**:
+```bash
+# 状态切换通知脚本
+cat > /usr/local/bin/notify_master.sh << 'EOF'
+#!/bin/bash
+echo "$(date): Node became MASTER" >> /var/log/keepalived/notify.log
+# 可以添加邮件、短信等通知逻辑
+EOF
+
+cat > /usr/local/bin/notify_backup.sh << 'EOF'
+#!/bin/bash
+echo "$(date): Node became BACKUP" >> /var/log/keepalived/notify.log
+EOF
+
+cat > /usr/local/bin/notify_fault.sh << 'EOF'
+#!/bin/bash
+echo "$(date): Node entered FAULT state" >> /var/log/keepalived/notify.log
+EOF
+
+chmod +x /usr/local/bin/notify_*.sh
+
+# 创建日志目录
+mkdir -p /var/log/keepalived
+```
+
+### 6.4 安装和配置 HAProxy
+
+#### 6.4.1 安装 HAProxy
+
+```bash
+# 在所有主节点上安装 HAProxy
+apt update
+apt install -y haproxy
+
+# 设置开机自启动
+systemctl enable --now haproxy
+```
+
+#### 6.4.2 配置 HAProxy
+
+```bash
+# 备份原始配置
+cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.bak
+
+# 创建 Kubernetes API Server 负载均衡配置
+cat > /etc/haproxy/haproxy.cfg << 'EOF'
+global
+    log /dev/log    local0
+    log /dev/log    local1 notice
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.sock mode 660 level admin expose-fd listeners
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+
+defaults
+    log     global
+    mode    tcp
+    option  tcplog
+    option  dontlognull
+    timeout connect 5000
+    timeout client  50000
+    timeout server  50000
+
+frontend k8s_api_frontend
+    bind *:8443
+    mode tcp
+    default_backend k8s_api_backend
+
+backend k8s_api_backend
+    mode tcp
+    balance roundrobin
+    option tcp-check
+    server k8s-m1 192.168.100.10:6443 check
+    server k8s-m2 192.168.100.11:6443 check
+
+listen stats
+    bind *:8404
+    mode http
+    stats enable
+    stats uri /stats
+    stats refresh 30s
+    stats admin if TRUE
+EOF
+```
+
+#### 6.4.3 验证 HAProxy 配置
+
+```bash
+# 检查配置文件语法
+haproxy -f /etc/haproxy/haproxy.cfg -c
+# 没有任何输出代表正确
+
+# 重启 HAProxy 服务
+systemctl restart haproxy
+
+# 检查服务状态
+systemctl status haproxy
+
+# 检查监听端口
+netstat -tlnp | grep haproxy
+```
+
+## 7. 集群初始化
+
+### 7.1 主节点初始化（k8s-m1）
+
+使用高可用架构进行集群初始化：
+
+:::warning
+初始化前需要确保keepalived haproxy两个服务都是启动成功的
+systemctl is-active keepalived haproxy
+:::
+
+```bash
+# 在第一个主节点（k8s-m1）上执行，使用VIP作为API Server地址
+ kubeadm init \
+    --apiserver-advertise-address=192.168.100.10 \
+    --apiserver-bind-port=6443 \
+    --control-plane-endpoint=192.168.100.7:8443 \
+    --image-repository registry.aliyuncs.com/google_containers \
+    --kubernetes-version=v1.33.0 \
+    --service-cidr=10.96.0.0/12 \
+    --pod-network-cidr=10.244.0.0/16 \
+    --ignore-preflight-errors=all
+```
+
+:::tip 参数说明
+- **apiserver-advertise-address**: API Server服务的绑定地址，使用当前主节点的物理IP（如192.168.100.10）
+- **apiserver-bind-port**: API Server监听的端口，使用标准端口6443
+- **control-plane-endpoint**: Kubernetes集群对外的统一访问地址，使用VIP:8443（如192.168.100.7:8443）
+:::
+
+
+### 7.2 配置 kubectl
 
 初始化成功后，按照提示配置 kubectl：
 
@@ -380,7 +643,36 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
-### 6.3 安装网络插件（CNI）
+:::tip 提示
+这个kubectl是在机器用命令行的方式操作k8s集群，用可视化管理工具也是可以的，例如ranchar
+:::
+
+### 7.3 启动高可用服务
+
+#### 7.3.1 启动服务顺序
+
+```bash
+# 1. 首先启动 HAProxy
+systemctl restart haproxy
+
+# 2. 然后启动 Keepalived
+systemctl restart keepalived
+
+# 3. 检查服务状态
+systemctl status haproxy keepalived
+```
+
+#### 7.3.2 验证 VIP 分配
+
+```bash
+# 在主节点（k8s-m1）上应该能看到VIP
+ip addr show | grep 192.168.100.7
+
+# 在备节点（k8s-m2）上不应该看到VIP
+ip addr show | grep 192.168.100.7
+```
+
+### 7.4 安装网络插件（CNI）
 
 选择一个 CNI 插件，这里以 Calico 为例：
 
@@ -389,18 +681,42 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
 ```
 
-### 6.4 添加其他节点
+### 7.5 添加其他节点
 
-**其他主节点加入**:
-在其他主节点上执行 `kubeadm init` 时生成的 join 命令。
-
-**工作节点加入**:
-在工作节点上执行 join 命令，格式类似：
+**添加其他主节点**:
+在初始化的主节点(k8s-m1)上需要执行下面的命令，用于k8s其他的主节点在加入集群时，传递相同的CA证书
 ```bash
-kubeadm join 192.168.100.10:6443 --token <token> --discovery-token-ca-cert-hash <hash>
+kubeadm init phase upload-certs --upload-certs
+
+# 输出了例如下面的字符串
+root@k8s-m1:~# kubeadm init phase upload-certs --upload-certs
+I1213 04:56:49.562209    8267 version.go:261] remote version is much newer: v1.34.3; falling back to: stable-1.33
+W1213 04:56:49.586253    8267 version.go:109] could not fetch a Kubernetes version from the internet: unable to get URL "https://dl.k8s.io/release/stable-1.33.txt": Get "https://dl.k8s.io/release/stable-1.33.txt": dial tcp [2600:1901:0:26f3::]:443: connect: network is unreachable
+W1213 04:56:49.586292    8267 version.go:110] falling back to the local client version: v1.33.6
+[upload-certs] Storing the certificates in Secret "kubeadm-certs" in the "kube-system" Namespace
+[upload-certs] Using certificate key:
+025e086454b81bdb31eb7062590f90ad4a6d18df75b883278ec59c5c3b4cc963
+
+# 最后一行就是--certificate-key 值，需要在主节点的命令中加上
+```
+在其他主节点（k8s-m2）上需要，使用第一个主节点初始化时生成的join命令，并额外添加 `--control-plane` 表示加入控制平面：
+  ```bash
+  kubeadm join 192.168.100.7:8443 \
+    --token <token> \
+    --discovery-token-ca-cert-hash <hash> \
+    --control-plane
+    --certificate-key 025e086454b8xxxx
+  ```
+
+**添加工作节点**:
+在工作节点上直接执行join命令（无需安装高可用组件）：
+```bash
+kubeadm join 192.168.100.7:8443 --token <token> --discovery-token-ca-cert-hash <hash>
 ```
 
-### 6.5 验证集群状态
+> 💡 **注意**: 工作节点只需要安装kubelet、kubeadm、kubectl，无需安装Keepalived和HAProxy
+
+### 7.6 验证集群状态
 
 ```bash
 # 查看节点状态
@@ -411,20 +727,154 @@ kubectl get pods --all-namespaces
 
 # 查看集群信息
 kubectl cluster-info
+
+# 测试通过VIP访问API Server
+curl -k https://192.168.100.7:8443/version
 ```
+
+## 8. 高可用维护和监控
+
+### 8.1 故障转移测试
+
+#### 8.1.1 模拟主节点故障
+
+```bash
+# 在主节点（k8s-m1）上停止HAProxy
+systemctl stop haproxy
+
+# 观察VIP是否转移到备节点
+# 在k8s-m2上检查：ip addr show | grep 192.168.100.7
+```
+
+#### 8.1.2 恢复主节点
+
+```bash
+# 在k8s-m1上重启服务
+systemctl start haproxy
+systemctl restart keepalived
+
+# VIP应该根据优先级重新分配
+```
+
+### 8.2 监控和日志
+
+#### 8.2.1 关键日志位置
+
+```bash
+# Keepalived日志
+tail -f /var/log/syslog | grep keepalived
+tail -f /var/log/keepalived/notify.log
+
+# HAProxy日志
+tail -f /var/log/haproxy.log
+
+# 系统服务日志
+journalctl -u keepalived -f
+journalctl -u haproxy -f
+```
+
+#### 8.2.2 健康检查脚本
+
+```bash
+# 创建集群健康状态检查脚本
+cat > /usr/local/bin/check_ha_cluster.sh << 'EOF'
+#!/bin/bash
+
+echo "=== Kubernetes HA Cluster Health Check ==="
+echo "Timestamp: $(date)"
+
+# 检查VIP状态
+echo -e "\n1. VIP Status:"
+VIP_FOUND=$(ip addr show | grep -c "192.168.100.7")
+if [ $VIP_FOUND -eq 1 ]; then
+    echo "✅ VIP is present on this node"
+else
+    echo "❌ VIP is not present on this node"
+fi
+
+# 检查Keepalived状态
+echo -e "\n2. Keepalived Status:"
+systemctl is-active keepalived && echo "✅ Keepalived is running" || echo "❌ Keepalived is not running"
+
+# 检查HAProxy状态
+echo -e "\n3. HAProxy Status:"
+systemctl is-active haproxy && echo "✅ HAProxy is running" || echo "❌ HAProxy is not running"
+
+# 检查后端API Server状态
+echo -e "\n4. Backend API Servers:"
+echo "lynk8s-m1 API Server:"
+curl -s -o /dev/null -w "%{http_code}\n" http://192.168.100.10:6443/healthz 2>/dev/null || echo "❌ Failed"
+echo "lynk8s-m2 API Server:"
+curl -s -o /dev/null -w "%{http_code}\n" http://192.168.100.11:6443/healthz 2>/dev/null || echo "❌ Failed"
+
+# 检查通过VIP的访问
+echo -e "\n5. VIP Access Test:"
+curl -s -o /dev/null -w "%{http_code}\n" http://192.168.100.7:8443/healthz 2>/dev/null || echo "❌ Failed"
+
+echo -e "\n=== Health Check Completed ==="
+EOF
+
+chmod +x /usr/local/bin/check_ha_cluster.sh
+```
+
+### 8.3 扩展主节点
+
+当需要添加更多主节点时：
+
+1. **新节点安装相同组件**: Keepalived + HAProxy
+2. **调整配置**:
+   - Keepalived配置中设置适当的优先级
+   - HAProxy配置中添加新的后端服务器
+3. **更新所有主节点的HAProxy配置**，添加新的主节点
+4. **重启相关服务**使配置生效
+
+> ⚠️ **重要提示**: 每次添加新主节点时，需要更新所有现有主节点的HAProxy配置文件，将新的主节点添加到后端服务器列表中。
+
+### 8.4 常见问题排查
+
+#### 问题1: VIP无法绑定
+- 检查网卡名称是否正确
+- 确认IP地址没有冲突
+- 检查防火墙规则
+
+#### 问题2: HAProxy健康检查失败
+- 检查API Server端口是否正常监听
+- 验证健康检查脚本的权限和路径
+- 查看HAProxy日志获取详细错误信息
+
+#### 问题3: 故障转移不生效
+- 确认Keepalived配置中的优先级设置
+- 检查VRRP认证密码是否一致
+- 验证网络连通性
 
 ---
 
 ## 📋 总结
 
-完成以上所有步骤后，您将拥有一个功能完整的 Kubernetes 1.33 集群。主要配置包括：
+完成以上所有步骤后，您将拥有一个功能完整且高可用的 Kubernetes 1.33 集群。主要配置包括：
 
-✅ **系统准备** - Debian 13 最小化安装
+✅ **系统准备** - Debian 13 最小化安装和网络规划
 ✅ **网络配置** - 静态IP和主机名解析
 ✅ **系统初始化** - 关闭Swap、加载内核模块、配置内核参数
 ✅ **容器运行时** - Containerd 配置（cgroup驱动和pause镜像优化）
 ✅ **Kubernetes组件** - kubeadm、kubelet、kubectl 安装
-✅ **集群部署** - 初始化主节点、添加工作节点
+✅ **高可用架构** - Keepalived + HAProxy 实现主节点高可用
+✅ **集群部署** - 使用VIP初始化高可用集群、添加工作节点
+✅ **监控维护** - 健康检查、故障转移、扩展方案
 
-您的集群现在已经准备好运行容器化应用了！
+### 🔧 关键特性
+
+- **高可用性**: 通过Keepalived + HAProxy实现API Server的高可用
+- **自动故障转移**: 主节点故障时，VIP自动切换到备用节点
+- **负载均衡**: HAProxy将请求分发到多个健康的主节点
+- **易于扩展**: 支持动态添加新的主节点和工作节点
+- **完整监控**: 提供健康检查脚本和日志监控方案
+
+您的Kubernetes集群现在已经准备好运行生产环境的容器化应用了！
+
+### 📚 相关参考
+
+- [Keepalived官方文档](https://keepalived.org/doc/)
+- [HAProxy官方文档](http://www.haproxy.org/doc/)
+- [Kubernetes高可用官方文档](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/)
 
