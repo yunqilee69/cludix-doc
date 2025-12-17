@@ -37,10 +37,13 @@ sudo docekr --version
 
 ## 3. 用户添加至docker组
 
-用户添加至docker组后，就不再需要使用sudo命令了。重新登陆或新开终端生效
+用户添加至docker组后，就不再需要使用sudo命令了。
 
 ```bash
-sudo usermod -aG docker 用户名
+sudo usermod -aG docker $USER
+
+# 重新登陆
+su - $USER
 ```
 
 ## 4. 配置docker自启动
