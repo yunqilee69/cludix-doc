@@ -31,3 +31,18 @@ nvm alias default v20.19.6
 # 临时切换版本
 nvm usc version
 ```
+
+## npm配置阿里云源
+
+### 1. 设置全局镜像
+
+```bash
+npm config set registry https://registry.npmmirror.com
+```
+
+### 2. 验证是否生效
+
+```bash
+npm config get registry
+# 输出 https://registry.npmmirror.com 即成功
+```
