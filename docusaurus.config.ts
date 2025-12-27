@@ -102,6 +102,12 @@ const config: Config = {
           label: '技术文档'
         },
         {
+          type: 'docSidebar',
+          sidebarId: 'devOpsSidebar',
+          position: 'right',
+          label: '运维篇'
+        },
+        {
           type: "docSidebar",
           sidebarId: "nebulaSidebar",
           position: "right",
