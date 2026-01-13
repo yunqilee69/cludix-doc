@@ -3,6 +3,7 @@ import nebulaSidebar from './nebula';
 import techNotesSidebar from './tech-notes';
 import bugRecordsSidebar from './bug-records';
 import devOpsSidebar from './dev-ops';
+import softwareSidebar from './software';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -23,6 +24,7 @@ const sidebars: SidebarsConfig = {
   techNotesSidebar,
   bugRecordsSidebar,
   devOpsSidebar,
+  softwareSidebar
 };
 
 export default sidebars;

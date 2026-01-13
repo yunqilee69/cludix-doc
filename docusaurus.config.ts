@@ -109,6 +109,12 @@ const config: Config = {
         },
         {
           type: "docSidebar",
+          sidebarId: "softwareSidebar",
+          position: "right",
+          label: "软件安装",
+        },
+        {
+          type: "docSidebar",
           sidebarId: "nebulaSidebar",
           position: "right",
           label: "Nebula",
