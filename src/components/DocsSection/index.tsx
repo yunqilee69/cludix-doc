@@ -20,18 +20,18 @@ interface DocItem {
 const docsItems: DocItem[] = [
   {
     id: '1',
-    title: '开发运维',
-    description: 'Docker、Kubernetes、Jenkins 等运维工具的安装与配置教程。',
+    title: '运维',
+    description: '服务器运维和应用部署相关文档。',
     tags: ['DevOps', '运维'],
-    permalink: '/docs/dev-ops',
+    permalink: '/docs/ops',
     icon: <FileTextOutlined style={{ fontSize: '32px', color: '#667eea' }} />,
   },
   {
     id: '2',
-    title: '问题记录',
-    description: '开发过程中遇到的问题及其解决方法记录。',
+    title: '问题解决',
+    description: '开发、运维过程中遇到的问题及解决方案。',
     tags: ['问题', '排查'],
-    permalink: '/docs/bug-records',
+    permalink: '/docs/solutions',
     icon: <FileTextOutlined style={{ fontSize: '32px', color: '#f093fb' }} />,
   },
   {
@@ -39,7 +39,7 @@ const docsItems: DocItem[] = [
     title: 'Nebula 规范',
     description: '项目开发规范和最佳实践指南。',
     tags: ['规范', '最佳实践'],
-    permalink: '/docs/nebula',
+    permalink: '/docs/projects/nebula',
     icon: <ReadOutlined style={{ fontSize: '32px', color: '#4facfe' }} />,
   },
 ]
