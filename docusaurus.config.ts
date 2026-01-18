@@ -12,7 +12,7 @@ const config: Config = {
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
-    v4: true, // Improve compatibility with the upcoming Docusaurus v4
+    v4: true, // Improve compatibility with upcoming Docusaurus v4
   },
 
   // Set the production url of your site here
@@ -29,7 +29,7 @@ const config: Config = {
   onBrokenLinks: "throw",
 
   // Even if you don't use internationalization, you can use this field to set
-  // useful metadata like html lang. For example, if your site is Chinese, you
+  // useful metadata like html lang. For example, if your site is in Chinese, you
   // may want to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: "en",
@@ -46,21 +46,6 @@ const config: Config = {
           // Remove this to remove the "edit this page" links.
           editUrl:
             "https://github.com/yunqilee69/cludix-doc/tree/master/",
-        },
-        blog: {
-          showReadingTime: true,
-          feedOptions: {
-            type: ["rss", "atom"],
-            xslt: true,
-          },
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            "https://github.com/yunqilee69/cludix-doc/tree/master/",
-          // Useful options to enforce blogging best practices
-          onInlineTags: "warn",
-          onInlineAuthors: "warn",
-          onUntruncatedBlogPosts: "warn",
         },
         theme: {
           customCss: "./src/css/custom.css",
@@ -91,41 +76,33 @@ const config: Config = {
         },
         {
           type: "docSidebar",
-          sidebarId: 'bugRecordsSidebar',
-          position: "right",
-          label: 'Bug记录'
+          sidebarId: 'opsSidebar',
+          position: "left",
+          label: "运维"
         },
         {
           type: "docSidebar",
-          sidebarId: 'techNotesSidebar',
-          position: "right",
-          label: '技术文档'
-        },
-        {
-          type: 'docSidebar',
-          sidebarId: 'devOpsSidebar',
-          position: 'right',
-          label: '运维篇'
+          sidebarId: 'devEnvSidebar',
+          position: "left",
+          label: "开发环境"
         },
         {
           type: "docSidebar",
-          sidebarId: "softwareSidebar",
-          position: "right",
-          label: "软件安装",
+          sidebarId: 'solutionsSidebar',
+          position: "left",
+          label: "问题解决"
         },
         {
           type: "docSidebar",
-          sidebarId: "nebulaSidebar",
-          position: "right",
-          label: "Nebula",
+          sidebarId: "projectsSidebar",
+          position: "left",
+          label: "项目文档"
         },
-        { to: "/blog", label: "Blog", position: "left" },
-        
         {
           href: "https://github.com/yunqilee69",
           label: "GitHub",
           position: "right",
-          
+
         },
       ],
     },
