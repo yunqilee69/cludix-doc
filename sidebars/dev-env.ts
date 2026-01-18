@@ -7,10 +7,10 @@ const devEnvSidebar: SidebarConfig = [
     collapsible: true,
     collapsed: false,
     items: [
-      'dev-env/package-managers/homebrew',
-      'dev-env/package-managers/nvm-nodejs',
-      'dev-env/package-managers/sdkman-java',
-      'dev-env/package-managers/uv-python',
+      'dev-env/package-managers/homebrew/index',
+      'dev-env/package-managers/nvm-nodejs/index',
+      'dev-env/package-managers/sdkman-java/index',
+      'dev-env/package-managers/uv-python/index',
     ],
   },
   {
@@ -19,9 +19,9 @@ const devEnvSidebar: SidebarConfig = [
     collapsible: true,
     collapsed: false,
     items: [
-      'dev-env/tools/oh-my-zsh',
-      'dev-env/tools/opencode',
-      'dev-env/tools/git',
+      'dev-env/tools/oh-my-zsh/index',
+      'dev-env/tools/opencode/index',
+      'dev-env/tools/git/index',
     ],
   },
 ];

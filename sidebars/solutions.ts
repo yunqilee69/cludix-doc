@@ -18,22 +18,8 @@ const solutionsSidebar: SidebarConfig = [
     collapsible: true,
     collapsed: true,
     items: [
-      'solutions/server-issues/vmware-usb-debian',
+      'solutions/server-issues/vmware-usb-debian/index',
     ],
-  },
-  {
-    type: 'category',
-    label: 'Dev Issues',
-    collapsible: true,
-    collapsed: true,
-    items: [],
-  },
-  {
-    type: 'category',
-    label: 'Network Issues',
-    collapsible: true,
-    collapsed: true,
-    items: [],
   },
 ];
 

@@ -6,10 +6,10 @@ const projectsSidebar: SidebarConfig = [
     label: 'Nebula',
     collapsible: false,
     items: [
-      'projects/nebula',
-      'projects/nebula/spec',
-      'projects/nebula/uaa',
-      'projects/nebula/api',
+      'projects/nebula/index',
+      'projects/nebula/spec/index',
+      'projects/nebula/uaa/index',
+      'projects/nebula/uaa/test',
     ],
   },
 ];

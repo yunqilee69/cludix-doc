@@ -7,10 +7,10 @@ const opsSidebar: SidebarConfig = [
     collapsible: true,
     collapsed: false,
     items: [
-      'ops/basics/debian-base-config',
-      'ops/basics/debian-static-ip',
-      'ops/basics/install-docker',
-      'ops/basics/install-k8s',
+      'ops/basics/debian-base-config/index',
+      'ops/basics/debian-static-ip/index',
+      'ops/basics/install-docker/index',
+      'ops/basics/install-k8s/index',
     ],
   },
   {
@@ -19,8 +19,8 @@ const opsSidebar: SidebarConfig = [
     collapsible: true,
     collapsed: true,
     items: [
-      'ops/network/frp-nat',
-      'ops/network/git-ssh',
+      'ops/network/frp-nat/index',
+      'ops/network/git-ssh/index',
     ],
   },
   {
@@ -29,8 +29,8 @@ const opsSidebar: SidebarConfig = [
     collapsible: true,
     collapsed: true,
     items: [
-      'ops/services/jellyfin',
-      'ops/services/milvus',
+      'ops/services/jellyfin/index',
+      'ops/services/milvus/index',
     ],
   },
   {
@@ -46,12 +46,12 @@ const opsSidebar: SidebarConfig = [
         collapsed: true,
         items: [
           'ops/cicd/jenkins/index',
-          'ops/cicd/jenkins/install-jenkins',
-          'ops/cicd/jenkins/jenkins-ssh-config',
-          'ops/cicd/jenkins/jenkins-deploy',
+          'ops/cicd/jenkins/install-jenkins/index',
+          'ops/cicd/jenkins/jenkins-ssh-config/index',
+          'ops/cicd/jenkins/jenkins-deploy/index',
         ],
       },
-      'ops/cicd/webhook',
+      'ops/cicd/webhook/index',
     ],
   },
 ];
