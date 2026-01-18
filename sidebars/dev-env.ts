@@ -3,7 +3,7 @@ import type {SidebarConfig} from './index';
 const devEnvSidebar: SidebarConfig = [
   {
     type: 'category',
-    label: 'Package Managers',
+    label: '包管理器',
     collapsible: true,
     collapsed: false,
     items: [
@@ -15,7 +15,7 @@ const devEnvSidebar: SidebarConfig = [
   },
   {
     type: 'category',
-    label: 'Tools',
+    label: '开发工具',
     collapsible: true,
     collapsed: false,
     items: [

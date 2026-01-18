@@ -28,19 +28,19 @@ const docsItems: DocItem[] = [
   },
   {
     id: '2',
-    title: '问题解决',
-    description: '开发、运维过程中遇到的问题及解决方案。',
-    tags: ['问题', '排查'],
-    permalink: '/docs/solutions',
+    title: '开发工具',
+    description: '包管理器和开发工具配置。',
+    tags: ['开发工具', '配置'],
+    permalink: '/docs/dev-env',
     icon: <FileTextOutlined style={{ fontSize: '32px', color: '#f093fb' }} />,
   },
   {
     id: '3',
-    title: 'Nebula 规范',
-    description: '项目开发规范和最佳实践指南。',
-    tags: ['规范', '最佳实践'],
-    permalink: '/docs/nebula',
-    icon: <ReadOutlined style={{ fontSize: '32px', color: '#4facfe' }} />,
+    title: '问题解决',
+    description: '开发、运维过程中遇到的问题及解决方案。',
+    tags: ['问题', '排查'],
+    permalink: '/docs/solutions',
+    icon: <FileTextOutlined style={{ fontSize: '32px', color: '#4facfe' }} />,
   },
 ]
 

@@ -71,11 +71,6 @@ const config: Config = {
       },
       items: [
         {
-          href: "https://github.com/yunqilee69",
-          label: "GitHub",
-          position: "right",
-        },
-        {
           type: "search",
           position: "right",
         },
@@ -87,21 +82,26 @@ const config: Config = {
         },
         {
           type: "docSidebar",
+          sidebarId: 'devEnvSidebar',
+          position: "right",
+          label: "开发工具"
+        },
+        {
+          type: "docSidebar",
           sidebarId: 'solutionsSidebar',
           position: "right",
           label: "问题解决"
         },
         {
           type: "docSidebar",
-          sidebarId: 'devEnvSidebar',
-          position: "right",
-          label: "开发环境"
-        },
-        {
-          type: "docSidebar",
           sidebarId: 'opsSidebar',
           position: "right",
           label: "运维"
+        },
+        {
+          href: "https://github.com/yunqilee69",
+          label: "GitHub",
+          position: "right",
         },
       ],
     },
