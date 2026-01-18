@@ -39,7 +39,7 @@ const docsItems: DocItem[] = [
     title: 'Nebula 规范',
     description: '项目开发规范和最佳实践指南。',
     tags: ['规范', '最佳实践'],
-    permalink: '/docs/projects/nebula',
+    permalink: '/docs/nebula',
     icon: <ReadOutlined style={{ fontSize: '32px', color: '#4facfe' }} />,
   },
 ]

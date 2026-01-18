@@ -2,7 +2,7 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
 import opsSidebar from './ops';
 import devEnvSidebar from './dev-env';
 import solutionsSidebar from './solutions';
-import projectsSidebar from './projects';
+import nebulaSidebar from './nebula';
 
 export type SidebarConfig = SidebarsConfig[string];
 
@@ -10,7 +10,7 @@ const sidebars: SidebarsConfig = {
   opsSidebar,
   devEnvSidebar,
   solutionsSidebar,
-  projectsSidebar
+  nebulaSidebar
 };
 
 export default sidebars;

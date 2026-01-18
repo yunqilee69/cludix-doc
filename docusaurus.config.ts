@@ -81,9 +81,9 @@ const config: Config = {
         },
         {
           type: "docSidebar",
-          sidebarId: 'projectsSidebar',
+          sidebarId: 'nebulaSidebar',
           position: "right",
-          label: "项目文档"
+          label: "Nebula"
         },
         {
           type: "docSidebar",
@@ -102,43 +102,6 @@ const config: Config = {
           sidebarId: 'opsSidebar',
           position: "right",
           label: "运维"
-        },
-      ],
-    },
-      items: [
-        {
-          type: "search",
-          position: "right",
-        },
-        {
-          type: "docSidebar",
-          sidebarId: 'opsSidebar',
-          position: "left",
-          label: "运维"
-        },
-        {
-          type: "docSidebar",
-          sidebarId: 'devEnvSidebar',
-          position: "left",
-          label: "开发环境"
-        },
-        {
-          type: "docSidebar",
-          sidebarId: 'solutionsSidebar',
-          position: "left",
-          label: "问题解决"
-        },
-        {
-          type: "docSidebar",
-          sidebarId: "projectsSidebar",
-          position: "left",
-          label: "项目文档"
-        },
-        {
-          href: "https://github.com/yunqilee69",
-          label: "GitHub",
-          position: "right",
-
         },
       ],
     },

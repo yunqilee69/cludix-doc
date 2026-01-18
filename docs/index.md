@@ -12,4 +12,4 @@
 - [运维文档](/docs/ops/)
 - [开发环境](/docs/dev-env/)
 - [问题解决](/docs/solutions/)
-- [项目文档](/docs/projects/)
+- [Nebula 项目](/docs/nebula/)
