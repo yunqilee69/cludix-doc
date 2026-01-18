@@ -118,7 +118,6 @@ const config: Config = {
         // 下面所有 key 都有 TS 提示
         language: "zh",
         docsRouteBasePath: "/docs",
-        blogRouteBasePath: "/blog",
       } satisfies SearchLocal.PluginOptions, // ✅ 一行锁死类型
     ],
   ],
