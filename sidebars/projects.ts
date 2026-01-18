@@ -9,7 +9,6 @@ const projectsSidebar: SidebarConfig = [
       'projects/nebula/index',
       'projects/nebula/spec/index',
       'projects/nebula/uaa/index',
-      'projects/nebula/uaa/test',
     ],
   },
 ];
