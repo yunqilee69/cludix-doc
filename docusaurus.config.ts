@@ -84,7 +84,7 @@ const config: Config = {
           type: "docSidebar",
           sidebarId: 'devEnvSidebar',
           position: "right",
-          label: "开发工具"
+          label: "环境配置"
         },
         {
           type: "docSidebar",

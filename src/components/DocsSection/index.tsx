@@ -28,9 +28,9 @@ const docsItems: DocItem[] = [
   },
   {
     id: '2',
-    title: '开发工具',
-    description: '包管理器和开发工具配置。',
-    tags: ['开发工具', '配置'],
+    title: '环境配置',
+    description: '包管理器、开发工具和环境配置。',
+    tags: ['环境配置', '开发工具'],
     permalink: '/docs/dev-env',
     icon: <FileTextOutlined style={{ fontSize: '32px', color: '#f093fb' }} />,
   },
