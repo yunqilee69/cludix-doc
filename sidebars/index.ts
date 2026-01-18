@@ -1,30 +1,16 @@
 import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
+import opsSidebar from './ops';
+import devEnvSidebar from './dev-env';
+import solutionsSidebar from './solutions';
 import nebulaSidebar from './nebula';
-import techNotesSidebar from './tech-notes';
-import bugRecordsSidebar from './bug-records';
-import devOpsSidebar from './dev-ops';
-import softwareSidebar from './software';
-
-// This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 export type SidebarConfig = SidebarsConfig[string];
 
-/**
- * Creating a sidebar enables you to:
- - create an ordered group of docs
- - render a sidebar for each doc of that group
- - provide next/previous navigation
-
- The sidebars can be generated from the filesystem, or explicitly defined here.
-
- Create as many sidebars as you want.
- */
 const sidebars: SidebarsConfig = {
-  nebulaSidebar,
-  techNotesSidebar,
-  bugRecordsSidebar,
-  devOpsSidebar,
-  softwareSidebar
+  opsSidebar,
+  devEnvSidebar,
+  solutionsSidebar,
+  nebulaSidebar
 };
 
 export default sidebars;

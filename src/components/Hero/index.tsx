@@ -1,6 +1,6 @@
 import React from 'react'
 import { Typography, Space, Card } from 'antd'
-import { GithubOutlined, MailOutlined, BookOutlined } from '@ant-design/icons'
+import { GithubOutlined, MailOutlined } from '@ant-design/icons'
 
 import Translate from '@docusaurus/Translate'
 
@@ -32,9 +32,6 @@ function SocialLinks() {
       </a>
       <a href="mailto:contact@example.com">
         <MailOutlined style={{ fontSize: '24px' }} />
-      </a>
-      <a href="/blog">
-        <BookOutlined style={{ fontSize: '24px' }} />
       </a>
     </Space>
   )
