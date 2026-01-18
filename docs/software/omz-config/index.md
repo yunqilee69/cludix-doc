@@ -1,0 +1,215 @@
+# Oh My Zsh配置
+
+Oh My Zsh是一个强大的Zsh框架，提供丰富的插件和主题配置，提升终端使用体验。
+
+## 安装Oh My Zsh
+
+```bash
+sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+```
+
+安装完成后，Zsh会自动成为默认Shell。
+
+## 配置主题
+
+### 查看内置主题
+
+Oh My Zsh内置了丰富的主题，可以在 `~/.oh-my-zsh/themes/` 目录下查看所有可用主题。
+
+### 更换内置主题
+
+编辑配置文件：
+
+```bash
+nano ~/.zshrc
+```
+
+找到 `ZSH_THEME` 配置项，修改为主题名称：
+
+```bash
+ZSH_THEME="robbyrussell"  # 默认主题
+# 或者尝试其他内置主题
+ZSH_THEME="agnoster"
+ZSH_THEME="powerline"
+ZSH_THEME="bira"
+```
+
+保存后重新加载配置：
+
+```bash
+source ~/.zshrc
+```
+
+### 安装Powerlevel10k主题
+
+Powerlevel10k是目前最流行的Oh My Zsh主题，速度快、显示信息丰富。
+
+#### 克隆主题仓库
+
+```bash
+git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+```
+
+#### 配置主题
+
+编辑 `~/.zshrc`，设置主题为 Powerlevel10k：
+
+```bash
+ZSH_THEME="powerlevel10k/powerlevel10k"
+```
+
+#### 配置向导
+
+重新加载配置后，Powerlevel10k会自动启动配置向导：
+
+```bash
+source ~/.zshrc
+```
+
+按照向导提示选择合适的样式，包括：
+- 图标样式（ASCII/Unicode）
+- 提示符颜色
+- 时间显示
+- 目录显示模式
+- Git状态显示
+
+#### 重新配置
+
+如果需要重新配置Powerlevel10k，运行：
+
+```bash
+p10k configure
+```
+
+## 安装常用插件
+
+### 查看内置插件
+
+所有内置插件位于 `~/.oh-my-zsh/plugins/` 目录。
+
+### 启用内置插件
+
+编辑 `~/.zshrc`，在 `plugins=(...)` 部分添加插件：
+
+```bash
+plugins=(
+  git
+  zsh-autosuggestions
+  zsh-syntax-highlighting
+  z
+  sudo
+)
+```
+
+#### 常用插件说明
+
+- **git**: Git命令补全和别名
+- **z**: 快速跳转到常用目录
+- **sudo**: 双击ESC快速添加sudo
+- **extract**: 统一解压命令
+
+### 安装外部插件
+
+#### zsh-autosuggestions（自动补全建议）
+
+```bash
+git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+```
+
+#### zsh-syntax-highlighting（语法高亮）
+
+```bash
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+```
+
+配置完成后重新加载：
+
+```bash
+source ~/.zshrc
+```
+
+## 常用配置
+
+### 历史记录配置
+
+编辑 `~/.zshrc`，添加以下配置：
+
+```bash
+# 历史记录保存数量
+HISTSIZE=10000
+SAVEHIST=10000
+
+# 历史记录文件
+HISTFILE=~/.zsh_history
+
+# 不记录重复命令
+setopt HIST_IGNORE_DUPS
+
+# 不记录以空格开头的命令
+setopt HIST_IGNORE_SPACE
+```
+
+### 别名配置
+
+在 `~/.zshrc` 中添加常用别名：
+
+```bash
+# 文件操作
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+# Git别名
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git log --oneline --graph --decorate'
+
+# Docker别名
+alias dps='docker ps'
+alias dpsa='docker ps -a'
+alias di='docker images'
+alias dex='docker exec -it'
+```
+
+### 环境变量配置
+
+```bash
+# 编辑器
+export EDITOR=nano
+export VISUAL=nano
+
+# 语言设置
+export LANG=zh_CN.UTF-8
+export LC_ALL=zh_CN.UTF-8
+```
+
+## 切换回Bash
+
+如果需要切换回Bash：
+
+```bash
+chsh -s /bin/bash
+```
+
+切换到Zsh：
+
+```bash
+chsh -s /bin/zsh
+```
+
+## 卸载Oh My Zsh
+
+运行卸载脚本：
+
+```bash
+uninstall_oh_my_zsh
+```
+
+## 参考资料
+
+- [Oh My Zsh官方文档](https://github.com/ohmyzsh/ohmyzsh)
+- [Powerlevel10k官方文档](https://github.com/romkatv/powerlevel10k)
+- [Oh My Zsh主题列表](https://github.com/ohmyzsh/ohmyzsh/wiki/Themes)
+- [Oh My Zsh插件列表](https://github.com/ohmyzsh/ohmyzsh/wiki/Plugins)
