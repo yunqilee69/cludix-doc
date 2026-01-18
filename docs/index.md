@@ -9,7 +9,7 @@
 
 ## 快速导航
 
-- [运维文档](ops/)
-- [开发环境](dev-env/)
-- [问题解决](solutions/)
-- [项目文档](projects/)
+- [运维文档](/docs/ops/)
+- [开发环境](/docs/dev-env/)
+- [问题解决](/docs/solutions/)
+- [项目文档](/docs/projects/)
