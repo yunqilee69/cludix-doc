@@ -10,6 +10,49 @@ sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.
 
 安装完成后，Zsh会自动成为默认Shell。
 
+## 配置备份与恢复
+
+### 备份位置
+
+Oh My Zsh 安装时会自动备份原有的配置文件：
+- `~/.zshrc` → `~/.zshrc.pre-oh-my-zsh`
+
+### 恢复原有配置
+
+如果安装 Oh My Zsh 后发现之前的配置（如 NVM、SDKMAN 等）丢失，可以按照以下步骤恢复：
+
+1. **查看备份文件内容**
+
+```bash
+cat ~/.zshrc.pre-oh-my-zsh
+```
+
+2. **将备份配置添加到新的 .zshrc**
+
+编辑 `~/.zshrc`，在文件末尾添加备份文件中的配置（通常包括 NVM、SDKMAN 等环境配置）：
+
+```bash
+# 示例：从备份文件中添加 NVM 和 SDKMAN 配置
+# NVM 配置
+export NVM_DIR="$HOME/.nvm"
+[ -s "$(brew --prefix)/opt/nvm/nvm.sh" ] && . "$(brew --prefix)/opt/nvm/nvm.sh"
+
+# SDKMAN 配置（必须在文件末尾）
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+```
+
+3. **重新加载配置**
+
+```bash
+source ~/.zshrc
+```
+
+**注意**：
+- 不要完全替换 `.zshrc`，而是将备份文件中的个人配置追加到 Oh My Zsh 配置的末尾
+- SDKMAN 的配置必须放在 `.zshrc` 文件的最末尾
+- 建议在修改前先备份当前的配置文件
+
 ## 配置主题
 
 ### 查看内置主题
