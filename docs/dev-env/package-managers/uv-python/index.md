@@ -66,34 +66,34 @@ uv 支持配置镜像源以加速下载。国内用户可以使用清华大学�
 #### 清华大学镜像源
 
 ```toml
-[index]
+[[index]]
 url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 ```
 
 #### 阿里云镜像源
 
 ```toml
-[index]
+[[index]]
 url = "https://mirrors.aliyun.com/pypi/simple/"
 ```
 
 #### 华为云镜像源
 
 ```toml
-[index]
+[[index]]
 url = "https://mirrors.huaweicloud.com/repository/pypi/simple"
 ```
 
 #### 中科大镜像源
 
 ```toml
-[index]
+[[index]]
 url = "https://pypi.mirrors.ustc.edu.cn/simple"
 ```
 
 ### 恢复官方源
 
-删除配置文件中的 `[index]` 部分即可。
+删除配置文件中的 `[[index]]` 部分即可。
 
 ## 基本使用
 
