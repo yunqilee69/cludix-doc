@@ -228,6 +228,64 @@ export LANG=zh_CN.UTF-8
 export LC_ALL=zh_CN.UTF-8
 ```
 
+## 解决终端图标显示问题
+
+某些主题（如 Powerlevel10k）使用特殊图标字符，在 VSCode 或 JetBrains 等编辑器的终端中可能无法正常显示。
+
+### 问题验证
+
+在终端中执行以下命令测试：
+
+```bash
+echo $'\uf179 \uf07c \uf418 \ue0b0'
+```
+
+如果显示的是乱码或方框，需要安装 Nerd Font 字体。
+
+### 安装 Nerd Font 字体
+
+推荐使用 Meslo 字体（与 iTerm2 和 Oh My Zsh 官方示例同族，视觉协调）：
+
+```bash
+brew tap homebrew/cask-fonts
+brew install --cask font-meslo-lg-nerd-font
+```
+
+安装完成后，字体册中会出现 `MesloLGS NF` / `MesloLGM Nerd Font` 等条目。
+
+### VSCode 配置
+
+在设置中搜索 `terminal.integrated.fontFamily`，修改为：
+
+```
+MesloLGM Nerd Font
+```
+
+保存后重启 VSCode 终端，图标即可正常显示。
+
+### JetBrains 系列配置
+
+- 打开 `Preferences` → `Editor` → `Font`
+- 取消勾选 `Use console font`
+- 将 `Console Font` 设置为 `MesloLGM Nerd Font`
+- 点击 `Apply & Restart`
+
+### 验证
+
+在终端执行：
+
+```bash
+echo $'\uf179 \uf07c \uf418 \ue0b0'
+```
+
+能看到苹果、文件夹、Git 分支图标和三角形，即表示 Nerd Font 已生效。然后运行：
+
+```bash
+omz reload
+```
+
+左侧提示符的图标会正常显示。
+
 ## 切换回Bash
 
 如果需要切换回Bash：
