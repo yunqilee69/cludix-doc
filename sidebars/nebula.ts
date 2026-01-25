@@ -8,7 +8,8 @@ const nebulaSidebar: SidebarConfig = [
     items: [
       'nebula/index',
       'nebula/spec/index',
-      'nebula/uaa/index',
+      'nebula/iam/index',
+      'nebula/iam/permission-read/index',
     ],
   },
 ];
