@@ -1,4 +1,4 @@
-import type {SidebarConfig} from './index';
+import type { SidebarConfig } from './index';
 
 const opsSidebar: SidebarConfig = [
   {
@@ -31,6 +31,7 @@ const opsSidebar: SidebarConfig = [
     items: [
       'ops/services/jellyfin/index',
       'ops/services/milvus/index',
+      'ops/cicd/filebrowser/index',
     ],
   },
   {
