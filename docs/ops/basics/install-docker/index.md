@@ -32,7 +32,7 @@ sudo apt update
 sudo apt install docker-ce docker-ce-cli docker-compose-plugin docker-buildx-plugin
 
 # 安装完成查看版本，确认安装成功
-sudo docekr --version
+sudo docker --version
 ```
 
 ## 3. 用户添加至docker组
