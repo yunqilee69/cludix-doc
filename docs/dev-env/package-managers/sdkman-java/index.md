@@ -112,22 +112,199 @@ echo "java=17.0.9-tem" > .sdkmanrc
 sdk env
 ```
 
+## 安装 Maven
+
+### 查看可用的 Maven 版本
+
+```bash
+sdk list maven
+```
+
+这将列出所有可用的 Maven 版本。
+
+### 安装指定版本的 Maven
+
+#### 安装最新的 Maven 版本（推荐）
+
+```bash
+sdk install maven
+```
+
+#### 安装特定版本
+
+```bash
+sdk install maven 3.9.9
+sdk install maven 3.9.8
+```
+
+### Maven 与 Java 版本兼容性
+
+| Maven 版本 | 最低 Java 版本 | 推荐Java版本 |
+|------------|---------------|-------------|
+| Maven 3.9.x | Java 8 | Java 11+ |
+| Maven 4.0+ | Java 17 | Java 17+ |
+| Maven 3.8.x | Java 7 | Java 8+ |
+
+> **注意**：使用 SDKMAN! 可以方便地为不同项目切换 Java 和 Maven 版本的组合。
+
+## 管理 Maven 版本
+
+### 查看已安装的 Maven 版本
+
+```bash
+sdk list maven | grep installed
+```
+
+或
+
+```bash
+sdk current maven
+```
+
+### 切换 Maven 版本（临时）
+
+```bash
+sdk use maven 3.9.9
+```
+
+此切换仅在当前终端会话有效。
+
+### 切换 Maven 版本（永久）
+
+```bash
+sdk default maven 3.9.9
+```
+
+此切换将设置全局默认版本。
+
+### 在特定目录使用特定 Maven 版本
+
+在项目根目录创建 `.sdkmanrc` 文件：
+
+```bash
+echo "java=17.0.9-tem" > .sdkmanrc
+echo "maven=3.9.9" >> .sdkmanrc
+```
+
+进入该目录后运行：
+
+```bash
+sdk env
+```
+
+## 验证 Maven 安装
+
+```bash
+mvn -version
+```
+
+输出示例：
+
+```
+Apache Maven 3.9.9
+Maven home: /Users/username/.sdkman/candidates/maven/3.9.9
+Java version: 17.0.9, vendor: Eclipse Adoptium
+Default locale: zh_CN, platform encoding: UTF-8
+OS name: "Mac OS X", version: "14.0", arch: "aarch64"
+```
+
+## Maven 配置
+
+### 配置国内镜像源（加速依赖下载）
+
+编辑 Maven 配置文件 `~/.m2/settings.xml`（如果不存在则创建）：
+
+```xml
+<settings>
+  <mirrors>
+    <!-- 阿里云镜像 -->
+    <mirror>
+      <id>aliyun</id>
+      <mirrorOf>central</mirrorOf>
+      <name>Aliyun Maven Mirror</name>
+      <url>https://maven.aliyun.com/repository/public</url>
+    </mirror>
+  </mirrors>
+</settings>
+```
+
+其他可选镜像源：
+
+| 提供商 | URL |
+|--------|-----|
+| 华为云 | `https://repo.huaweicloud.com/repository/maven/` |
+| 腾讯云 | `https://mirrors.cloud.tencent.com/nexus/repository/maven-public/` |
+| 网易云 | `https://mirrors.163.com/maven/repository/maven-public/` |
+
+### 配置本地仓库位置
+
+在 `settings.xml` 中添加：
+
+```xml
+<settings>
+  <localRepository>/path/to/your/local/repo</localRepository>
+</settings>
+```
+
 ## 常用命令
+
+### SDKMAN! 命令
 
 ```bash
 # 更新 SDKMAN!
-brew upgrade sdkman-cli
+sdk update
 
 # 更新所有已安装的 SDK
 sdk upgrade
 
-# 卸载 Java 版本
-sdk uninstall java 8.0.392-tem
+# 卸载 Maven 版本
+sdk uninstall maven 3.8.8
 
-# 设置 Java 主目录环境变量
-sdk home java 17.0.9-tem
+# 设置 Maven 主目录环境变量
+sdk home maven 3.9.9
 
 # 离线模式（避免网络请求）
 sdk offline enable
 sdk offline disable
+```
+
+### Maven 命令
+
+```bash
+# 创建新项目
+mvn archetype:generate -DgroupId=com.example -DartifactId=my-app
+
+# 编译项目
+mvn compile
+
+# 运行测试
+mvn test
+
+# 打包项目
+mvn package
+
+# 清理构建
+mvn clean
+
+# 安装到本地仓库
+mvn install
+
+# 跳过测试打包
+mvn package -DskipTests
+
+# 查看依赖树
+mvn dependency:tree
+
+# 查看有效 POM
+mvn help:effective-pom
+```
+
+### Maven 环境变量
+
+```bash
+# 设置 Maven 内存（在 ~/.mavenrc 或环境变量中）
+export MAVEN_OPTS="-Xms256m -Xmx1024m"
+
+# 设置 Maven 仓库镜像
+# 通过 settings.xml 配置（推荐）
 ```
