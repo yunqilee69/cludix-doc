@@ -82,19 +82,19 @@ const config: Config = {
         },
         {
           type: "docSidebar",
-          sidebarId: 'devEnvSidebar',
+          sidebarId: 'developmentSidebar',
           position: "right",
-          label: "环境配置"
+          label: "开发"
         },
         {
           type: "docSidebar",
-          sidebarId: 'solutionsSidebar',
+          sidebarId: 'softwareSidebar',
           position: "right",
-          label: "问题解决"
+          label: "软件安装"
         },
         {
           type: "docSidebar",
-          sidebarId: 'opsSidebar',
+          sidebarId: 'operationsSidebar',
           position: "right",
           label: "运维"
         },
