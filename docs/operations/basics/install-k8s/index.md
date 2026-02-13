@@ -1,9 +1,11 @@
 # Debian 13 上部署 Kubernetes 1.33 集群指南
 
-本文档详细介绍如何在 Debian 13 系统上部署 Kubernetes 1.33 集群。本教程采用 2 主 5 从的集群架构：
+本文档详细介绍如何在 Debian 13 系统上部署 Kubernetes 1.33 集群。本教程示例采用 3 主 3 从的集群架构（宿主机 16C64G，预留资源后用于集群 12C48G）：
 
-- **主节点**: 2C4G（2个主节点：k8s-m1、k8s-m2）
-- **工作节点**: 1C4G（5个工作节点：k8s-w1 到 k8s-w5）
+> ⚠️ **生产建议**: kubeadm 的 HA（stacked etcd）建议使用至少 3 个控制平面节点（奇数个）以保证 etcd 仲裁能力。
+
+- **主节点**: 2C4G（3个主节点：k8s-m1、k8s-m2、k8s-m3）
+- **工作节点**: 2C12G（3个工作节点：k8s-w1 到 k8s-w3）
 - **虚拟化平台**: VMware Workstation
 
 ## 1. 系统准备
@@ -33,11 +35,10 @@
 |--------|--------|------|------|
 | k8s-m1 | 192.168.100.10 | Master节点 | 2C4G |
 | k8s-m2 | 192.168.100.11 | Master节点 | 2C4G |
-| k8s-w1 | 192.168.100.12 | Worker节点 | 1C4G |
-| k8s-w2 | 192.168.100.13 | Worker节点 | 1C4G |
-| k8s-w3 | 192.168.100.14 | Worker节点 | 1C4G |
-| k8s-w4 | 192.168.100.15 | Worker节点 | 1C4G |
-| k8s-w5 | 192.168.100.16 | Worker节点 | 1C4G |
+| k8s-m3 | 192.168.100.12 | Master节点 | 2C4G |
+| k8s-w1 | 192.168.100.13 | Worker节点 | 2C12G |
+| k8s-w2 | 192.168.100.14 | Worker节点 | 2C12G |
+| k8s-w3 | 192.168.100.15 | Worker节点 | 2C12G |
 
 > 💡 **建议**: 首先完整配置一个节点（k8s-m1），然后通过 VMware 克隆功能创建其他节点，最后修改 IP 地址和主机名即可。
 
@@ -75,17 +76,35 @@ vim /etc/hosts
 # Kubernetes集群主机映射
 192.168.100.10 k8s-m1
 192.168.100.11 k8s-m2
-192.168.100.12 k8s-w1
-192.168.100.13 k8s-w2
-192.168.100.14 k8s-w3
-192.168.100.15 k8s-w4
-192.168.100.16 k8s-w5
+192.168.100.12 k8s-m3
+192.168.100.13 k8s-w1
+192.168.100.14 k8s-w2
+192.168.100.15 k8s-w3
 ```
 
 > ⚠️ **注意**: 克隆虚拟机后，需要修改每个节点的：
 > 1. 静态IP地址（按规划表分配）
 > 2. 对应的主机名
 > 3. hosts文件保持一致
+
+### 2.3 推荐的主流自动化方案（保留手动方案）
+
+当前文档保留了完整的手动步骤，便于理解原理；在实际落地时，更推荐使用自动化减少逐台配置错误。
+
+**方案A（推荐）: Kubespray + Ansible**
+- 业界主流，适合 3 主 3 工这类 kubeadm 集群
+- 用 inventory 描述节点后，可一键批量初始化与部署
+- 重复执行安全，便于后续扩容和变更
+
+**方案B（当前文档）: 手动逐台配置**
+- 适合理解原理、排障和小规模实验
+- 成本是步骤多、容易出现漏配或节点配置不一致
+
+> 建议：先按本文手动跑通一次，再切换到 Kubespray/Ansible 做标准化。
+
+参考：
+- [Kubespray 项目](https://github.com/kubernetes-sigs/kubespray)
+- [kubeadm 官方高可用文档](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/)
 
 ## 3. 系统初始化配置
 
@@ -94,16 +113,37 @@ vim /etc/hosts
 **说明**: Kubernetes 要求关闭 Swap 分区，因为 Swap 会影响 Pod 的性能和调度决策。
 
 ```bash
-# 临时关闭所有Swap分区
+# 1) 查看当前 swap 形态（分区 / 文件 / zram）
+swapon --show --output=NAME,TYPE,SIZE,USED,PRIO
+
+# 2) 临时关闭所有 swap（立即生效）
 swapoff -a
 
-# 永久关闭：注释掉fstab中的swap条目
-sed -i '/ swap /s/^/#/' /etc/fstab
+# 3) 永久关闭：注释 fstab 里的 swap 条目（覆盖分区和文件）
+cp /etc/fstab /etc/fstab.bak
+sed -ri '/\s+swap\s+/ s/^#?/#/' /etc/fstab
 
-# 验证关闭结果
+# 4) 若系统启用了 dphys-swapfile（Debian 常见）
+systemctl disable --now dphys-swapfile 2>/dev/null || true
+
+# 5) 若系统启用了 zram（部分发行版常见）
+systemctl disable --now systemd-zram-setup@zram0.service 2>/dev/null || true
+
+# 6) 立即验证
 swapon --show
-# 期望：无任何输出（空结果）
+free -h | grep -i swap
+# 期望：swapon 无输出，且 free 中 Swap 为 0B
+
+# 7) 重启后再次验证（防止开机被服务重新启用）
+reboot
+# 重启后执行：
+swapon --show
+free -h | grep -i swap
 ```
+
+**常见说明**:
+- `swap 分区` 和 `swap 文件` 都会出现在 `swapon --show` 中，`swapoff -a` 可统一关闭。
+- 仅改 `fstab` 不一定够，若有 `dphys-swapfile/zram` 服务，会在开机重新启用 swap。
 
 ### 3.2 加载内核模块
 
@@ -117,14 +157,20 @@ br_netfilter
 EOF
 
 # 立即加载内核模块
-modprobe overlay br_netfilter
+modprobe overlay
+modprobe br_netfilter
 
-# 验证模块加载状态
+# 立即验证模块加载状态
 lsmod | grep -E 'overlay|br_netfilter'
 # 期望看到类似输出：
 # br_netfilter           36864  0
 # bridge                389120  1 br_netfilter
 # overlay               217088  0
+
+# 重启后验证（确保开机自动加载）
+reboot
+# 重启后执行：
+lsmod | grep -E 'overlay|br_netfilter'
 ```
 
 ### 3.3 配置内核参数
@@ -150,7 +196,16 @@ sysctl net.bridge.bridge-nf-call-iptables \
 # net.bridge.bridge-nf-call-iptables = 1
 # net.bridge.bridge-nf-call-ip6tables = 1
 # net.ipv4.ip_forward = 1
+
+# 重启后验证（确保参数持久化）
+reboot
+# 重启后执行：
+sysctl net.bridge.bridge-nf-call-iptables \
+       net.bridge.bridge-nf-call-ip6tables \
+       net.ipv4.ip_forward
 ```
+
+> 如果 3.3 在不重启时验证异常，通常是 3.2 的 `br_netfilter` 未成功加载导致；请先确认 `lsmod | grep br_netfilter` 有输出。
 
 ## 4. 安装和配置 Containerd
 
@@ -229,8 +284,8 @@ sed -i 's|sandbox_image = .*|sandbox_image = "registry.cn-hangzhou.aliyuncs.com/
 ```
 
 **为什么要修改为国内镜像源**?
-- 默认使用 `k8s.gcr.io/pause:3.10`
-- 国内访问 gcr.io 可能很慢或无法访问
+- 默认使用 `registry.k8s.io/pause:3.10`
+- 国内访问 registry.k8s.io 可能较慢或不稳定
 - 使用阿里云镜像加速下载，提高集群初始化速度
 
 ### 4.3 应用配置并验证
@@ -259,12 +314,12 @@ grep -E "SystemdCgroup|sandbox_image" /etc/containerd/config.toml
 # 创建APT密钥目录
 mkdir -p /etc/apt/keyrings
 
-# 添加Kubernetes官方GPG密钥（使用清华镜像）
-curl -fsSL https://mirrors.tuna.tsinghua.edu.cn/kubernetes/core:/stable:/v1.33/deb/Release.key | \
+# 添加Kubernetes官方GPG密钥（v1.33）
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.33/deb/Release.key | \
   sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
-# 添加Kubernetes APT仓库（使用清华镜像源）
-echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://mirrors.tuna.tsinghua.edu.cn/kubernetes/core:/stable:/v1.33/deb/ /" | \
+# 添加Kubernetes APT仓库（官方 pkgs.k8s.io）
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.33/deb/ /" | \
   sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 # 更新软件包索引
@@ -338,8 +393,9 @@ kubectl version --client
   HAProxy (负载均衡)
     ↓
 ┌─────────────────────────────────┐
-│  Master节点1 (k8s-m1:6443)    │ ← 主节点
-│  Master节点2 (k8s-m2:6443)    │ ← 备节点
+│  Master节点1 (k8s-m1:6443)    │
+│  Master节点2 (k8s-m2:6443)    │
+│  Master节点3 (k8s-m3:6443)    │
 └─────────────────────────────────┘
 ```
 
@@ -351,6 +407,7 @@ kubectl version --client
 |------|--------|------|------|
 | k8s-m1 | 192.168.100.10 | 6443 | Master节点1 API Server |
 | k8s-m2 | 192.168.100.11 | 6443 | Master节点2 API Server |
+| k8s-m3 | 192.168.100.12 | 6443 | Master节点3 API Server |
 | **VIP** | **192.168.100.7** | 8443 | 集群统一访问入口 |
 
 > 💡 **注意**: VIP (192.168.100.7) 是一个虚拟IP，不实际分配给任何物理网卡，由Keepalived管理。
@@ -360,7 +417,7 @@ kubectl version --client
 #### 6.3.1 在所有主节点上安装 Keepalived
 
 ```bash
-# 在 k8s-m1 和 k8s-m2 上执行
+# 在 k8s-m1、k8s-m2、k8s-m3 上执行
 apt update
 apt install -y keepalived
 
@@ -464,6 +521,13 @@ vrrp_instance VI_1 {
 EOF
 ```
 
+**备节点（k8s-m3）配置（与 k8s-m2 基本一致）**:
+```bash
+# 仅列出与 k8s-m2 不同的关键项
+router_id k8s-m3
+priority 90
+```
+
 #### 6.3.3 创建健康检查和通知脚本
 
 **HAProxy健康检查脚本**:
@@ -479,7 +543,7 @@ if ! pgrep haproxy > /dev/null; then
 fi
 
 # 检查HAProxy是否在监听端口
-if ! netstat -tlnp | grep -q ":8443"; then
+if ! ss -lntp | grep -q ":8443"; then
     echo "HAProxy not listening on port 8443"
     exit 1
 fi
@@ -574,14 +638,15 @@ backend k8s_api_backend
     option tcp-check
     server k8s-m1 192.168.100.10:6443 check
     server k8s-m2 192.168.100.11:6443 check
+    server k8s-m3 192.168.100.12:6443 check
 
 listen stats
-    bind *:8404
+    bind 127.0.0.1:8404
     mode http
     stats enable
     stats uri /stats
     stats refresh 30s
-    stats admin if TRUE
+    # 如需开启管理操作，请配合内网ACL和认证
 EOF
 ```
 
@@ -599,7 +664,7 @@ systemctl restart haproxy
 systemctl status haproxy
 
 # 检查监听端口
-netstat -tlnp | grep haproxy
+ss -lntp | grep haproxy
 ```
 
 ## 7. 集群初始化
@@ -622,8 +687,7 @@ systemctl is-active keepalived haproxy
     --image-repository registry.aliyuncs.com/google_containers \
     --kubernetes-version=v1.33.0 \
     --service-cidr=10.96.0.0/12 \
-    --pod-network-cidr=10.244.0.0/16 \
-    --ignore-preflight-errors=all
+    --pod-network-cidr=10.244.0.0/16
 ```
 
 :::tip 参数说明
@@ -644,7 +708,7 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
 :::tip 提示
-这个kubectl是在机器用命令行的方式操作k8s集群，用可视化管理工具也是可以的，例如ranchar
+这个 kubectl 是在机器上用命令行方式操作 k8s 集群，用可视化管理工具也是可以的，例如 Rancher。
 :::
 
 ### 7.3 启动高可用服务
@@ -668,7 +732,7 @@ systemctl status haproxy keepalived
 # 在主节点（k8s-m1）上应该能看到VIP
 ip addr show | grep 192.168.100.7
 
-# 在备节点（k8s-m2）上不应该看到VIP
+# 在其他备节点（k8s-m2 或 k8s-m3）上不应该看到VIP
 ip addr show | grep 192.168.100.7
 ```
 
@@ -677,8 +741,8 @@ ip addr show | grep 192.168.100.7
 选择一个 CNI 插件，这里以 Calico 为例：
 
 ```bash
-# 应用Calico网络插件
-kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+# 应用 Calico 网络插件（请按官方文档选择与当前版本匹配的清单）
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.2/manifests/calico.yaml
 ```
 
 ### 7.5 添加其他节点
@@ -699,12 +763,12 @@ W1213 04:56:49.586292    8267 version.go:110] falling back to the local client v
 
 # 最后一行就是--certificate-key 值，需要在主节点的命令中加上
 ```
-在其他主节点（k8s-m2）上需要，使用第一个主节点初始化时生成的join命令，并额外添加 `--control-plane` 表示加入控制平面：
+在其他主节点（k8s-m2、k8s-m3）上需要，使用第一个主节点初始化时生成的 join 命令，并额外添加 `--control-plane` 表示加入控制平面：
   ```bash
   kubeadm join 192.168.100.7:8443 \
     --token <token> \
     --discovery-token-ca-cert-hash <hash> \
-    --control-plane
+    --control-plane \
     --certificate-key 025e086454b8xxxx
   ```
 
@@ -742,8 +806,8 @@ curl -k https://192.168.100.7:8443/version
 # 在主节点（k8s-m1）上停止HAProxy
 systemctl stop haproxy
 
-# 观察VIP是否转移到备节点
-# 在k8s-m2上检查：ip addr show | grep 192.168.100.7
+# 观察VIP是否转移到其他主节点
+# 在k8s-m2或k8s-m3上检查：ip addr show | grep 192.168.100.7
 ```
 
 #### 8.1.2 恢复主节点
@@ -802,14 +866,16 @@ systemctl is-active haproxy && echo "✅ HAProxy is running" || echo "❌ HAProx
 
 # 检查后端API Server状态
 echo -e "\n4. Backend API Servers:"
-echo "lynk8s-m1 API Server:"
-curl -s -o /dev/null -w "%{http_code}\n" http://192.168.100.10:6443/healthz 2>/dev/null || echo "❌ Failed"
-echo "lynk8s-m2 API Server:"
-curl -s -o /dev/null -w "%{http_code}\n" http://192.168.100.11:6443/healthz 2>/dev/null || echo "❌ Failed"
+echo "k8s-m1 API Server:"
+curl -sk -o /dev/null -w "%{http_code}\n" https://192.168.100.10:6443/healthz 2>/dev/null || echo "❌ Failed"
+echo "k8s-m2 API Server:"
+curl -sk -o /dev/null -w "%{http_code}\n" https://192.168.100.11:6443/healthz 2>/dev/null || echo "❌ Failed"
+echo "k8s-m3 API Server:"
+curl -sk -o /dev/null -w "%{http_code}\n" https://192.168.100.12:6443/healthz 2>/dev/null || echo "❌ Failed"
 
 # 检查通过VIP的访问
 echo -e "\n5. VIP Access Test:"
-curl -s -o /dev/null -w "%{http_code}\n" http://192.168.100.7:8443/healthz 2>/dev/null || echo "❌ Failed"
+curl -sk -o /dev/null -w "%{http_code}\n" https://192.168.100.7:8443/healthz 2>/dev/null || echo "❌ Failed"
 
 echo -e "\n=== Health Check Completed ==="
 EOF
