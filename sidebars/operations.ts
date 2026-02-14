@@ -20,6 +20,7 @@ const operationsSidebar: SidebarConfig = [
     collapsed: false,
     items: [
       'operations/k8s/install-k8s/index',
+      'operations/k8s/helm-chart-package-and-sharing',
       'operations/k8s/nfs-server/index',
       {
         type: 'category',
