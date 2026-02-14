@@ -31,10 +31,21 @@ const operationsSidebar: SidebarConfig = [
     type: 'category',
     label: '服务',
     collapsible: true,
-    collapsed: true,
+    collapsed: false,
     items: [
+      'operations/services/nfs-server/index',
       'operations/services/jellyfin/index',
       'operations/services/milvus/index',
+      {
+        type: 'category',
+        label: 'Rancher',
+        collapsible: true,
+        collapsed: false,
+        items: [
+          'operations/services/rancher/index',
+          'operations/services/rancher/empty-cluster-rancher',
+        ],
+      },
     ],
   },
   {

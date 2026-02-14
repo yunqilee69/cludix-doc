@@ -288,6 +288,112 @@ sed -i 's|sandbox_image = .*|sandbox_image = "registry.cn-hangzhou.aliyuncs.com/
 - 国内访问 registry.k8s.io 可能较慢或不稳定
 - 使用阿里云镜像加速下载，提高集群初始化速度
 
+#### 📌 配置 containerd 镜像加速（国内网络推荐）
+
+除了 `pause` 镜像，业务组件在部署时还会拉取 `ghcr.io`、`quay.io`、`gcr.io`、`registry.k8s.io`、`docker.io` 等仓库镜像。建议在每个节点统一配置 containerd 镜像加速。
+
+下面提供一个可直接执行的脚本：
+
+- 脚本开头定义了 5 个镜像加速地址变量
+- 你只需要按实际可用镜像源修改变量值
+- 脚本会自动生成对应 `hosts.toml`
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ===== 可修改变量（按你的镜像源实际地址替换） =====
+DOCKER_IO_MIRROR="https://docker.m.daocloud.io"
+REGISTRY_K8S_IO_MIRROR="https://k8s.m.daocloud.io"
+QUAY_IO_MIRROR="https://quay.m.daocloud.io"
+GHCR_IO_MIRROR="https://ghcr.m.daocloud.io"
+GCR_IO_MIRROR="https://gcr.m.daocloud.io"
+
+# ===== hosts.toml 生成函数 =====
+write_host_toml() {
+  local registry="$1"
+  local mirror="$2"
+  local path="/etc/containerd/certs.d/${registry}"
+
+  mkdir -p "${path}"
+  cat >"${path}/hosts.toml" <<EOF
+server = "https://${registry}"
+
+[host."${mirror}"]
+  capabilities = ["pull", "resolve"]
+  skip_verify = false
+EOF
+}
+
+# ===== 写入 5 类仓库加速配置 =====
+write_host_toml "docker.io" "${DOCKER_IO_MIRROR}"
+write_host_toml "registry.k8s.io" "${REGISTRY_K8S_IO_MIRROR}"
+write_host_toml "quay.io" "${QUAY_IO_MIRROR}"
+write_host_toml "ghcr.io" "${GHCR_IO_MIRROR}"
+write_host_toml "gcr.io" "${GCR_IO_MIRROR}"
+
+echo "containerd registry mirror hosts.toml generated."
+```
+
+> 说明：如果你有企业内网 Harbor，建议优先使用 Harbor 作为统一镜像源，再按业务或 chart 参数将镜像指向 Harbor。
+
+#### 📌 `config_path` 改哪一个（重点）
+
+`/etc/containerd/config.toml` 里可能出现多个 `config_path`，镜像加速只看这一个：
+
+- `[plugins."io.containerd.grpc.v1.cri".registry]` 下的 `config_path`
+
+先精确定位该段落（不要看其他段）：
+
+```bash
+awk '
+  /\[plugins\."io.containerd.grpc.v1.cri"\.registry\]/ { in_registry=1; print NR":"$0; next }
+  in_registry && /config_path/ { print NR":"$0; in_registry=0 }
+' /etc/containerd/config.toml
+```
+
+如果输出是 `config_path = ""`，改成：
+
+```bash
+perl -0777 -i -pe 's#(\[plugins\."io\.containerd\.grpc\.v1\.cri"\.registry\]\n\s*)config_path = ".*?"#${1}config_path = "/etc/containerd/certs.d"#s' \
+  /etc/containerd/config.toml
+```
+
+再次确认：
+
+```bash
+awk '
+  /\[plugins\."io.containerd.grpc.v1.cri"\.registry\]/ { in_registry=1; print NR":"$0; next }
+  in_registry && /config_path/ { print NR":"$0; in_registry=0 }
+' /etc/containerd/config.toml
+```
+
+> 重要：这项配置也需要在 **所有节点** 执行，否则 Pod 调度到未修改节点时仍可能拉镜像失败。
+
+#### 📌 CNI 插件路径统一（所有节点都必须设置）
+
+`failed to find plugin "calico" in path [/usr/lib/cni]` 这类报错通常是节点间 CNI 二进制路径不一致导致。建议统一使用 `/opt/cni/bin`。
+
+> 重要：该配置需要在 **所有节点** 执行（控制平面节点 + 工作节点）。任何一个节点没改，Pod 调度到该节点时仍会失败。
+
+```bash
+# 1) 检查当前配置
+grep -n "bin_dir\|conf_dir" /etc/containerd/config.toml
+
+# 2) 统一 CNI 插件目录为 /opt/cni/bin
+sed -i 's#bin_dir = ".*"#bin_dir = "/opt/cni/bin"#' /etc/containerd/config.toml
+sed -i 's#conf_dir = ".*"#conf_dir = "/etc/cni/net.d"#' /etc/containerd/config.toml
+
+# 3) 若历史环境存在 /usr/lib/cni，可建立兼容软链接（可选）
+mkdir -p /usr/lib/cni
+ln -sf /opt/cni/bin/calico /usr/lib/cni/calico
+ln -sf /opt/cni/bin/calico-ipam /usr/lib/cni/calico-ipam
+
+# 4) 重启运行时与 kubelet
+systemctl restart containerd
+systemctl restart kubelet
+```
+
 ### 4.3 应用配置并验证
 
 ```bash
@@ -302,6 +408,22 @@ grep -E "SystemdCgroup|sandbox_image" /etc/containerd/config.toml
 # 期望输出：
 # SystemdCgroup = true
 # sandbox_image = "registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.10"
+
+# 验证镜像加速 hosts 配置
+for r in docker.io registry.k8s.io quay.io ghcr.io gcr.io; do
+  echo "=== $r ==="
+  cat /etc/containerd/certs.d/$r/hosts.toml
+done
+
+# 验证 registry.config_path（必须是 /etc/containerd/certs.d）
+awk '
+  /\[plugins\."io.containerd.grpc.v1.cri"\.registry\]/ { in_registry=1; print NR":"$0; next }
+  in_registry && /config_path/ { print NR":"$0; in_registry=0 }
+' /etc/containerd/config.toml
+
+# 验证 CNI 插件路径与二进制
+grep -n "bin_dir\|conf_dir" /etc/containerd/config.toml
+ls -l /opt/cni/bin/calico /opt/cni/bin/calico-ipam
 ```
 
 ## 5. 安装 Kubernetes 组件
@@ -741,8 +863,14 @@ ip addr show | grep 192.168.100.7
 选择一个 CNI 插件，这里以 Calico 为例：
 
 ```bash
-# 应用 Calico 网络插件（请按官方文档选择与当前版本匹配的清单）
-kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.2/manifests/calico.yaml
+# 先下载 Calico 清单到本地（请按官方文档选择与当前版本匹配的清单）
+curl -L -o calico.yaml https://raw.githubusercontent.com/projectcalico/calico/v3.30.2/manifests/calico.yaml
+
+# 将镜像源替换为国内可用镜像源（示例使用 DaoCloud 镜像）
+sed -i 's#docker.io/#docker.m.daocloud.io/#g' calico.yaml
+
+# 应用本地清单
+kubectl apply -f calico.yaml
 ```
 
 ### 7.5 添加其他节点
