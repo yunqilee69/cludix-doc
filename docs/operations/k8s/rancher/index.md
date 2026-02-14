@@ -2,7 +2,7 @@
 
 本文只聚焦 Helm 本身，不包含具体业务应用部署。
 
-Rancher 空白集群部署请看：`operations/services/rancher/empty-cluster-rancher`
+Rancher 空白集群部署请看：`operations/k8s/rancher/empty-cluster-rancher`
 
 ## 1. 安装 Helm
 

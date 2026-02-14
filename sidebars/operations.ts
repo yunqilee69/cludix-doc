@@ -10,8 +10,27 @@ const operationsSidebar: SidebarConfig = [
       'operations/basics/debian-base-config/index',
       'operations/basics/debian-static-ip/index',
       'operations/basics/install-docker/index',
-      'operations/basics/install-k8s/index',
       'operations/basics/install-docker/offline-install-debian13',
+    ],
+  },
+  {
+    type: 'category',
+    label: 'Kubernetes',
+    collapsible: true,
+    collapsed: false,
+    items: [
+      'operations/k8s/install-k8s/index',
+      'operations/k8s/nfs-server/index',
+      {
+        type: 'category',
+        label: 'Rancher',
+        collapsible: true,
+        collapsed: false,
+        items: [
+          'operations/k8s/rancher/index',
+          'operations/k8s/rancher/empty-cluster-rancher',
+        ],
+      },
     ],
   },
   {
@@ -33,19 +52,8 @@ const operationsSidebar: SidebarConfig = [
     collapsible: true,
     collapsed: false,
     items: [
-      'operations/services/nfs-server/index',
       'operations/services/jellyfin/index',
       'operations/services/milvus/index',
-      {
-        type: 'category',
-        label: 'Rancher',
-        collapsible: true,
-        collapsed: false,
-        items: [
-          'operations/services/rancher/index',
-          'operations/services/rancher/empty-cluster-rancher',
-        ],
-      },
     ],
   },
   {

@@ -51,8 +51,8 @@
 ### 2.1 系统基础配置
 
 首先完成 Debian 系统的基础配置，参考：
-- [Debian 13 系统基础配置](../debian-base-config/)
-- [Debian 13 静态IP配置](../debian-static-ip/)
+- [Debian 13 系统基础配置](../../basics/debian-base-config/)
+- [Debian 13 静态IP配置](../../basics/debian-static-ip/)
 
 ### 2.2 网络配置
 

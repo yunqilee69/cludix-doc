@@ -33,7 +33,7 @@ kubectl get pods -A
 kubectl get pods -n kube-system
 ```
 
-如果还没装 CNI，可参考：`operations/basics/install-k8s/index`
+如果还没装 CNI，可参考：`operations/k8s/install-k8s/index`
 
 ## 2.3 默认 StorageClass
 
@@ -45,7 +45,7 @@ kubectl get sc
 
 本指南不再使用 `local-path`。空白集群请优先准备 NFS 共享存储（nfsd），并基于 NFS 提供默认存储类。
 
-NFS Server（nfsd）安装与配置请先完成：`operations/services/nfs-server/index`
+NFS Server（nfsd）安装与配置请先完成：`operations/k8s/nfs-server/index`
 
 完成后，确认集群内有默认 `StorageClass`：
 
