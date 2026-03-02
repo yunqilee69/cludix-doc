@@ -103,6 +103,8 @@ source ~/.bashrc
 
 本篇示例统一使用 `cludix-doc` 作为证书文件前缀。
 
+## 安装到固定路径并自动重载 Nginx
+
 其他站点可按同样方式执行 `--install-cert`，仅替换域名和文件名前缀，例如：
 
 ```bash

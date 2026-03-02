@@ -16,15 +16,15 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: "https://your-docusaurus-site.example.com",
+  url: "https://yunqilee69.github.io",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: "/",
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: "facebook", // Usually your GitHub org/user name.
-  projectName: "docusaurus", // Usually your repo name.
+  organizationName: "yunqilee69", // Usually your GitHub org/user name.
+  projectName: "cludix-doc", // Usually your repo name.
 
   onBrokenLinks: "throw",
 
@@ -60,8 +60,8 @@ const config: Config = {
     colorMode: {
       // 默认色彩模式
       defaultMode: 'light',
-      // 关闭切换，在导航栏隐藏切换按钮
-      disableSwitch: true,
+      disableSwitch: false,
+      respectPrefersColorScheme: true,
     },
     navbar: {
       title: "云星",
@@ -105,10 +105,10 @@ const config: Config = {
         },
       ],
     },
-    // prism: {
-    //   theme: prismThemes.github,
-    //   darkTheme: prismThemes.dracula,
-    // },
+    prism: {
+      theme: prismThemes.github,
+      darkTheme: prismThemes.dracula,
+    },
   } satisfies Preset.ThemeConfig,
 
   themes: [

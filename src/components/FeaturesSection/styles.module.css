@@ -1,6 +1,10 @@
 .featuresSection {
   padding: 80px 0;
-  background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+  background: linear-gradient(
+    180deg,
+    var(--ifm-color-emphasis-100) 0%,
+    var(--ifm-background-color) 100%
+  );
 }
 
 .container {
@@ -18,7 +22,11 @@
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 16px !important;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(
+    135deg,
+    var(--ifm-color-primary) 0%,
+    var(--ifm-color-primary-dark) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -26,13 +34,15 @@
 
 .subtitle {
   font-size: 1.125rem;
-  color: #6c757d;
+  color: var(--ifm-color-emphasis-700);
   max-width: 600px;
   margin: 0 auto;
 }
 
 .featureCard {
   height: 100%;
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
   border-radius: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
@@ -50,18 +60,18 @@
   width: 64px;
   height: 64px;
   border-radius: 16px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: var(--ifm-color-emphasis-200);
 }
 
 .featureTitle {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 12px !important;
-  color: #2d3748;
+  color: var(--ifm-heading-color);
 }
 
 .featureDescription {
-  color: #718096;
+  color: var(--ifm-color-emphasis-700);
   font-size: 0.95rem;
   line-height: 1.6;
   margin-bottom: 0 !important;
