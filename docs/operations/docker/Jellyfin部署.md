@@ -1,3 +1,8 @@
+---
+slug: /operations/jellyfin-compose
+title: Jellyfin Docker Compose 配置
+---
+
 # Jellyfin
 
 本文提供 Jellyfin 媒体服务器的配置示例与配置原因说明，遵循本目录统一规范（单应用 compose + 复用 `app-net`）。

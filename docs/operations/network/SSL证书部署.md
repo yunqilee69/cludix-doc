@@ -1,3 +1,8 @@
+---
+slug: /operations/ssl-deployment
+title: SSL 证书申请与 Nginx 配置指南
+---
+
 # SSL 证书申请与 Nginx 配置指南（acme.sh + DNS-01）
 
 本文档使用 `acme.sh` 的 DNS-01 验证方案申请 Let's Encrypt 证书。该方案不依赖 `/.well-known/acme-challenge/`，适合容器化 Nginx 和经常升级/切换发布目录的场景。

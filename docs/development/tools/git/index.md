@@ -1,3 +1,8 @@
+---
+slug: /development/git
+title: Git 配置指南
+---
+
 # Git 配置指南
 
 Git 相关的配置和工具使用文档。

@@ -1,3 +1,8 @@
+---
+slug: /software/openclaw
+title: OpenClaw 安装与基础配置
+---
+
 # OpenClaw 安装与基础配置
 
 本文介绍 OpenClaw 的基础安装流程与初始化注意事项，建议在 Linux 环境中使用：

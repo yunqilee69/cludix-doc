@@ -1,4 +1,5 @@
 ---
+slug: /operations/debian-static-ip
 title: Debian 13 静态IP配置指南
 ---
 

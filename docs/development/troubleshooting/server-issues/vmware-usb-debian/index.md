@@ -1,10 +1,10 @@
 ---
+slug: /development/vmware-usb-debian
 title: VMware使用U盘安装Debian系统
 description: 详细介绍在VMware Workstation中如何使用U盘安装Debian系统
 tags: [VMware, Debian]
 date: 2025-12-10
 ---
-
 本文详细介绍在VMware Workstation中如何使用U盘安装Debian系统，以Debian 13（代号Trixie）为例。
 
 <!-- truncate -->

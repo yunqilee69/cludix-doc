@@ -1,4 +1,5 @@
 ---
+slug: /operations/debian-base-config
 title: Debian 13 系统基础配置
 ---
 

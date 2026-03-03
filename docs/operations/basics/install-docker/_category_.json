@@ -1,0 +1,10 @@
+{
+  "label": "安装 Docker",
+  "position": 3,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "doc",
+    "id": "operations/basics/install-docker/index"
+  }
+}

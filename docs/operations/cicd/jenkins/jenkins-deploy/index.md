@@ -1,3 +1,8 @@
+---
+slug: /operations/jenkins-deploy
+title: Jenkins 实现自动部署
+---
+
 # jenkins实现自动部署
 
 本文介绍如何通过jenkins实现自动部署，以前端部署为例。

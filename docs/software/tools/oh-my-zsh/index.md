@@ -1,3 +1,8 @@
+---
+slug: /software/oh-my-zsh
+title: Oh My Zsh配置
+---
+
 # Oh My Zsh配置
 
 Oh My Zsh是一个强大的Zsh框架，提供丰富的插件和主题配置，提升终端使用体验。

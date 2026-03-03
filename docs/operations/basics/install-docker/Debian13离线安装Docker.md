@@ -1,3 +1,8 @@
+---
+slug: /operations/docker-offline-install
+title: Debian 13 离线安装 Docker
+---
+
 # Debian 13 离线安装 Docker / Docker Compose（二进制）
 
 本文介绍在 `Debian 13 (x86_64)` 环境下，如何通过二进制包离线安装 Docker Engine 与 Docker Compose（CLI 插件方式）。

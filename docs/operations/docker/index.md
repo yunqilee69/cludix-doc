@@ -1,3 +1,8 @@
+---
+slug: /operations/docker
+title: Docker 部署规范
+---
+
 # Docker 部署规范
 
 本目录下的容器部署文档（如 Nginx、MySQL、Redis、Nacos）统一遵循同一套 Docker Compose 模式，便于运维管理与按需启停。
@@ -119,13 +124,13 @@ docker compose -f /app/docker-compose.nginx.yml ps
 
 ## 7. 目录内文档说明
 
-- [Nginx 部署示例](./nginx-compose)
-- [MySQL 部署示例](./mysql-compose)
-- [Redis 部署示例](./redis-compose)
-- [Nacos 部署示例](./nacos-compose)
-- [RocketMQ 部署示例](./rocketmq-compose)
-- [Filebrowser 部署示例](./filebrowser-compose)
-- [Jellyfin 部署示例](./jellyfin-compose)
-- [Jenkins 部署示例](./jenkins-compose)
+- [Nginx 部署示例](./Nginx部署.md)
+- [MySQL 部署示例](./MySQL部署.md)
+- [Redis 部署示例](./Redis部署.md)
+- [Nacos 部署示例](./Nacos部署.md)
+- [RocketMQ 部署示例](./RocketMQ部署.md)
+- [Filebrowser 部署示例](./Filebrowser部署.md)
+- [Jellyfin 部署示例](./Jellyfin部署.md)
+- [Jenkins 部署示例](./Jenkins部署.md)
 
 后续新增其他容器文档时，均按本规范编排。

@@ -1,3 +1,8 @@
+---
+slug: /operations/helm-chart-package
+title: Helm Chart 打包与分享
+---
+
 # 从零构建 Helm Chart 包并分享给他人
 
 本文介绍如何把一个 Kubernetes 应用封装成 Helm Chart 包，并通过多种方式分享给团队成员使用。

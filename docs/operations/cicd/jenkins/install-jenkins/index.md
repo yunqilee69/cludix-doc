@@ -1,3 +1,8 @@
+---
+slug: /operations/install-jenkins
+title: Docker安装Jenkins
+---
+
 # Docker安装Jenkins
 
 ## 拉取镜像

@@ -1,3 +1,8 @@
+---
+slug: /operations/debian-proxy
+title: Debian 代理自动配置指南
+---
+
 # Debian 代理自动配置指南
 
 本文档介绍如何在 Debian 系统中配置代理，实现开机后和 SSH 连接后自动配置代理。

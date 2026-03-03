@@ -1,3 +1,8 @@
+---
+slug: /
+title: 欢迎使用云星文档站
+---
+
 # 欢迎使用云星文档站
 
 这是我的个人技术知识库，主要记录：
@@ -9,7 +14,7 @@
 
 ## 快速导航
 
-- [运维文档](/docs/operations/)
-- [开发文档](/docs/development/)
-- [软件安装](/docs/software/)
-- [Nebula 项目](/docs/nebula/)
+- [运维文档](./operations/index.md)
+- [开发文档](./development/index.md)
+- [软件安装](./software/index.md)
+- [Nebula 项目](./nebula/index.md)

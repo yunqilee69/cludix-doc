@@ -1,3 +1,8 @@
+---
+slug: /software/uv-python
+title: uv 安装与配置
+---
+
 # uv 在 macOS/Linux 上的安装与配置
 
 ## 什么是 uv

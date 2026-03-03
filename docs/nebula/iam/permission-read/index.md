@@ -1,3 +1,8 @@
+---
+slug: /nebula/permission-read
+title: IAM权限系统设计方案
+---
+
 # IAM权限系统设计方案
 
 > **IAM**（Identity and Access Management，身份与访问管理）是指对系统中的用户身份进行认证（Authentication）和授权（Authorization）的管理体系。本系统基于IAM理念，提供统一的权限管理能力。

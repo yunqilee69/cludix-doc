@@ -1,3 +1,8 @@
+---
+slug: /operations/nginx-compose
+title: Nginx Docker Compose 配置
+---
+
 # Nginx
 
 本文仅提供配置示例与配置原因说明，不包含验证访问和运维命令。

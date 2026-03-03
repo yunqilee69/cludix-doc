@@ -1,8 +1,8 @@
 ---
+slug: /nebula/iam
 title: Nebula-IAM 架构概览
 description: Nebula-IAM 微服务认证授权系统的模块结构和依赖关系
 ---
-
 # Nebula-IAM 架构概览
 
 Nebula-IAM 是一套完整的微服务认证授权解决方案，采用模块化设计，支持单体应用和分布式部署。本文档介绍其包结构和模块间的依赖关系。

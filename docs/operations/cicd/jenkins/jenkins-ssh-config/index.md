@@ -1,3 +1,8 @@
+---
+slug: /operations/jenkins-ssh
+title: Jenkins 生成目标机用户密钥与免密配置
+---
+
 # Jenkins 生成目标机用户密钥与免密配置
 本文演示如何在 Jenkins 容器里一次性生成 Ed25519 密钥对，把公钥写入目标机普通用户（如 deploy）的 ~/.ssh/authorized_keys，并在目标机 sudoers 中给该用户开白名单，实现 Pipeline 全程无交互登录与提权。
 ## 1. 在 Jenkins 容器内生成密钥

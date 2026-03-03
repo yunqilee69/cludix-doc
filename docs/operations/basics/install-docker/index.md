@@ -1,3 +1,8 @@
+---
+slug: /operations/install-docker
+title: Debian系统安装Docker
+---
+
 # Debian系统安装Docker
 
 本文介绍在Debian系统上，如何安装Docker,并将用户添加到docker组中

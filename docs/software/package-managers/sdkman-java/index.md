@@ -1,3 +1,8 @@
+---
+slug: /software/sdkman-java
+title: SDKMAN! 安装与 Java 多版本管理
+---
+
 # SDKMAN! 在 macOS 上的安装与 Java 多版本管理
 
 ## 什么是 SDKMAN!

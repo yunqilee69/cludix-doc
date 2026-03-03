@@ -1,3 +1,8 @@
+---
+slug: /software/nvm-nodejs
+title: Debian安装nodejs环境
+---
+
 # Debian安装nodejs环境
 
 debian下安装nodejs环境，推荐使用nvm,可以动态切换nodejs版本

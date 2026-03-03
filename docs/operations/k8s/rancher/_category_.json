@@ -1,0 +1,10 @@
+{
+  "label": "Rancher",
+  "position": 4,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "doc",
+    "id": "operations/k8s/rancher/index"
+  }
+}

@@ -1,3 +1,8 @@
+---
+slug: /operations/jellyfin
+title: Docker 部署 Jellyfin
+---
+
 # Docker 部署 Jellyfin
 
 本文介绍如何使用 Docker 部署 Jellyfin 媒体服务器。

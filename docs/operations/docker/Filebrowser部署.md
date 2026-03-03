@@ -1,3 +1,8 @@
+---
+slug: /operations/filebrowser-compose
+title: Filebrowser Docker Compose 配置
+---
+
 # Filebrowser
 
 本文提供 Filebrowser 的配置示例与配置原因说明，遵循本目录统一规范（单应用 compose + 复用 `app-net`）。

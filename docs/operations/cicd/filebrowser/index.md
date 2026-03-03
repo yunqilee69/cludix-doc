@@ -1,3 +1,8 @@
+---
+slug: /operations/filebrowser
+title: Filebrowser Docker 部署指南
+---
+
 # Filebrowser Docker 部署指南
 
 ## 概述

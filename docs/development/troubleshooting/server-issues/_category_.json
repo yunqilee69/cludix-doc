@@ -1,0 +1,10 @@
+{
+  "label": "服务器问题",
+  "position": 2,
+  "collapsible": true,
+  "collapsed": true,
+  "link": {
+    "type": "doc",
+    "id": "development/troubleshooting/server-issues/index"
+  }
+}

@@ -1,3 +1,8 @@
+---
+slug: /operations/linux-homebrew
+title: Linux 安装配置 Homebrew 指南
+---
+
 # Linux 安装配置 Homebrew 指南
 
 本文档介绍如何在 Debian 系统中安装和配置 Homebrew 包管理器，并配置国内镜像源加速下载。

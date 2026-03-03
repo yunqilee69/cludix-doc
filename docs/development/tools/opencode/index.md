@@ -1,3 +1,8 @@
+---
+slug: /development/opencode
+title: OpenCode 安装与使用指南
+---
+
 # OpenCode 安装与使用指南
 
 OpenCode 是一款智能代码辅助编程工具，支持自定义模型提供商，内置两种核心 Agent：

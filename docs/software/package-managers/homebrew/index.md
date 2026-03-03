@@ -1,3 +1,8 @@
+---
+slug: /software/homebrew
+title: Homebrew 在 macOS 上的安装与国内源配置
+---
+
 # Homebrew 在 macOS 上的安装与国内源配置
 
 ## 什么是 Homebrew

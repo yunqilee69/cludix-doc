@@ -1,3 +1,8 @@
+---
+slug: /operations/git-ssh
+title: Debian配置Github的SSH连接
+---
+
 # Debian配置Github的SSH连接
 
 在debian系统上配置ssh,实现通过ssh协议来对github仓库进行操作

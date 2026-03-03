@@ -1,3 +1,8 @@
+---
+slug: /operations/jenkins-compose
+title: Jenkins Docker Compose 配置
+---
+
 # Jenkins
 
 本文提供 Jenkins CI/CD 服务器的配置示例与配置原因说明，遵循本目录统一规范（单应用 compose + 复用 `app-net`）。

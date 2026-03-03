@@ -1,8 +1,13 @@
+---
+slug: /operations/rancher-helm
+title: Helm 安装、配置与基础使用
+---
+
 # Helm 安装、配置与基础使用（国内网络优先）
 
 本文只聚焦 Helm 本身，不包含具体业务应用部署。
 
-Rancher 空白集群部署请看：`operations/k8s/rancher/empty-cluster-rancher`
+Rancher 空白集群部署请看：`operations/k8s/rancher/空白集群部署Rancher`
 
 ## 1. 安装 Helm
 

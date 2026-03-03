@@ -1,3 +1,8 @@
+---
+slug: /operations/nacos-compose
+title: Nacos Docker Compose 配置
+---
+
 # Nacos
 
 本文提供 Nacos 的配置示例与配置原因说明，遵循本目录统一规范（单应用 compose + 复用 `app-net`）。

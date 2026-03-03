@@ -1,3 +1,8 @@
+---
+slug: /operations/milvus
+title: Docker Compose 部署 Milvus
+---
+
 # Docker Compose 部署 Milvus
 
 本文介绍如何在 Docker Compose 环境下部署单机版的 Milvus 服务，使用 etcd 和 MinIO 作为存储层。

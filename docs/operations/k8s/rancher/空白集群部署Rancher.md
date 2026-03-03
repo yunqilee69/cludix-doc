@@ -1,3 +1,8 @@
+---
+slug: /operations/rancher-deploy
+title: Rancher 部署指南
+---
+
 # 空白集群基础配置与 Rancher 部署指南（国内网络优先）
 
 本文面向“刚建好的空白 Kubernetes 集群”，按可落地顺序完成 Rancher 部署。

@@ -1,3 +1,8 @@
+---
+slug: /operations/nfs-server
+title: Debian 安装与配置 NFS Server
+---
+
 # Debian 安装与配置 NFS Server（用于 Kubernetes 共享存储）
 
 本文用于在独立服务器上部署 NFS Server，供 Kubernetes 集群通过 NFS CSI 提供 RWX 存储。

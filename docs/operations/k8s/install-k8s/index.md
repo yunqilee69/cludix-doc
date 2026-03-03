@@ -1,3 +1,8 @@
+---
+slug: /operations/install-k8s
+title: Debian 13 上部署 Kubernetes 1.33 集群
+---
+
 # Debian 13 上部署 Kubernetes 1.33 集群指南
 
 本文档详细介绍如何在 Debian 13 系统上部署 Kubernetes 1.33 集群。本教程示例采用 3 主 3 从的集群架构（宿主机 16C64G，预留资源后用于集群 12C48G）：
@@ -49,8 +54,8 @@
 ### 2.1 系统基础配置
 
 首先完成 Debian 系统的基础配置，参考：
-- [Debian 13 系统基础配置](../../basics/debian-base-config/)
-- [Debian 13 静态IP配置](../../basics/debian-static-ip/)
+- [Debian 13 系统基础配置](../../basics/debian-base-config/index.md)
+- [Debian 13 静态IP配置](../../basics/debian-static-ip/index.md)
 
 ### 2.2 网络配置
 

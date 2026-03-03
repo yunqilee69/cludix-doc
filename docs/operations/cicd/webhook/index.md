@@ -1,3 +1,8 @@
+---
+slug: /operations/webhook
+title: 服务器配置 WebHook
+---
+
 # 服务器配置 WebHook
 
 由于服务器配置仅为 1C2G 的小水管服务器，无法部署重量级的 CI/CD 工具（如 Jenkins）。因此在 GitHub 上寻找轻量级的 WebHook 解决方案，发现了一款长时间运行内存消耗仅几十 MB 的工具。
