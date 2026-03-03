@@ -125,5 +125,7 @@ docker compose -f /app/docker-compose.nginx.yml ps
 - [Nacos 部署示例](./nacos-compose)
 - [RocketMQ 部署示例](./rocketmq-compose)
 - [Filebrowser 部署示例](./filebrowser-compose)
+- [Jellyfin 部署示例](./jellyfin-compose)
+- [Jenkins 部署示例](./jenkins-compose)
 
 后续新增其他容器文档时，均按本规范编排。

@@ -17,7 +17,7 @@ const operationsSidebar: SidebarConfig = [
     type: 'category',
     label: 'Docker',
     collapsible: true,
-    collapsed: false,
+    collapsed: true,
     items: [
       'operations/docker/index',
       'operations/docker/nginx-compose',
@@ -26,6 +26,9 @@ const operationsSidebar: SidebarConfig = [
       'operations/docker/nacos-compose',
       'operations/docker/rocketmq-compose',
       'operations/docker/filebrowser-compose',
+      'operations/docker/jellyfin-compose',
+      'operations/docker/milvus-compose',
+      'operations/docker/jenkins-compose',
     ],
   },
   {
