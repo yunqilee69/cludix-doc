@@ -15,6 +15,21 @@ const operationsSidebar: SidebarConfig = [
   },
   {
     type: 'category',
+    label: 'Docker',
+    collapsible: true,
+    collapsed: false,
+    items: [
+      'operations/docker/index',
+      'operations/docker/nginx-compose',
+      'operations/docker/mysql-compose',
+      'operations/docker/redis-compose',
+      'operations/docker/nacos-compose',
+      'operations/docker/rocketmq-compose',
+      'operations/docker/filebrowser-compose',
+    ],
+  },
+  {
+    type: 'category',
     label: 'Kubernetes',
     collapsible: true,
     collapsed: false,
