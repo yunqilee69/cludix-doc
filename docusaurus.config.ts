@@ -7,7 +7,7 @@ import type * as SearchLocal from "@easyops-cn/docusaurus-search-local";
 
 const config: Config = {
   title: "云星",
-  tagline: "Dinosaurs are cool",
+  tagline: "",
   favicon: "img/favicon.ico",
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -32,8 +32,8 @@ const config: Config = {
   // useful metadata like html lang. For example, if your site is in Chinese, you
   // may want to replace "en" with "zh-Hans".
   i18n: {
-    defaultLocale: "en",
-    locales: ["en"],
+    defaultLocale: "zh",
+    locales: ["zh"],
   },
 
   presets: [
@@ -98,11 +98,6 @@ const config: Config = {
           position: "right",
           label: "运维"
         },
-        {
-          href: "https://github.com/yunqilee69",
-          label: "GitHub",
-          position: "right",
-        },
       ],
     },
     prism: {
@@ -115,10 +110,20 @@ const config: Config = {
     [
       require.resolve("@easyops-cn/docusaurus-search-local"),
       {
-        // 下面所有 key 都有 TS 提示
-        language: "zh",
-        docsRouteBasePath: "/docs",
-      } satisfies SearchLocal.PluginOptions, // ✅ 一行锁死类型
+        language: ["en", "zh"],
+        docsRouteBasePath: "docs",
+        // 启用哈希索引缓存（优化构建和加载）
+        hashed: true,
+        // 搜索结果配置
+        indexDocs: true,
+        indexBlog: false,
+        indexPages: true,
+        // 搜索体验增强
+        highlightSearchTermsOnTargetPage: true,
+        searchResultLimits: 8,
+        searchResultContextMaxLength: 50,
+        explicitSearchResultPath: true,
+      } satisfies SearchLocal.PluginOptions,
     ],
   ],
 
