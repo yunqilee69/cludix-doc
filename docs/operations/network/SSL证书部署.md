@@ -26,7 +26,6 @@ title: SSL 证书申请与 Nginx 配置指南
 - 你希望使用浏览器信任证书（Let's Encrypt）
 - 你不希望依赖 WebRoot 路径（避免升级时挑战目录失效）
 - 你使用容器 Nginx，证书需要固定输出到宿主机 `/app/nginx/ssl`
-- 你在同一台服务器上部署多个站点，希望每个站点使用独立证书文件名
 
 ---
 
@@ -90,35 +89,23 @@ source ~/.bashrc
   -d yunke.icu -d '*.yunke.icu' \
   --dns dns_dp \
   --keylength ec-256
-```
-
 说明：
 
 - `--dns dns_dp` 表示通过腾讯云 DNSPod API 自动写入 TXT 记录
-- `-d '*.yunke.icu'` 表示申请通配符证书
+- `-d yunke.icu` 是根域名，`-d '*.yunke.icu'` 是泛域名，覆盖所有子域名
 - DNS-01 不依赖 80 端口，也不依赖 Nginx 的 `/.well-known` 路径
-
-### 3) 多站点命名建议（重要）
-
-同一台服务器部署多个网站时，建议每个站点使用独立证书文件名，避免覆盖：
-
-- cludix-doc：`/app/nginx/ssl/cludix-doc.crt`、`/app/nginx/ssl/cludix-doc.key`
-- blog：`/app/nginx/ssl/blog.crt`、`/app/nginx/ssl/blog.key`
-- admin：`/app/nginx/ssl/admin.crt`、`/app/nginx/ssl/admin.key`
-
-本篇示例统一使用 `cludix-doc` 作为证书文件前缀。
 
 ## 安装到固定路径并自动重载 Nginx
 
-其他站点可按同样方式执行 `--install-cert`，仅替换域名和文件名前缀，例如：
+将证书安装到固定路径，并配置自动重载 Nginx：
+## 安装到固定路径并自动重载 Nginx
 
 ```bash
-~/.acme.sh/acme.sh --install-cert -d www.yunke.icu -d yunke.icu --ecc \
-  --key-file /app/nginx/ssl/cludix-doc.key \
-  --fullchain-file /app/nginx/ssl/cludix-doc.crt \
+~/.acme.sh/acme.sh --install-cert -d yunke.icu -d '*.yunke.icu' --ecc \
+  --key-file /app/nginx/ssl/cludix.key \
+  --fullchain-file /app/nginx/ssl/cludix.crt \
   --reloadcmd "docker exec nginx nginx -s reload"
 ```
-
 ## Nginx HTTPS 配置示例
 
 假设挂载关系：
@@ -132,17 +119,17 @@ source ~/.bashrc
 server {
     listen 80;
     listen [::]:80;
-    server_name yunke.icu www.yunke.icu;
+    server_name yunke.icu www.yunke.icu *.yunke.icu;
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl;
     listen [::]:443 ssl;
-    server_name yunke.icu www.yunke.icu;
+    server_name yunke.icu www.yunke.icu *.yunke.icu;
 
-    ssl_certificate /etc/nginx/ssl/cludix-doc.crt;
-    ssl_certificate_key /etc/nginx/ssl/cludix-doc.key;
+    ssl_certificate /etc/nginx/ssl/cludix.crt;
+    ssl_certificate_key /etc/nginx/ssl/cludix.key;
 
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_session_timeout 1d;
@@ -193,7 +180,6 @@ crontab -l | grep acme.sh
 ```bash
 curl -I https://yunke.icu
 echo | openssl s_client -servername yunke.icu -connect yunke.icu:443 2>/dev/null | openssl x509 -noout -dates -issuer -subject
-```
 
 ### 常见问题
 
