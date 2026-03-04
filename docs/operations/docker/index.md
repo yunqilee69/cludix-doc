@@ -70,7 +70,26 @@ sudo usermod -aG appgroup $USER
 getent group appgroup | cut -d: -f3
 ```
 
-可选（推荐）：如果希望新建文件默认具有组写权限，避免受 umask 影响，可增加 ACL：
+必做：为保证新建文件默认具备组写权限、避免受 umask 影响，必须配置 ACL。
+
+如果系统未安装 ACL 工具，请先安装：
+
+```bash
+sudo apt update
+sudo apt install -y acl
+```
+
+安装后先验证：
+
+```bash
+# 检查是否安装成功
+getfacl --version
+
+# 查看当前目录 ACL（测试命令）
+getfacl /app
+```
+
+然后执行 ACL 配置：
 
 ```bash
 sudo setfacl -R -m g:appgroup:rwx /app

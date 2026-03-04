@@ -64,60 +64,115 @@ networks:
 - 通过 `group_add` 复用宿主机组权限，减少重复 `chown` 操作
 - 增加 `healthcheck`，便于在编排层判断 Bifrost 是否可用
 
-## 3. Provider 配置
+## 3. Provider 配置（基于 config.json 初始化）
 
-Bifrost 支持通过 Web UI、API 或环境变量配置 LLM 提供商。
+推荐使用 `config.json + config_store` 进行首次引导初始化，再通过 Web UI 或 HTTP API 持久化修改配置。
 
-### 方式一：Web UI 配置（推荐）
+### 3.1 初始化文件示例（OpenAI 兼容上游）
 
-启动后访问 `http://<服务器IP>:8080`，在 Web 界面中可视化配置 Provider 和 API Key。
+在宿主机创建 `/app/bifrost/data/config.json`（容器内对应 `/app/data/config.json`）：
 
-### 方式二：环境变量配置
-
-在 `docker-compose.bifrost.yml` 中添加环境变量：
-
-```yaml
-environment:
-  - TZ=Asia/Shanghai
-  # OpenAI
-  - OPENAI_API_KEY=sk-xxxxx
-  # Anthropic
-  - ANTHROPIC_API_KEY=sk-ant-xxxxx
-  # Google AI
-  - GEMINI_API_KEY=xxxxx
-  # Mistral
-  - MISTRAL_API_KEY=xxxxx
+```json
+{
+  "client": {
+    "drop_excess_requests": false
+  },
+  "providers": {
+    "openai-custom": {
+      "keys": [
+        {
+          "name": "openai-custom-key-1",
+          "value": "env.OPENAI_API_KEY",
+          "models": [],
+          "weight": 1.0
+        }
+      ],
+      "network_config": {
+        "base_url": "https://your-openai-compatible-endpoint.com"
+      },
+      "custom_provider_config": {
+        "base_provider_type": "openai",
+        "allowed_requests": {
+          "chat_completion": true,
+          "chat_completion_stream": true
+        },
+        "request_path_overrides": {
+          "chat_completion": "/v1/chat/completions",
+          "chat_completion_stream": "/v1/chat/completions"
+        }
+      }
+    }
+  },
+  "config_store": {
+    "enabled": true,
+    "type": "sqlite",
+    "config": {
+      "path": "./config.db"
+    }
+  }
+}
 ```
 
-### 方式三：API 动态配置
+### 3.2 配置模式与常见坑点
 
-启动后通过 API 添加 Provider：
+Bifrost 有两种配置模式，不能混用：
+
+- 不配置 `config_store`：UI 禁用，配置为只读内存模式；修改 `config.json` 后必须重启生效
+- 配置 `config_store`：UI 可用，配置持久化到数据库；可通过 UI/API 实时修改
+
+`config_store` 开启后还有一个关键行为：
+
+- 首次启动且数据库为空：使用 `config.json` 引导初始化
+- 数据库已存在且有数据：直接以数据库为准，忽略 `config.json`
+- 因此 `config.json` 主要用于初始化；后续变更请走 UI 或 API
+
+Docker 挂载注意事项：
+
+- 本文挂载为 `/app/bifrost/data:/app/data`，`./config.db` 实际位于容器内 `/app/data/config.db`
+- 若要重新按 `config.json` 引导，需清空/替换已有 `config.db`（会丢失当前数据库中的配置）
+
+### 3.3 custom_provider_config 在 UI/API 的可用性说明
+
+- UI 支持新增 Custom Provider（选择 provider 名称、base provider type、allowed requests）
+- `request_path_overrides` 建议通过 API 或 `config.json` 维护，便于精确控制路径映射
+
+示例：通过 API 更新已有 custom provider（实时生效并持久化到 SQLite）
 
 ```bash
-# 添加 OpenAI Provider
-curl --location 'http://localhost:8080/api/providers' \
---header 'Content-Type: application/json' \
---data '{
-  "provider": "openai",
-  "keys": [
-    {
-      "value": "sk-xxxxx"
+curl -X PUT http://localhost:8080/api/providers \
+  -H "Content-Type: application/json" \
+  -d '{
+    "provider": "openai-custom",
+    "keys": [
+      {
+        "name": "openai-custom-key-1",
+        "value": "env.OPENAI_API_KEY",
+        "models": [],
+        "weight": 1.0
+      }
+    ],
+    "network_config": {
+      "base_url": "https://your-openai-compatible-endpoint.com"
+    },
+    "custom_provider_config": {
+      "base_provider_type": "openai",
+      "allowed_requests": {
+        "chat_completion": true,
+        "chat_completion_stream": true
+      },
+      "request_path_overrides": {
+        "chat_completion": "/api/v2/chat",
+        "chat_completion_stream": "/api/v2/chat"
+      }
     }
-  ]
-}'
-
-# 添加 Anthropic Provider
-curl --location 'http://localhost:8080/api/providers' \
---header 'Content-Type: application/json' \
---data '{
-  "provider": "anthropic",
-  "keys": [
-    {
-      "value": "sk-ant-xxxxx"
-    }
-  ]
-}'
+  }'
 ```
+
+配置原因：
+
+- 用 `config.json` 做首启基线，便于 IaC/GitOps 管理
+- 启用 `config_store` 后保留 UI/API 动态运维能力
+- 对 OpenAI 兼容上游使用 `custom_provider_config`，可复用 Bifrost 统一接口并做路径适配
 
 ## 4. 常用命令（复制即用）
 
@@ -154,44 +209,7 @@ curl -X POST http://localhost:8080/v1/chat/completions \
 
 > **注意**：调用前需先配置对应 Provider 的 API Key。
 
-## 6. SDK 集成示例
-
-Bifrost 提供 OpenAI 兼容 API，只需修改 `base_url` 即可无缝接入现有应用：
-
-### OpenAI SDK（Python）
-
-```python
-from openai import OpenAI
-
-client = OpenAI(
-    base_url="http://localhost:8080/openai/v1",
-    api_key="dummy-key"  # Key 由 Bifrost 管理
-)
-
-response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[{"role": "user", "content": "Hello!"}]
-)
-```
-
-### Anthropic SDK（Python）
-
-```python
-from anthropic import Anthropic
-
-client = Anthropic(
-    base_url="http://localhost:8080/anthropic/v1",
-    api_key="dummy-key"
-)
-
-response = client.messages.create(
-    model="claude-3-sonnet-20240229",
-    max_tokens=1024,
-    messages=[{"role": "user", "content": "Hello!"}]
-)
-```
-
-## 7. 核心特性
+## 6. 核心特性
 
 | 特性 | 说明 |
 |------|------|
@@ -202,7 +220,7 @@ response = client.messages.create(
 | 预算管理 | 层级化成本控制，支持虚拟 Key 和团队预算 |
 | 可观测性 | 原生 Prometheus 指标、分布式追踪、日志记录 |
 
-## 8. 支持的 Provider
+## 7. 支持的 Provider
 
 | Provider | 模型示例 |
 |----------|----------|
@@ -217,7 +235,7 @@ response = client.messages.create(
 | Cerebras | llama-3-70b |
 | Ollama | 本地模型 |
 
-## 9. 参考资料
+## 8. 参考资料
 
 - [Bifrost 官方文档](https://docs.getbifrost.ai)
 - [Bifrost GitHub](https://github.com/maximhq/bifrost)
