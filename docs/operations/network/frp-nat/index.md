@@ -45,8 +45,6 @@ sudo mkdir -p /app/frp
 
 ### 2.1 服务端配置文件
 
-frp 的 TOML 配置支持 Go 模板变量。比如先执行 `export CLUDIX_PASSWORD=your_web_password`，随后可在配置文件中通过 `{{ .Envs.CLUDIX_PASSWORD }}` 引用该环境变量。这里更适合用于服务端 Web 面板密码配置。
-
 ```bash
 # 创建服务端配置
 sudo tee /app/frp/frps.toml > /dev/null <<EOF
@@ -55,7 +53,7 @@ auth.method = "token"
 auth.token = "your_secure_token_here"
 webServer.port = 7778
 webServer.user = "admin"
-webServer.password = "{{ .Envs.CLUDIX_PASSWORD }}"
+webServer.password = "your_web_password"
 log.to = "./frps.log"
 log.level = "info"
 log.maxDays = 3
@@ -179,7 +177,7 @@ sudo systemctl start frpc
 
 ### 3.3 macOS 客户端示例
 
-如果客户端是 macOS，也可以直接运行 `frpc`。以下示例以 Apple Silicon 机器为例：
+如果客户端是 macOS，也可以直接运行 `frpc`。以下示例以 Apple Silicon 机器为例，安装目录统一使用 `/usr/local/frp`：
 
 ```bash
 # 下载 frp 0.67.0 macOS ARM64 版本
@@ -211,6 +209,60 @@ EOF
 
 # 前台测试运行
 cd /usr/local/frp && ./frpc -c frpc.toml
+```
+
+如果希望 `frpc` 在 macOS 后台常驻，并在开机登录后自动启动，可以通过 `launchd` 创建用户级 `LaunchAgent`：
+
+```bash
+# 创建 LaunchAgents 目录
+mkdir -p ~/Library/LaunchAgents
+
+# 写入启动配置
+cat > ~/Library/LaunchAgents/com.cludix.frpc.plist <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.cludix.frpc</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/frp/frpc</string>
+    <string>-c</string>
+    <string>/usr/local/frp/frpc.toml</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/usr/local/frp</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/usr/local/frp/frpc.log</string>
+  <key>StandardErrorPath</key>
+  <string>/usr/local/frp/frpc-error.log</string>
+</dict>
+</plist>
+EOF
+
+# 加载并设置为登录后自动启动
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.cludix.frpc.plist
+launchctl enable gui/$(id -u)/com.cludix.frpc
+launchctl kickstart -k gui/$(id -u)/com.cludix.frpc
+```
+
+常用维护命令：
+
+```bash
+# 查看服务状态
+launchctl print gui/$(id -u)/com.cludix.frpc
+
+# 停止服务
+launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.cludix.frpc.plist
+
+# 修改配置后重新加载
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.cludix.frpc.plist
+launchctl kickstart -k gui/$(id -u)/com.cludix.frpc
 ```
 
 如果是 Intel Mac，请将下载包文件名替换为对应的 `darwin_amd64` 版本。
