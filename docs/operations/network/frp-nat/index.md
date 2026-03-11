@@ -211,14 +211,15 @@ EOF
 cd /usr/local/frp && ./frpc -c frpc.toml
 ```
 
-如果希望 `frpc` 在 macOS 后台常驻，并在开机登录后自动启动，可以通过 `launchd` 创建用户级 `LaunchAgent`：
+如果希望 `frpc` 在 macOS 后台常驻，并且设备重启后自动恢复连接，建议直接使用 macOS 自带的 `launchd` 配置系统级 `LaunchDaemon`。这种方式会在系统开机后自动拉起 `frpc`，不依赖用户登录，更适合 FRP 这种底层常驻服务。
+
+其中 `com.cludix.frpc.plist` 只是示例名，遵循 `launchd` 常见的反向域名命名方式：`com.组织或域名.服务名`。对应的 `Label` 一般写成 `com.cludix.frpc`，配置文件名则按约定写成 `<Label>.plist`，这样便于识别、管理，也能避免和系统中其他服务重名。
+
+### 3.4 macOS 开机自启
 
 ```bash
-# 创建 LaunchAgents 目录
-mkdir -p ~/Library/LaunchAgents
-
-# 写入启动配置
-cat > ~/Library/LaunchAgents/com.cludix.frpc.plist <<EOF
+# 写入系统级 LaunchDaemon 配置
+sudo tee /Library/LaunchDaemons/com.cludix.frpc.plist > /dev/null <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -237,6 +238,8 @@ cat > ~/Library/LaunchAgents/com.cludix.frpc.plist <<EOF
   <true/>
   <key>KeepAlive</key>
   <true/>
+  <key>UserName</key>
+  <string>root</string>
   <key>StandardOutPath</key>
   <string>/usr/local/frp/frpc.log</string>
   <key>StandardErrorPath</key>
@@ -245,25 +248,36 @@ cat > ~/Library/LaunchAgents/com.cludix.frpc.plist <<EOF
 </plist>
 EOF
 
-# 加载并设置为登录后自动启动
-launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.cludix.frpc.plist
-launchctl enable gui/$(id -u)/com.cludix.frpc
-launchctl kickstart -k gui/$(id -u)/com.cludix.frpc
+# 设置权限（LaunchDaemon 必须由 root 拥有）
+sudo chown root:wheel /Library/LaunchDaemons/com.cludix.frpc.plist
+sudo chmod 644 /Library/LaunchDaemons/com.cludix.frpc.plist
+
+# 加载并立即启动
+sudo launchctl bootstrap system /Library/LaunchDaemons/com.cludix.frpc.plist
+sudo launchctl enable system/com.cludix.frpc
+sudo launchctl kickstart -k system/com.cludix.frpc
 ```
 
 常用维护命令：
 
 ```bash
 # 查看服务状态
-launchctl print gui/$(id -u)/com.cludix.frpc
+sudo launchctl print system/com.cludix.frpc
 
-# 停止服务
-launchctl bootout gui/$(id -u) ~/Library/LaunchAgents/com.cludix.frpc.plist
+# 停止并卸载服务
+sudo launchctl bootout system /Library/LaunchDaemons/com.cludix.frpc.plist
 
 # 修改配置后重新加载
-launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.cludix.frpc.plist
-launchctl kickstart -k gui/$(id -u)/com.cludix.frpc
+sudo launchctl bootstrap system /Library/LaunchDaemons/com.cludix.frpc.plist
+sudo launchctl kickstart -k system/com.cludix.frpc
 ```
+
+注意事项：
+
+- 如果使用 `LaunchDaemon`，建议保证 `/usr/local/frp` 与 `frpc.toml` 对 `root` 可读。
+- 正常情况下，执行完成后 `frpc` 会转为系统后台进程，并在每次开机后自动启动。
+- 首次排查问题时，优先查看 `/usr/local/frp/frpc.log` 与 `/usr/local/frp/frpc-error.log`。
+- 如果 `sudo launchctl print system/com.cludix.frpc` 能看到 `state = running`，说明后台常驻和开机自启已经生效。
 
 如果是 Intel Mac，请将下载包文件名替换为对应的 `darwin_amd64` 版本。
 
