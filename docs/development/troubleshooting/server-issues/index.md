@@ -9,4 +9,5 @@ title: 服务器问题
 
 ## 📚 文档列表
 
-- [VMware USB Debian 安装](./vmware-usb-debian/)
+- [制作启动U盘](./create-debian-boot-usb/)
+- [VMware 使用 U 盘安装 Debian 系统](./vmware-usb-debian/)

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+  <title id="title">复制 Debian 镜像示意图</title>
+  <desc id="desc">示意图展示把 Debian ISO 复制到 Ventoy U 盘，并以 UEFI 模式启动。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff9f1"/>
+      <stop offset="100%" stop-color="#f6f8ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" rx="32" fill="url(#bg)"/>
+
+  <rect x="70" y="82" width="280" height="360" rx="24" fill="#ffffff" stroke="#e3d6ba" stroke-width="2"/>
+  <text x="110" y="130" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#6f4b17">本地镜像文件</text>
+  <rect x="114" y="175" width="192" height="156" rx="20" fill="#fff1d8" stroke="#ffc66a" stroke-width="2"/>
+  <circle cx="210" cy="228" r="36" fill="#ff9f1c"/>
+  <circle cx="210" cy="228" r="15" fill="#fff1d8"/>
+  <text x="210" y="286" text-anchor="middle" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, Arial, sans-serif" font-size="24" font-weight="700" fill="#8b5200">debian.iso</text>
+  <text x="210" y="362" text-anchor="middle" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, Arial, sans-serif" font-size="16" fill="#866542">复制到U盘分区</text>
+
+  <path d="M372 262h184" stroke="#8da0c9" stroke-width="6" stroke-dasharray="10 12" stroke-linecap="round"/>
+  <path d="M536 262l-22 -16v32z" fill="#8da0c9"/>
+
+  <rect x="586" y="82" width="304" height="360" rx="24" fill="#ffffff" stroke="#d6dff7" stroke-width="2"/>
+  <text x="628" y="130" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#29427c">Ventoy 启动U盘</text>
+  <rect x="630" y="176" width="216" height="50" rx="12" fill="#eef3ff" stroke="#a6baf3" stroke-width="2"/>
+  <text x="650" y="208" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, Arial, sans-serif" font-size="20" fill="#2a3d73">debian.iso</text>
+  <rect x="630" y="250" width="216" height="108" rx="18" fill="#effbf4" stroke="#83cba2" stroke-width="2"/>
+  <text x="738" y="300" text-anchor="middle" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, Arial, sans-serif" font-size="30" font-weight="700" fill="#1f7a52">UEFI 启动</text>
+  <text x="738" y="332" text-anchor="middle" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, Arial, sans-serif" font-size="16" fill="#4b6b5d">在固件中选择 UEFI 模式</text>
+</svg>

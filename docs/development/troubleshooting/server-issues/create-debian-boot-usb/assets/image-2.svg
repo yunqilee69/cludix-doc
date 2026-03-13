@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+  <title id="title">安装 Ventoy 示意图</title>
+  <desc id="desc">示意图展示在 Ventoy 安装器中选择目标 U 盘并执行安装。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f5fbf7"/>
+      <stop offset="100%" stop-color="#edf8ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" rx="32" fill="url(#bg)"/>
+  <rect x="84" y="64" width="792" height="412" rx="26" fill="#ffffff" stroke="#d5e7df" stroke-width="2"/>
+  <rect x="84" y="64" width="792" height="56" rx="26" fill="#1e7a57"/>
+  <text x="124" y="99" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#ffffff">Ventoy 安装器</text>
+
+  <text x="124" y="165" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, Arial, sans-serif" font-size="18" fill="#325068">步骤一：选择目标U盘设备</text>
+  <rect x="124" y="185" width="500" height="54" rx="12" fill="#f5f9fc" stroke="#c8d8e4" stroke-width="2"/>
+  <text x="148" y="219" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, Arial, sans-serif" font-size="20" fill="#19384f">磁盘 2 - U盘设备 - 32 GB</text>
+
+  <text x="124" y="290" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, Arial, sans-serif" font-size="18" fill="#325068">步骤二：确认安装并写入U盘</text>
+  <rect x="124" y="312" width="220" height="72" rx="16" fill="#1e7a57"/>
+  <text x="234" y="356" text-anchor="middle" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, Arial, sans-serif" font-size="28" font-weight="700" fill="#ffffff">安装</text>
+
+  <rect x="636" y="172" width="172" height="216" rx="24" fill="#eef4ff" stroke="#9db4ff" stroke-width="2"/>
+  <rect x="690" y="196" width="64" height="122" rx="16" fill="#4b73ff"/>
+  <rect x="709" y="184" width="26" height="22" rx="6" fill="#4b73ff"/>
+  <circle cx="722" cy="294" r="6" fill="#dce6ff"/>
+  <text x="722" y="352" text-anchor="middle" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, Arial, sans-serif" font-size="18" fill="#40538e">目标U盘</text>
+
+  <path d="M370 348h220" stroke="#58a98a" stroke-width="6" stroke-linecap="round"/>
+  <path d="M572 348l-22 -16v32z" fill="#58a98a"/>
+</svg>

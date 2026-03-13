@@ -10,4 +10,5 @@ title: 问题解决
 ## 📚 分类
 
 - [General](./general/文件上传报错.md) - 跨场景的通用问题
-- [Server Issues](./server-issues/vmware-usb-debian/index.md) - 服务器相关问题
+- [制作启动U盘](./server-issues/create-debian-boot-usb/index.md) - 使用 Ventoy 制作可在 UEFI 模式下启动的 Debian 安装盘
+- [VMware 使用 U 盘安装 Debian 系统](./server-issues/vmware-usb-debian/index.md) - VMware 虚拟机中的 Debian 安装排查与操作记录

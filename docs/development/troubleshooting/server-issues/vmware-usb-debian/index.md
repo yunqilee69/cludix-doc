@@ -11,7 +11,10 @@ date: 2025-12-10
 
 ## 准备工作
 
-推荐使用[Ventoy](https://www.ventoy.net/cn/index.html)制作一个多系统启动U盘，Ventoy支持同时存放多个ISO镜像文件，非常方便。具体使用方法将在后续文章中详细介绍。
+推荐先完成 Debian 启动 U 盘制作，再继续本文的虚拟机透传与安装步骤。
+
+- 如果你还没有准备好启动盘，请先阅读 [制作启动U盘](../create-debian-boot-usb/index.md)
+- 如果你已经使用 Ventoy、Rufus、balenaEtcher 等工具完成了启动盘制作，可以直接继续本文后续步骤
 
 :::tip 启动方式说明
 制作启动U盘时，务必选择 **UEFI** 作为启动方式，以确保与虚拟机固件类型匹配。
