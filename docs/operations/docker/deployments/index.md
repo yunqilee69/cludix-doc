@@ -14,6 +14,7 @@ title: Docker 部署文档
 - [RocketMQ 部署示例](./RocketMQ部署.md)
 - [Filebrowser 部署示例](./Filebrowser部署.md)
 - [Jellyfin 部署示例](./Jellyfin部署.md)
+- [Jellyseerr 部署示例](./Jellyseerr部署.md)
 - [Jenkins 部署示例](./Jenkins部署.md)
 - [Milvus 部署示例](./Milvus部署.md)
 - [Bifrost 部署示例](./Bifrost部署.md)
