@@ -1,213 +1,102 @@
 ---
 slug: /nebula/permission-read
-title: IAM权限系统设计方案
+title: "[草稿] Nebula 权限模型说明"
+description: 说明 Nebula 中 IAM 权限能力在 nebula-auth 中的落地方式和协作关系。
 ---
 
-# IAM权限系统设计方案
+# [草稿] Nebula 权限模型说明
 
-> **IAM**（Identity and Access Management，身份与访问管理）是指对系统中的用户身份进行认证（Authentication）和授权（Authorization）的管理体系。本系统基于IAM理念，提供统一的权限管理能力。
+在 Nebula 中，权限能力由 `nebula-auth` 模块承载。为了避免把 IAM 讲成一套脱离代码的抽象模型，这篇文档只描述当前仓库中可以明确确认的权限对象、协作关系和前后端使用方式。
 
-## 一、表关系图
+## 权限模型里有哪些核心对象
 
-### 1.1 主体关联关系
+从当前 `nebula-auth` 模块和接口结构看，权限模型至少围绕这些对象展开：
 
-```
-iam_user (用户)
-  │
-  ├── ia m_user_role ── iam_role (角色)
-  │   (用户-角色关联)
-  │
-  └── iam_user_org ── iam_org (组织)
-      (用户-组织关联)
-        │
-        └── iam_org (下级组织 - 自关联)
-```
+- 用户（User）
+- 角色（Role）
+- 组织（Org）
+- 菜单（Menu）
+- 按钮（Button）
+- 权限（Permission）
 
-### 1.2 资源关联关系
+这些对象共同组成 Nebula 的平台访问控制基础。
 
-```
-iam_menu (菜单)
-  │
-  ├── iam_menu (子菜单 - 自关联)
-  │
-  └── iam_button (按钮)
-```
+## 可以怎么理解它们之间的关系
 
-### 1.3 权限关联关系
+### 主体
 
-```
-iam_permission (权限⭐) ── 主体
-  │
-  ├── USER  ── iam_user
-  │
-  ├── ROLE  ── iam_role
-  │
-  └── ORG   ── iam_org
+主体是“谁拥有权限”，当前主要包括：
 
-iam_permission (权限⭐) ── 资源
-  │
-  ├── MENU   ── iam_menu
-  │
-  └── BUTTON ── iam_button
-```
+- 用户
+- 角色
+- 组织
 
-### 1.4 关系说明表
+### 资源
 
-| 表名 | 关联表 | 关联字段 | 关系说明 |
-|------|--------|----------|----------|
-| iam_user_role | iam_user | user_id | 用户拥有多个角色 |
-| iam_user_role | iam_role | role_id | 角色被分配给多个用户 |
-| iam_user_org | iam_user | user_id | 用户属于多个组织 |
-| iam_user_org | iam_org | org_id | 组织包含多个用户 |
-| iam_org | iam_org | parent_id | 组织层级关系（自关联） |
-| iam_menu | iam_menu | parent_id | 菜单层级关系（自关联） |
-| iam_button | iam_menu | menu_id | 按钮属于某个菜单 |
-| iam_permission | iam_user | subject_id + subject_type='USER' | 用户授权 |
-| iam_permission | iam_role | subject_id + subject_type='ROLE' | 角色授权 |
-| iam_permission | iam_org | subject_id + subject_type='ORG' | 组织授权 |
-| iam_permission | iam_menu | resource_id + resource_type='MENU' | 菜单权限 |
-| iam_permission | iam_button | resource_id + resource_type='BUTTON' | 按钮权限 |
+资源是“权限作用到什么东西上”，当前最直接对应：
 
-## 二、方案概述
+- 菜单
+- 按钮
 
-本权限系统采用统一权限模型（Unified Permission Model），核心特点：
+这也是为什么 `nebula-auth` 同时提供了菜单管理、按钮管理和权限管理接口。它不是三块互不相关的功能，而是一个统一权限模型的不同观察面。
 
-| 特性 | 说明 |
-|------|------|
-| 多主体授权 | 支持用户(User)、角色(Role)、组织(Org)三种维度独立授权 |
-| 资源分离 | 菜单和按钮为独立表结构，便于分别管理 |
-| 灵活授权 | 支持授权(Allow)和拒绝(Deny)两种效果 |
-| 自定义范围 | 权限范围字段为字符串，用户可自定义（默认ALL） |
-| 动态扩展 | 新增资源类型无需修改权限表结构 |
+## 对前端最有意义的理解方式
 
-**授权优先级**：用户授权 > 角色授权 > 组织授权，Deny（拒绝） > Allow（授权）
+对 `nebula-portal` 而言，权限模型最重要的不是数据库表怎么命名，而是下面这条协作链：
 
-## 三、表结构定义
+1. 用户登录后获得当前会话
+2. 前端拿到当前用户和权限信息
+3. 菜单数据参与动态导航和路由装载
+4. 按钮权限码控制页面动作显示与否
 
-### 3.1 用户表 (iam_user)
+因此，Nebula 权限模型既影响后端授权判断，也直接影响前端页面结构。
 
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| id | BIGINT | 主键，自增 |
-| username | VARCHAR(50) | 用户名，唯一 |
-| password | VARCHAR(100) | 密码 |
-| nickname | VARCHAR(50) | 昵称 |
-| avatar | VARCHAR(500) | 头像URL |
-| email | VARCHAR(50) | 邮箱 |
-| phone | VARCHAR(50) | 手机号 |
-| status | TINYINT | 状态：0禁用 1启用 |
-| create_time | TIMESTAMP | 创建时间 |
-| update_time | TIMESTAMP | 更新时间 |
+## 当前已能确认的接口分组
 
-### 3.2 角色表 (iam_role)
+从 `nebula-auth-local` 当前控制器可以确认这些接口分组：
 
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| id | BIGINT | 主键，自增 |
-| code | VARCHAR(50) | 角色编码，唯一 |
-| name | VARCHAR(50) | 角色名称 |
-| description | VARCHAR(200) | 描述 |
-| status | TINYINT | 状态：0禁用 1启用 |
-| create_time | TIMESTAMP | 创建时间 |
-| update_time | TIMESTAMP | 更新时间 |
+- `/api/auth/users/*`
+- `/api/auth/roles/*`
+- `/api/auth/permissions/*`
+- `/api/auth/orgs/*`
+- `/api/auth/menus/*`
+- `/api/auth/buttons/*`
 
-### 3.3 组织表 (iam_org)
+它们共同构成了权限域最核心的操作入口。
 
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| id | BIGINT | 主键，自增 |
-| parent_id | BIGINT | 父组织ID，0为根节点 |
-| code | VARCHAR(50) | 组织编码，唯一 |
-| name | VARCHAR(100) | 组织名称 |
-| type | TINYINT | 类型：1公司 2部门 3小组 |
-| path | VARCHAR(500) | 层级路径，如：id1-id2-id3 |
-| sort | INT | 排序，越大越靠前 |
-| status | TINYINT | 状态：0禁用 1启用 |
-| create_time | TIMESTAMP | 创建时间 |
-| update_time | TIMESTAMP | 更新时间 |
+## 为什么菜单和按钮要放进权限模型
 
-### 3.4 用户-角色关联表 (iam_user_role)
+在普通业务系统里，菜单和按钮有时只是“页面元素”。但在 Nebula 这样的中台里，它们更像平台资源：
 
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| id | BIGINT | 主键，自增 |
-| user_id | BIGINT | 用户ID |
-| role_id | BIGINT | 角色ID |
-| create_time | TIMESTAMP | 创建时间 |
-| update_time | TIMESTAMP | 更新时间 |
+- 菜单决定用户能否进入某个页面或模块
+- 按钮决定用户在页面里能否执行某个动作
 
-### 3.5 用户-组织关联表 (iam_user_org)
+所以把菜单、按钮纳入同一套权限域，是符合中台工作台场景的。
 
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| id | BIGINT | 主键，自增 |
-| user_id | BIGINT | 用户ID |
-| org_id | BIGINT | 组织ID |
-| is_priamry | TINYINT | 是否主组织：0否 1是 |
-| create_time | TIMESTAMP | 创建时间 |
+## 推荐的协作理解
 
-### 3.6 菜单表 (iam_menu) ⭐ 资源表1
+### 后端视角
 
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| id | BIGINT | 主键，自增 |
-| parent_id | BIGINT | 父菜单ID，0为根节点 |
-| code | VARCHAR(100) | 菜单编码，唯一 |
-| name | VARCHAR(100) | 菜单名称 |
-| path | VARCHAR(200) | 路由路径 |
-| icon | VARCHAR(50) | 图标 |
-| component | VARCHAR(200) | 前端组件路径 |
-| type | VARCHAR(100) | 类型：菜单组、菜单、外链 |
-| sort | INT | 排序号 |
-| status | TINYINT | 状态：0禁用 1启用 |
-| c re a te Ti me | TIMESTAMP | 创建时间 |
-| update_time | TIMESTAMP | 更新时间 |
+后端负责维护用户、角色、组织、菜单、按钮和权限配置，并在认证与授权链路中提供统一结果。
 
-### 3.7 按钮表 (iam_button) ⭐ 资源表2
+### 前端视角
 
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| id | BIGINT | 主键，自增 |
-| menu_id | BIGINT | 所属菜单ID |
-| code | VARCHAR(100) | 按钮编码，唯一 |
-| name | VARCHAR(100) | 按钮名称 |
-| type | VARCHAR(20) | 按钮类型：add/edit/delete/export等 |
-| sort | INT | 排序号 |
-| status | TINYINT | 状态：0禁用 1启用 |
-| create_time | TIMESTAMP | 创建时间 |
-| update_time | TIMESTAMP | 更新时间 |
+前端负责消费这些结果，用于：
 
-### 3.8 权限表 (iam_permission) ⭐ 核心表
+- 登录后恢复当前用户状态
+- 构建动态菜单和动态路由
+- 控制按钮与操作区显隐
 
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| id | BIGINT | 主键，自增 |
-| subject_type | VARCHAR(20) | 主体类型：USER/ROLE/ORG |
-| subject_id | BIGINT | 主体ID |
-| resource_type | VARCHAR(20) | 资源类型：MENU/BUTTON |
-| resource_id | BIGINT | 资源ID |
-| effect | VARCHAR(100) | 效果：Allow（授权）或 Deny（拒绝），默认Allow |
-| scope | VARCHAR(100) | 权限范围，用户自定义字符串，默认ALL |
-| create_time | TIMESTAMP | 创建时间 |
-| update_time | TIMESTAMP | 更新时间 |
+### 联调视角
 
-**唯一约束**：(subject_type, subject_id, resource_type, resource_id)
+前后端最需要对齐的三类信息是：
 
-## 四、字段详细说明
+- 当前用户会话结构
+- 菜单树与组件 key 对应关系
+- 按钮权限 code 的命名与使用方式
 
-### 4.1 effect（授权效果）
+只要这三类信息稳定，Nebula 的权限协作链路就会顺畅很多。
 
-| 值 | 含义 | 优先级 |
-|----|------|--------|
-| Allow | 授权 | 低 |
-| Deny | 拒绝 | 高 |
+## 这篇文档故意不展开什么
 
-**规则**：同一资源同时存在Allow和Deny时，Deny优先
-
-### 4.2 scope（权限范围）
-
-| 示例值 | 含义 | 说明 |
-|--------|------|------|
-| ALL | 全部 | 默认，无限制 |
-
-> scope字段为字符串，业务系统可根据需求自定义格式和解析逻辑
+这篇文档不再继续保留旧版里那种脱离现有仓库的 `nebula-ima-*` 模块命名，也不强行给出当前仓库里没有明确验证的表结构细节。这样做的目的是让 IAM 文档和实际代码保持一致，而不是让新人读完后再去怀疑项目里为什么找不到对应模块。

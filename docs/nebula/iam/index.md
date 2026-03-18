@@ -1,91 +1,89 @@
 ---
 slug: /nebula/iam
-title: Nebula-IAM 架构概览
-description: Nebula-IAM 微服务认证授权系统的模块结构和依赖关系
+title: "[草稿] Nebula IAM 架构概览"
+description: Nebula 中台中的 IAM 实际由 nebula-auth 模块承载，这里说明它的结构和协作方式。
 ---
-# Nebula-IAM 架构概览
 
-Nebula-IAM 是一套完整的微服务认证授权解决方案，采用模块化设计，支持单体应用和分布式部署。本文档介绍其包结构和模块间的依赖关系。
+# [草稿] Nebula IAM 架构概览
+
+在 Nebula 里，IAM 并不是一个单独叫做 `iam` 的模块，而是由 `nebula-auth` 承载。也就是说，当我们在 Nebula 文档里说 IAM，实际指的是认证、身份、菜单、按钮、角色、组织和权限这一整套能力，而这些能力当前都集中在 `nebula-auth` 中。
+
+## IAM 在 Nebula 中对应什么
+
+当前仓库中，IAM 主要对应 `nebula-auth` 提供的这些能力：
+
+- 登录、注册、刷新令牌、退出登录
+- 当前用户信息获取
+- 用户管理
+- 角色管理
+- 权限管理
+- 组织管理与组织树
+- 菜单管理与菜单树
+- 按钮管理
+- OAuth2 客户端与账号绑定管理
+
+因此，如果你在项目里讨论“权限中心”“认证中心”或“IAM 模块”，在实际代码层面通常就是在讨论 `nebula-auth`。
 
 ## 模块结构
 
-| 子模块 | 职责 | 依赖关系 |
-|--------|------|----------|
-| **nebula-ima-api** | 提供接口定义、DTO、常量等核心抽象 | 无 |
-| **nebula-ima-core** | 核心业务逻辑实现 | nebula-ima-api |
-| **nebula-ima-local** | 本地实现：Mapper、Service、JWT、缓存等 | nebula-ima-core |
-| **nebula-ima-remote** | 远程实现：Feign 客户端（向 service 发送请求） | nebula-ima-api |
-| **nebula-ima-service** | 可执行的 Boot 项目（IAM 微服务） | nebula-ima-local |
+`nebula-auth` 当前采用和 Nebula 其他业务模块一致的标准分层：
 
-## 依赖关系图
-
-### 文本流程图
-```
-nebula-ima-api (基础层)
-    ↓
-nebula-ima-core (核心层)
-    ↓
-nebula-ima-local (本地实现)
-    ↓
-nebula-ima-service (微服务)
-
-nebula-ima-remote (远程客户端)
-    ↓
-nebula-ima-service (通过 Feign 调用)
+```text
+nebula-auth/
+├── nebula-auth-api      # 契约层：接口、DTO、命令、查询、模块守卫
+├── nebula-auth-core     # 核心实现：service、mapper、安全配置
+├── nebula-auth-local    # 本地接入层：controller + core
+├── nebula-auth-remote   # 远程接入层：Feign client + 远程代理实现
+└── nebula-auth-service  # 独立服务启动模块
 ```
 
-### 依赖层级
-1. **基础层**: nebula-ima-api (无依赖)
-2. **核心层**: nebula-ima-core (依赖: nebula-ima-api)
-3. **实现层**:
-   - nebula-ima-local (依赖: nebula-ima-core)
-   - nebula-ima-remote (依赖: nebula-ima-api)
-4. **服务层**: nebula-ima-service (依赖: nebula-ima-local)
+## 每层各自做什么
 
-### 部署模式
+### `nebula-auth-api`
 
-1. **单体应用模式**: 使用 `nebula-ima-local` 集成到单体应用中
-2. **微服务模式**: 部署 `nebula-ima-service` 作为独立认证服务
-3. **远程调用模式**: 其他服务引入 `nebula-ima-remote`，通过 Feign 调用 `nebula-ima-service`
+- 定义认证与权限领域的稳定契约
+- 作为其他模块依赖 `auth` 能力时的基础入口
 
-### 模块职责详解
+### `nebula-auth-core`
 
-#### nebula-ima-api
-- 定义统一的接口规范
-- 提供公共 DTO 对象
-- 定义常量和枚举
-- 作为其他模块的基础依赖
+- 承载认证、安全、角色、组织、菜单、按钮、权限等核心实现
+- 是 IAM 规则真正落地的地方
 
-#### nebula-ima-core
-- 实现核心业务逻辑
-- 提供领域模型和服务接口
-- 实现权限校验算法
-- 处理授权优先级逻辑
+### `nebula-auth-local`
 
-#### nebula-ima-local
-- 本地 Mapper 实现（MyBatis）
-- 本地 Service 实现
-- JWT 令牌生成和解析
-- 缓存实现（Redis/Caffeine）
-- 适用于单体应用或需要本地缓存的场景
+- 提供本地 HTTP 接口
+- 适合单体项目直接集成
 
-#### nebula-ima-remote
-- Feign 客户端实现（配置 FeignClient）
-- 仅依赖 nebula-ima-api（不依赖 core）
-- 通过 Feign 远程调用向 nebula-ima-service 发送请求
-- 适用于微服务架构下其他服务调用 IAM 服务的场景
+### `nebula-auth-remote`
 
-#### nebula-ima-service
-- 可执行的 Spring Boot 应用
-- 暴露 REST API 端点
-- 集成 nebula-ima-local 的实现
-- 作为独立的 IAM 微服务运行
+- 提供远程调用代理
+- 适合其他微服务以消费者身份调用认证中心
 
-### 核心特性
+### `nebula-auth-service`
 
-- 🔐 统一认证授权
-- 🔄 JWT 令牌管理
-- 🌐 微服务架构支持
-- 🛠️ 灵活的集成方式
-- 📦 模块化设计
-- 🚀 本地实现 + 远程调用双模式
+- 作为独立认证服务启动
+- 默认端口是 `17778`
+
+## IAM 的三种使用方式
+
+### 单体集成
+
+业务工程直接依赖 `nebula-auth-local`，适合单体后台或快速集成场景。
+
+### 认证中心独立部署
+
+启动 `nebula-auth-service`，适合把 IAM 能力拆成独立服务。
+
+### 远程调用
+
+其他服务依赖 `nebula-auth-remote`，通过远程方式复用 IAM 能力。
+
+## 为什么前端会强依赖这个模块
+
+`nebula-portal` 的登录态、菜单装载、按钮权限和动态路由，本质上都依赖 `nebula-auth` 提供的数据模型。因此，IAM 在 Nebula 中不只是后端安全模块，也是前端平台结构的重要上游。
+
+## 推荐阅读
+
+- [认证、菜单与权限后端说明](/docs/nebula/backend/auth-and-permission)
+- [认证、菜单与权限](/docs/nebula/frontend/auth-menu-permission)
+- [Nebula 权限模型说明](/docs/nebula/permission-read)
