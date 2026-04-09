@@ -5,7 +5,11 @@ title: Docker 规范
 
 # Docker 规范
 
-本目录下的容器部署文档（如 Nginx、MySQL、Redis、Nacos）统一遵循同一套 Docker Compose 模式，便于运维管理与按需启停。
+本目录下的大多数容器部署文档（如 Nginx、MySQL、Redis、Nacos）统一遵循同一套 Docker Compose 模式，便于运维管理与按需启停。
+
+:::tip
+像 DeerFlow 这类官方维护多服务编排的项目，会优先遵循其上游仓库提供的 Docker 工作流，而不是强行改造成本文的单应用 `app-net` 规范。相关文档见 [DeerFlow Docker 部署指南](./deployments/DeerFlow部署.md)。
+:::
 
 ## 1. 统一原则
 
@@ -143,7 +147,8 @@ docker compose -f /app/docker-compose.nginx.yml ps
 
 ## 7. 目录内文档说明
 
-- [Docker 部署文档](./deployments/index.md)
+- [Docker 部署列表](./deployments/index.md)
+- [特殊案例：DeerFlow Docker 部署指南](./deployments/DeerFlow部署.md)
 - [Docker 使用文档](./usage/index.md)
 
 后续新增其他容器文档时，均按本规范编排。

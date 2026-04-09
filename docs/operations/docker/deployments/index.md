@@ -4,7 +4,7 @@ title: Docker 部署文档
 
 # Docker 部署文档
 
-本目录聚合各类基于 Docker Compose 的应用部署示例。
+本目录聚合各类基于 Docker Compose 的应用部署示例，同时包含少量遵循上游官方编排方式的特殊案例文档。
 
 - [Nginx 部署示例](./Nginx部署.md)
 - [NewAPI 部署示例](./NewAPI部署.md)
@@ -18,3 +18,4 @@ title: Docker 部署文档
 - [Jenkins 部署示例](./Jenkins部署.md)
 - [Milvus 部署示例](./Milvus部署.md)
 - [Bifrost 部署示例](./Bifrost部署.md)
+- [DeerFlow Docker 部署指南](./DeerFlow部署.md)
