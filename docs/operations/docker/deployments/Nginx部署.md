@@ -26,7 +26,16 @@ title: Nginx Docker Compose 配置
 - `logs`：容器日志持久化目录，避免容器重建后丢失访问/错误日志
 - `ssl`：证书目录，集中管理证书文件并以只读方式挂载到容器
 
-## 2. Compose 配置示例
+## 2. 目录权限设置
+
+Nginx alpine 镜像默认以 root 运行，无需特殊权限设置。创建目录即可：
+
+```bash
+# 创建目录
+mkdir -p /app/nginx/{html,conf.d,logs,ssl}
+```
+
+## 3. Compose 配置示例
 
 `/app/docker-compose.nginx.yml`：
 
@@ -36,8 +45,6 @@ services:
     image: nginx:1.27-alpine
     container_name: nginx
     restart: unless-stopped
-    group_add:
-      - "<APPGROUP_GID>"
     ports:
       - "80:80"
       - "443:443"
@@ -64,12 +71,11 @@ networks:
 
 - 使用 `external: true` 复用统一网络 `app-net`，与其他 compose 文件内应用直接互通
 - 暴露 `80/443`，同时满足 HTTP 与 HTTPS 场景
-- 使用 `group_add` 对齐宿主机共享组权限，减少挂载目录权限冲突
 - `html`/`conf.d`/`ssl` 使用只读挂载，降低运行时误改风险
 - `logs` 单独挂载到宿主机，便于日志留存与问题排查
 - 增加 `healthcheck`（`nginx -t`），不依赖站点文件是否已初始化
 
-## 3. Nginx 站点配置示例（可选）
+## 4. Nginx 站点配置示例（可选）
 
 `/app/nginx/conf.d/default.conf`：
 
@@ -106,7 +112,7 @@ server {
 - 证书路径固定在 `/etc/nginx/ssl`，与宿主机 `/app/nginx/ssl` 一一对应
 - 显式声明 `access_log` 与 `error_log`，确保日志输出到持久化目录
 
-## 4. 常用命令（复制即用）
+## 5. 常用命令
 
 ```bash
 # 启动 Nginx

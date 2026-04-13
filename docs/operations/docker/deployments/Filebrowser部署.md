@@ -24,7 +24,26 @@ title: Filebrowser Docker Compose 配置
 - `database`：SQLite 数据目录，用于保存账号、权限和元数据
 - `config`：配置文件目录，用于固定服务行为
 
-## 2. Compose 配置示例
+## 2. 目录权限设置
+
+建议以非 root 用户运行 Filebrowser。容器内默认用户 UID 为 `1000`：
+
+```bash
+# 创建目录
+mkdir -p /app/filebrowser/{srv,database,config}
+
+# 设置目录所有者
+sudo chown -R 1000:1000 /app/filebrowser
+
+# 创建配置文件
+touch /app/filebrowser/config/settings.json
+```
+
+:::tip
+如果需要宿主机其他用户也能访问 `/app/filebrowser/srv` 目录，可适当放宽权限：`sudo chmod -R 755 /app/filebrowser/srv`。
+:::
+
+## 3. Compose 配置示例
 
 `/app/docker-compose.filebrowser.yml`：
 
@@ -35,8 +54,6 @@ services:
     container_name: filebrowser
     restart: unless-stopped
     user: "1000:1000"
-    group_add:
-      - "<APPGROUP_GID>"
     ports:
       - "8080:80"
     volumes:
@@ -55,11 +72,10 @@ networks:
 
 - 复用 `app-net`，便于与其他业务容器协同（如共享导入导出目录）
 - `srv` 和 `database` 分离挂载，避免权限和数据互相影响
-- 通过 `group_add` 统一容器与宿主机组权限，减少目录读写冲突
 - 配置文件使用只读挂载，防止运行时误改导致服务行为漂移
 - 显式指定运行用户，降低 root 运行带来的安全风险
 
-## 3. Filebrowser 配置示例
+## 4. Filebrowser 配置示例
 
 `/app/filebrowser/config/settings.json`：
 
@@ -80,7 +96,7 @@ networks:
 - `root` 固定为 `/srv`，与宿主机目录映射保持一致
 - `log` 输出到标准输出，便于统一容器日志采集
 
-## 4. 常用命令（复制即用）
+## 5. 常用命令
 
 ```bash
 # 启动 Filebrowser

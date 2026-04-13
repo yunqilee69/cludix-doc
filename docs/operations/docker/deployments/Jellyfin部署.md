@@ -26,12 +26,23 @@ title: Jellyfin Docker Compose 配置
 - `cache`：缓存和临时文件目录
 - `media`：媒体文件目录（可包含 movies、tv、music 等子目录，也可替换为其他宿主机媒体目录）
 
-权限要求（强制）：
+## 2. 目录权限设置
 
-- 必须先按 [Docker 部署规范](./) 完成 `/app` 权限初始化
-- 执行 `getent group appgroup | cut -d: -f3` 获取 GID，再写入 `group_add`
+Jellyfin 官方镜像默认以特定用户运行。建议指定 UID:GID 并设置目录权限：
 
-## 2. Compose 配置示例
+```bash
+# 创建目录
+mkdir -p /app/jellyfin/{config,cache,media}
+
+# 设置目录所有者（使用你希望的用户 UID:GID）
+sudo chown -R 1000:1000 /app/jellyfin
+```
+
+:::tip
+`1000:1000` 是常见的第一个非 root 用户 UID。你可以根据实际需要修改为其他值，并在 compose 中同步修改 `user` 参数。
+:::
+
+## 3. Compose 配置示例
 
 `/app/docker-compose.jellyfin.yml`：
 
@@ -42,8 +53,6 @@ services:
     container_name: jellyfin
     restart: unless-stopped
     user: "1000:1000"
-    group_add:
-      - "<APPGROUP_GID>"
     ports:
       - "8096:8096/tcp"
       - "7359:7359/udp"
@@ -70,9 +79,8 @@ networks:
 - 镜像标签固定为大版本 `10`，可降低 `latest` 带来的不可预期升级风险；如需更严格控制，可进一步固定到小版本
 - `8096/tcp` 是 Web 访问端口，`7359/udp` 用于客户端自动发现
 - `JELLYFIN_PublishedServerUrl` 用于告诉客户端服务器对外访问地址，尤其适合内网穿透、反代或多网卡环境
-- `user: "1000:1000"` 指定容器运行用户，避免权限问题（可替换为实际用户的 UID:GID）
+- `user: "1000:1000"` 指定容器运行用户，避免权限问题
 - 媒体目录使用 bind mount 且默认只读挂载，降低误删或误改媒体文件的风险
-- 通过 `group_add` 复用宿主机组权限，减少重复 `chown` 操作
 
 :::tip
 如果你需要启用 DLNA 广播，或明确希望 Jellyfin 直接使用宿主机网络，可以改成主机网络模式：
@@ -85,22 +93,6 @@ networks:
 
 同时删除 `ports` 和 `networks` 配置。官方文档将主机网络模式视为可选项，常见用途是 DLNA；如果只是普通 Web 播放和局域网访问，默认桥接模式已经足够。
 :::
-
-## 3. 部署步骤（复制即用）
-
-```bash
-# 创建目录
-mkdir -p /app/jellyfin/{config,cache,media}
-
-# 复用 Docker 部署规范中的组权限
-sudo chgrp -R appgroup /app/jellyfin
-sudo chmod -R 2775 /app/jellyfin
-
-# 启动 Jellyfin
-docker compose -f /app/docker-compose.jellyfin.yml up -d
-```
-
-如果你的媒体文件已经放在其他磁盘目录（例如 `/data/media`），把 compose 里的 `source: /app/jellyfin/media` 替换成实际路径即可；如不希望 Jellyfin 改写媒体文件，建议继续保留 `read_only: true`。
 
 ## 4. 首次初始化
 
@@ -135,24 +127,3 @@ docker logs -f jellyfin
 ```
 
 之后在 Jellyfin 管理后台开启对应的硬件转码方式。若宿主机启用了额外的设备权限控制，请确保容器用户对 `/dev/dri` 具备访问权限。
-
-## 7. 故障排查：权限报错
-
-当启动时报错：
-
-`Access to the path '/config/log' is denied`
-
-这是因为容器内的用户与宿主机目录的所有者不匹配。
-
-### 修改目录所有者为容器用户
-
-```bash
-# 查看当前用户的 UID 和 GID
-id
-
-# 修改目录所有者（替换 1000:1000 为实际 UID:GID）
-sudo chown -R 1000:1000 /app/jellyfin
-
-# 重启容器
-docker compose -f /app/docker-compose.jellyfin.yml restart
-```

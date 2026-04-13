@@ -28,7 +28,19 @@ title: RocketMQ Docker Compose 配置
 - `broker/store`：消息存储目录，容器重建后消息不丢失
 - `namesrv/logs`：NameServer 日志目录，便于排障
 
-## 2. Compose 配置示例
+## 2. 目录权限设置
+
+RocketMQ 官方镜像默认以 root 运行，无需特殊权限设置。创建目录即可：
+
+```bash
+# 创建目录
+mkdir -p /app/rocketmq/{broker/{conf,logs,store},namesrv/logs}
+
+# 创建 broker 配置文件
+touch /app/rocketmq/broker/conf/broker.conf
+```
+
+## 3. Compose 配置示例
 
 `/app/docker-compose.rocketmq.yml`：
 
@@ -38,8 +50,6 @@ services:
     image: apache/rocketmq:5.3.2
     container_name: rocketmq-namesrv
     restart: unless-stopped
-    group_add:
-      - "<APPGROUP_GID>"
     command: sh mqnamesrv
     ports:
       - "9876:9876"
@@ -60,8 +70,6 @@ services:
     image: apache/rocketmq:5.3.2
     container_name: rocketmq-broker
     restart: unless-stopped
-    group_add:
-      - "<APPGROUP_GID>"
     depends_on:
       - rocketmq-namesrv
     command: sh mqbroker -c /home/rocketmq/rocketmq-5.3.2/conf/broker.conf
@@ -94,12 +102,11 @@ networks:
 
 - NameServer 与 Broker 拆分，符合 RocketMQ 基础架构
 - 通过容器名 `rocketmq-namesrv:9876` 直连 NameServer，简化服务发现
-- 通过 `group_add` 统一容器与宿主机组权限，降低日志/存储目录权限冲突
 - Broker 日志与消息存储独立挂载，便于监控、备份和容量管理
 - 复用 `app-net`，便于业务容器直连 MQ 服务
 - 增加 `healthcheck`，可快速识别 NameServer/Broker 端口可用状态
 
-## 3. Broker 配置示例
+## 4. Broker 配置示例
 
 `/app/rocketmq/broker/conf/broker.conf`：
 
@@ -122,7 +129,7 @@ namesrvAddr=rocketmq-namesrv:9876
 - 设置 `fileReservedTime` 控制消息文件保留时长，避免磁盘无限增长
 - 显式声明 `namesrvAddr`，保证 Broker 启动后可注册到 NameServer
 
-## 4. 常用命令（复制即用）
+## 5. 常用命令
 
 ```bash
 # 启动 RocketMQ

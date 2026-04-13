@@ -26,12 +26,23 @@ title: MySQL Docker Compose 配置
 - `conf.d`：自定义配置目录，用于覆盖默认参数
 - `logs`：错误日志与慢日志持久化目录，便于排障与审计
 
-权限要求（强制）：
+## 2. 目录权限设置
 
-- 必须先按 [Docker 部署规范](./) 完成 `/app` 权限初始化
-- 执行 `getent group appgroup | cut -d: -f3` 获取 GID，再写入 `group_add`
+MySQL 官方镜像容器内使用 `mysql` 用户，UID 为 `999`。需在启动前设置目录权限：
 
-## 2. Compose 配置示例
+```bash
+# 创建目录
+mkdir -p /app/mysql/{data,conf.d,logs}
+
+# 设置目录所有者为容器内 mysql 用户
+sudo chown -R 999:999 /app/mysql
+```
+
+:::tip
+`999:999` 是 MySQL 官方镜像中 mysql 用户的 UID:GID。如果使用其他 MySQL 镜像版本，请先确认容器内用户 UID。
+:::
+
+## 3. Compose 配置示例
 
 `/app/docker-compose.mysql.yml`：
 
@@ -41,8 +52,6 @@ services:
     image: mysql:8.4.8
     container_name: mysql
     restart: unless-stopped
-    group_add:
-      - "<APPGROUP_GID>"
     environment:
       MYSQL_ROOT_PASSWORD: "change_me"
       MYSQL_ROOT_HOST: "%"
@@ -77,10 +86,9 @@ networks:
 - 设置字符集为 `utf8mb4`，避免中文和表情字符兼容问题
 - MySQL 8.4 已移除 `default-authentication-plugin` 参数，避免配置该参数导致启动失败
 - 通过 `MYSQL_ROOT_HOST=%` 显式声明允许远程 `root` 登录，行为与官方镜像初始化逻辑一致，无需额外初始化脚本
-- 通过 `group_add` 复用宿主机组权限，减少重复 `chown` 操作
 - 增加 `healthcheck`，便于在编排层判断 MySQL 何时真正可用
 
-## 3. MySQL 配置示例
+## 4. MySQL 配置示例
 
 `/app/mysql/conf.d/custom.cnf`：
 
@@ -101,14 +109,14 @@ log_error = /var/log/mysql/error.log
 - 开启慢查询日志，便于定位 SQL 性能瓶颈
 - 错误日志与慢日志统一输出到挂载目录，便于长期留存
 
-## 4. 远程 root 连接说明
+## 5. 远程 root 连接说明
 
 - Docker Official Image 在首次初始化数据目录时会处理 `MYSQL_ROOT_HOST`；对于 `mysql:8.4.8`，入口脚本默认值为 `%`，因此新初始化实例本身就支持 `root` 从非 `localhost` 主机登录
 - 本文仍显式保留 `MYSQL_ROOT_HOST: "%"`，目的是让配置意图更直观；若需收敛权限，建议改为固定来源地址或网段模式，而不是长期使用 `%`
 - `/docker-entrypoint-initdb.d` 下的脚本只会在数据目录为空时执行一次；因此把远程 `root` 创建逻辑写成自定义初始化脚本并不会比官方内置逻辑更可靠，反而增加维护成本
 - 如果你是在已有数据目录上补开远程 `root`，仅修改 compose 环境变量不会回放初始化逻辑，需要手动执行 `CREATE USER` / `ALTER USER` / `GRANT`，或在确认可清空数据后重新初始化
 
-## 5. 常用命令
+## 6. 常用命令
 
 ```bash
 # 启动 MySQL

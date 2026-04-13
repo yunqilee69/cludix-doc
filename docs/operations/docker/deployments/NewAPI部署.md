@@ -24,12 +24,16 @@ NewAPI 是一个面向大模型与 AI 服务的统一网关，支持多供应商
 - `data`：NewAPI 数据目录；按官方 Docker 部署默认方式使用 SQLite 时，可通过该目录持久化数据库文件
 - `logs`：服务日志目录，配合 `--log-dir /app/logs` 保存运行日志，便于排障与审计
 
-权限要求（强制）：
+## 2. 目录权限设置
 
-- 必须先按 [Docker 部署规范](../index.md) 完成 `/app` 权限初始化
-- 执行 `getent group appgroup | cut -d: -f3` 获取 GID，再写入 `group_add`
+NewAPI 官方镜像默认以 root 运行，无需特殊权限设置。创建目录即可：
 
-## 2. Compose 配置示例
+```bash
+# 创建目录
+mkdir -p /app/newapi/{data,logs}
+```
+
+## 3. Compose 配置示例
 
 `/app/docker-compose.newapi.yml`：
 
@@ -40,8 +44,6 @@ services:
     container_name: new-api
     restart: unless-stopped
     command: ["--log-dir", "/app/logs"]
-    group_add:
-      - "<APPGROUP_GID>"
     ports:
       - "3000:3000"
     environment:
@@ -84,11 +86,10 @@ networks:
 - 固定 `calciumion/new-api:v0.11.4`，避免 `latest` 在后续自动漂移导致升级不可控
 - 保留 `--log-dir /app/logs` 与日志挂载，便于长期留存运行日志
 - 默认使用 SQLite，可先以单容器方式快速落地；需要生产级共享数据库时再启用 `SQL_DSN`
-- `group_add` 复用宿主机 `appgroup` 权限，减少挂载目录权限冲突
 - 复用 `app-net`，便于后续与独立部署的 MySQL、PostgreSQL、Redis、反向代理容器互通
 - 健康检查命中 `/api/status`，可直接反映 Web 服务是否已完成启动
 
-## 3. 环境变量建议
+## 4. 环境变量建议
 
 常用环境变量：
 
@@ -108,7 +109,7 @@ networks:
 - 多节点部署时，所有节点必须使用相同的 `SESSION_SECRET` 与 `CRYPTO_SECRET`
 - 若未配置 `SQL_DSN`，官方 Docker 部署通常以 SQLite 作为默认落地方式；适合个人或轻量场景，不适合多节点共享
 
-## 4. 首次启动与访问
+## 5. 首次启动与访问
 
 ```bash
 # 启动 NewAPI
@@ -125,7 +126,7 @@ docker logs -f new-api
 
 如果后续接入 Nginx 反向代理，建议保留容器内部端口 `3000` 不变，仅由 Nginx 对外统一暴露 `80/443`。
 
-## 5. 常用运维命令（复制即用）
+## 6. 常用运维命令
 
 ```bash
 # 启动或更新容器
@@ -141,7 +142,7 @@ docker compose -f /app/docker-compose.newapi.yml restart
 docker logs -f new-api
 ```
 
-## 6. 升级建议
+## 7. 升级建议
 
 升级前先确认 Docker Hub 官方仓库是否已发布新的具体标签，不要直接改回 `latest`。
 
@@ -152,7 +153,7 @@ docker logs -f new-api
 3. 执行 `docker compose -f /app/docker-compose.newapi.yml up -d`
 4. 观察 `docker logs -f new-api` 和 `docker compose ... ps`，确认健康检查正常
 
-## 7. 参考资料
+## 8. 参考资料
 
 - [NewAPI 官方文档](https://docs.newapi.pro/zh/docs/installation)
 - [NewAPI 环境变量文档](https://docs.newapi.pro/zh/docs/installation/config-maintenance/environment-variables)

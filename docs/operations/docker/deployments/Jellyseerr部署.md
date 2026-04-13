@@ -22,13 +22,19 @@ title: Jellyseerr Docker Compose 配置
 
 - `config`：Jellyseerr 配置目录，包含应用设置、SQLite 数据库和缓存数据
 
-权限要求（强制）：
+## 2. 目录权限设置
 
-- 必须先按 [Docker 部署规范](./) 完成 `/app` 权限初始化
-- 执行 `getent group appgroup | cut -d: -f3` 获取 GID，再写入 `group_add`
-- 首次部署前确保 `/app/jellyseerr/config` 的所有者可被 UID `1000` 写入
+Jellyseerr 官方镜像默认使用 UID `1000` 运行：
 
-## 2. Compose 配置示例
+```bash
+# 创建目录
+mkdir -p /app/jellyseerr/config
+
+# 设置目录所有者为容器内用户
+sudo chown -R 1000:1000 /app/jellyseerr
+```
+
+## 3. Compose 配置示例
 
 `/app/jellyseerr/docker-compose.yml`：
 
@@ -40,8 +46,6 @@ services:
     init: true
     restart: unless-stopped
     user: "1000:1000"
-    group_add:
-      - "<APPGROUP_GID>"
     environment:
       - LOG_LEVEL=info
       - TZ=Asia/Shanghai
@@ -78,23 +82,6 @@ networks:
 官方更推荐使用独立子域名（例如 `jellyseerr.example.com`）做反向代理，而不是子路径。子路径方案通常需要额外改写代理规则，且并不属于官方推荐的标准部署方式。
 :::
 
-## 3. 部署步骤（复制即用）
-
-```bash
-# 创建目录
-mkdir -p /app/jellyseerr/config
-
-# 复用 Docker 部署规范中的组权限
-sudo chgrp -R appgroup /app/jellyseerr
-sudo chmod -R 2775 /app/jellyseerr
-
-# 确保容器默认用户可写入配置目录
-sudo chown -R 1000:1000 /app/jellyseerr/config
-
-# 启动 Jellyseerr
-cd /app/jellyseerr && docker compose up -d
-```
-
 ## 4. 首次初始化
 
 服务启动后，访问 `http://<SERVER_IP>:5055`（或你配置的实际域名）进入初始化向导，并完成以下设置：
@@ -128,29 +115,7 @@ docker inspect --format='{{json .State.Health}}' jellyseerr
 
 如果前面已经接入 Nginx 或其他反向代理，也可以通过绑定的域名访问。
 
-## 7. 故障排查：配置目录权限报错
-
-当启动时报错：
-
-`EACCES: permission denied` 或数据库文件无法创建
-
-这通常是因为 `/app/jellyseerr/config` 目录对容器内 UID `1000` 不可写。
-
-### 修复目录权限
-
-```bash
-# 修改配置目录所有者
-sudo chown -R 1000:1000 /app/jellyseerr/config
-
-# 如仍需宿主机组协作读写，补充组权限
-sudo chgrp -R appgroup /app/jellyseerr
-sudo chmod -R 2775 /app/jellyseerr
-
-# 重启容器
-cd /app/jellyseerr && docker compose restart
-```
-
-## 8. 故障排查：无法连接 Jellyfin 或 Arr 服务
+## 7. 故障排查：无法连接 Jellyfin 或 Arr 服务
 
 如果在初始化页面里测试连接失败，优先检查以下几点：
 

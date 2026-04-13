@@ -22,7 +22,16 @@ title: Nacos Docker Compose 配置
 - `logs`：运行日志目录，便于排障与审计
 - `data`：本地嵌入式存储目录（单机场景）
 
-## 2. Compose 配置示例
+## 2. 目录权限设置
+
+Nacos 官方镜像默认以 root 运行，无需特殊权限设置。创建目录即可：
+
+```bash
+# 创建目录
+mkdir -p /app/nacos/{logs,data}
+```
+
+## 3. Compose 配置示例
 
 `/app/docker-compose.nacos.yml`：
 
@@ -32,8 +41,6 @@ services:
     image: nacos/nacos-server:v3.1.1
     container_name: nacos
     restart: unless-stopped
-    group_add:
-      - "<APPGROUP_GID>"
     environment:
       PREFER_HOST_MODE: hostname
       MODE: standalone
@@ -67,12 +74,11 @@ networks:
 - 使用 `v3.1.1`，与官方最新长期支持分支对齐
 - `MODE=standalone` 适合单机部署，部署复杂度低
 - 复用 `app-net`，业务容器可直接通过容器名访问 Nacos
-- 使用 `group_add` 对齐宿主机共享组权限，减少挂载目录权限冲突
 - 默认仅挂载 `logs/data`，避免空目录覆盖镜像内置 `conf` 导致启动失败
 - 3.x 要求显式配置 `NACOS_AUTH_TOKEN`、`NACOS_AUTH_IDENTITY_KEY`、`NACOS_AUTH_IDENTITY_VALUE`
 - 增加 `healthcheck`，可在编排层识别 Nacos 是否可用
 
-## 3. 鉴权变量说明
+## 4. 鉴权变量说明
 
 `NACOS_AUTH_TOKEN` 需要使用 **长度大于 32 字符** 的密钥再进行 Base64 编码。可用以下命令生成：
 
@@ -87,9 +93,9 @@ openssl rand -base64 32
 - 3.x 版本中鉴权相关参数属于必填项，缺失会导致启动异常
 - 使用环境变量集中管理鉴权配置，便于运维统一修改
 
-## 4. 可选：自定义 conf（高级）
+## 5. 可选：自定义 conf（高级）
 
-`/home/nacos/conf` 是镜像内置目录。若直接挂载空目录，会把容器内默认文件“遮蔽”，出现 `nacos-logback.xml` 缺失错误。
+`/home/nacos/conf` 是镜像内置目录。若直接挂载空目录，会把容器内默认文件"遮蔽"，出现 `nacos-logback.xml` 缺失错误。
 
 推荐流程：
 
@@ -124,7 +130,7 @@ docker compose -f /app/docker-compose.nacos.yml down
 docker compose -f /app/docker-compose.nacos.yml up -d
 ```
 
-## 7. 常用命令（复制即用）
+## 7. 常用命令
 
 ```bash
 # 启动 Nacos
