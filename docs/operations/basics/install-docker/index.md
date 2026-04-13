@@ -57,7 +57,7 @@ su - $USER
 sudo systemctl enable docker
 ```
 
-## 4. 配置docker镜像源
+## 5. 配置docker镜像源
 
 由于dockerhub被墙，所需要需要使用代理或镜像源实现快速下载，推荐镜像源，安全稳定
 
@@ -73,6 +73,12 @@ sudo tee /etc/docker/daemon.json >/dev/null <<EOF
 EOF
 
 # xxxx需要注册轩辕账号后，充值流量后，可以生成专属域名
+# 轩辕镜像支持加速以下容器仓库：
+# - docker.io（Docker Hub）
+# - ghcr.io（GitHub Container Registry）
+# - gcr.io（Google Container Registry）
+# - quay.io（Red Hat Quay）
+# - registry.k8s.io（Kubernetes 官方仓库）
 
 # 重载并重启 Docker
 sudo systemctl daemon-reload
@@ -82,11 +88,20 @@ sudo systemctl restart docker
 sudo docker info
 ```
 
-## 5. 注册轩辕镜像账号
+**手动拉取 ghcr.io 镜像示例**：
+
+```bash
+# 原始地址
+docker pull ghcr.io/owner/image:tag
+
+# 使用轩辕镜像加速（具体格式请参考轩辕镜像官方文档）
+docker pull xxxx.xuanyuan.run/ghcr.io/owner/image:tag
+```
+
+## 6. 注册轩辕镜像账号
+
+[轩辕镜像，点击进行注册](https://xuanyuan.cloud/?code=5EGSZC)
 
 国内开发者在直接从海外仓库（如 Docker Hub、谷歌容器镜像仓库、Kubernetes 官方仓库）拉取 docker镜像 时，常常遇到速度缓慢、网络中断甚至超时失败的问题。这些问题不仅影响个人开发效率，更可能拖慢企业级 CI/CD 流程。为破解这一瓶颈，docker加速、docker镜像加速 与 docker下载加速 成为刚需，而选择高质量的 docker加速源 是关键。
 
 轩辕镜像 专注于公共仓库的 docker加速 服务，致力于为国内开发者提供高效、稳定、安全的 docker镜像加速 解决方案。依托智能 CDN 全球加速网络，平台通过动态路由优化与节点负载均衡技术，让用户在国内也能享受流畅的 docker下载加速 体验。
-
-[轩辕镜像](https://xuanyuan.cloud/?code=5EGSZC)
-
