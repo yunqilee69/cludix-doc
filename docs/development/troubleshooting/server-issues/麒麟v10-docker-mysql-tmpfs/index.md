@@ -1,9 +1,5 @@
 ---
-slug: /development/kylin-v10-docker-mysql-tmpfs
 title: 麒麟v10 tmpfs权限导致Docker MySQL启动失败
-description: 解决麒麟v10系统中cgroupfs tmpfs目录权限问题导致的Docker MySQL容器启动失败
-tags: [麒麟, Docker, MySQL, tmpfs, cgroupfs]
-date: 2026-04-13
 ---
 
 本文记录在麒麟v10系统上部署Docker MySQL容器时，因cgroupfs tmpfs目录权限配置问题导致的启动失败及其解决方案。
@@ -194,5 +190,5 @@ docker exec -it mysql mysql -uroot -p
 
 ## 相关文档
 
-- [MySQL Docker Compose 配置](../../../../operations/docker/deployments/MySQL部署.md)
-- [Docker 部署规范](../../../../operations/docker/deployments/)
+- [MySQL Docker Compose 配置](/docs/operations/mysql-compose)
+- [Docker 部署规范](/docs/operations/docker/deployments/)

@@ -89,16 +89,19 @@ source ~/.bashrc
   -d yunke.icu -d '*.yunke.icu' \
   --dns dns_dp \
   --keylength ec-256
+```
+
 说明：
 
 - `--dns dns_dp` 表示通过腾讯云 DNSPod API 自动写入 TXT 记录
 - `-d yunke.icu` 是根域名，`-d '*.yunke.icu'` 是泛域名，覆盖所有子域名
 - DNS-01 不依赖 80 端口，也不依赖 Nginx 的 `/.well-known` 路径
 
+---
+
 ## 安装到固定路径并自动重载 Nginx
 
 将证书安装到固定路径，并配置自动重载 Nginx：
-## 安装到固定路径并自动重载 Nginx
 
 ```bash
 ~/.acme.sh/acme.sh --install-cert -d yunke.icu -d '*.yunke.icu' --ecc \
@@ -106,6 +109,9 @@ source ~/.bashrc
   --fullchain-file /app/nginx/ssl/cludix.crt \
   --reloadcmd "docker exec nginx nginx -s reload"
 ```
+
+---
+
 ## Nginx HTTPS 配置示例
 
 假设挂载关系：
@@ -180,6 +186,7 @@ crontab -l | grep acme.sh
 ```bash
 curl -I https://yunke.icu
 echo | openssl s_client -servername yunke.icu -connect yunke.icu:443 2>/dev/null | openssl x509 -noout -dates -issuer -subject
+```
 
 ### 常见问题
 
