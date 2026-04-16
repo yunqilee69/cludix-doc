@@ -9,8 +9,12 @@ title: 软件安装
 
 ## 📚 分类
 
-- [包管理器](./package-managers/homebrew/index.md) - Homebrew、NVM、SDKMAN、uv 等包管理器
+- [包管理器](./package-managers/homebrew/index.md) - Homebrew、NVM、SDKMAN、uv、Rust/Cargo 等包管理器
 - [工具](./tools/oh-my-zsh/index.md) - Oh My Zsh 等工具软件
+
+### 推荐阅读
+
+- [Rust 环境与 Cargo 配置（macOS）](./package-managers/rust-cargo/index.md) - 在 macOS 上安装 Rust、配置 Cargo 镜像与常用工具链
 
 ## 🖥️ macOS 相关
 
