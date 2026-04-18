@@ -63,7 +63,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
 
 <ApiEndpoint
   name="直接上传单文件"
-  description="适用于普通附件场景。上传成功后返回临时上传任务详情，后续仍需要 bind 才会生成正式文件。文件扩展名和 MIME 类型都由后端根据文件名与上传内容上下文自动补齐。"
+  description="适用于普通附件场景。上传成功后返回临时上传任务详情，后续仍需要 bind 才会生成正式文件。simple 上传不接受 taskId 和 fileMimeType，文件扩展名与 MIME 类型都由后端根据最终文件名推导。"
   method="POST"
   path="/api/storage/upload"
   requestBody={{
@@ -124,12 +124,12 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
 
 <ApiEndpoint
   name="上传分片"
-  description="向指定上传任务写入一个分片，支持可选 partHash 做一致性校验。"
+  description="向指定上传任务写入一个分片，支持可选 partHash 做一致性校验；只要调用方传入 partHash，服务端就会在本次上传时校验它必须与实际分片内容 MD5 一致。"
   method="PUT"
   path="/api/storage/upload-tasks/{taskId}/parts/{partNo}"
   queryParams={[
     { name: 'partSize', type: 'number', required: true, description: '当前分片大小' },
-    { name: 'partHash', type: 'string', required: false, description: '当前分片哈希值，可选' },
+    { name: 'partHash', type: 'string', required: false, description: '当前分片 MD5；不传则跳过声明校验，传入后服务端会校验必须与实际内容一致' },
   ]}
   requestBody={{
     contentType: 'multipart/form-data',
@@ -154,7 +154,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
         { name: 'data.id', type: 'string', description: '上传任务 ID' },
         { name: 'data.uploadedChunkCount', type: 'number', description: '已上传分片数' },
         { name: 'data.taskMode', type: 'string', description: '任务类型，固定为 chunk' },
-        { name: 'data.status', type: 'string', description: '任务状态，通常为 UPLOADING' },
+        { name: 'data.status', type: 'string', description: '任务状态。分片未齐时通常为 UPLOADING；所有分片已齐但尚未 complete 时，可能回到 INIT，表示等待显式 complete' },
       ],
       example: {
         code: '0',

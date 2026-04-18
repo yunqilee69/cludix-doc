@@ -125,8 +125,8 @@ storage 模块最关键的实现设计，是把上传拆成两个阶段。
 
 `StorageServiceImpl#uploadSimpleFile` 的核心逻辑是：
 
-1. 解析或创建上传任务
-2. 根据文件名推导扩展名与 MIME 类型
+1. 创建新的 simple 临时上传任务
+2. 根据最终文件名推导扩展名与 MIME 类型
 3. 读取文件流内容
 4. 写入 temp 存储区：`storageContentRepository.storeTemp(...)`
 5. 计算 `fileHash`
@@ -149,7 +149,7 @@ storage 模块最关键的实现设计，是把上传拆成两个阶段。
 这里体现了两点设计：
 
 - 分片上传具备幂等保护
-- 通过 `partHash` 做内容一致性校验
+- 通过 `partHash` 做内容一致性校验；如果调用方传入 `partHash`，服务端会在首传和重复上传时都要求它与实际内容一致
 
 ### 4.3 完成上传任务
 
