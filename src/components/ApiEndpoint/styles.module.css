@@ -1,0 +1,344 @@
+.apiDoc {
+  margin: 1.5rem 0;
+  padding: 1rem 1.1rem 1.1rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 18px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--ifm-background-surface-color) 95%, var(--ifm-color-primary) 5%),
+    color-mix(in srgb, var(--ifm-background-surface-color) 92%, var(--ifm-color-emphasis-100) 8%)
+  );
+}
+
+.apiTitle {
+  margin-bottom: 0.35rem !important;
+  color: var(--ifm-font-color-base) !important;
+  font-size: 1.08rem !important;
+}
+
+.apiDescription {
+  margin-bottom: 0.85rem !important;
+  color: var(--ifm-color-emphasis-700);
+  line-height: 1.65;
+}
+
+.apiEndpointRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.methodBadge {
+  margin-inline-end: 0 !important;
+  padding: 0.24rem 0.7rem;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.apiPath {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.38rem 0.72rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ifm-color-emphasis-100) 82%, transparent);
+  color: var(--ifm-font-color-base);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
+.apiSections {
+  margin-top: 0.25rem;
+}
+
+.apiCollapse {
+  background: transparent;
+}
+
+.apiCollapse :global(.ant-collapse-item) {
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 14px !important;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--ifm-background-surface-color) 90%, var(--ifm-color-emphasis-100));
+}
+
+.apiCollapse :global(.ant-collapse-item + .ant-collapse-item) {
+  margin-top: 0.75rem;
+}
+
+.apiCollapse :global(.ant-collapse-header) {
+  align-items: center !important;
+  padding: 0.9rem 1rem !important;
+}
+
+.apiCollapse :global(.ant-collapse-content) {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+  background: transparent;
+}
+
+.apiCollapse :global(.ant-collapse-content-box) {
+  padding: 0.95rem 1rem 1rem !important;
+}
+
+.sectionHeaderInner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.sectionHeaderTitle {
+  font-weight: 600;
+}
+
+.sectionHeaderBadge {
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ifm-color-primary) 10%, transparent);
+  color: var(--ifm-color-primary);
+  font-size: 0.8rem;
+}
+
+.paramTable :global(.ant-table) {
+  background: transparent;
+}
+
+.apiCollapse :global(.ant-collapse-header),
+.apiCollapse :global(.ant-collapse-expand-icon),
+.apiCollapse :global(.ant-collapse-arrow),
+.apiCollapse :global(.ant-collapse-header-text),
+.responseTabsWrap :global(.ant-tabs-tab),
+.responseTabsWrap :global(.ant-tabs-nav),
+.responseTabsWrap :global(.ant-tabs-nav::before),
+.responseTabsWrap :global(.ant-tabs-content),
+.responseTabsWrap :global(.ant-tabs-content-holder),
+.responseTabsWrap :global(.ant-tabs-tabpane),
+.paramTable :global(.ant-table),
+.paramTable :global(.ant-table-cell),
+.paramTable :global(.ant-table-thead > tr > th),
+.paramTable :global(.ant-table-tbody > tr > td),
+.codeBlockLabel,
+.codeBlockPre,
+.fieldDesc,
+.sectionHeaderTitle {
+  color: var(--ifm-font-color-base);
+}
+
+.paramTable :global(.ant-table-thead > tr > th) {
+  background: color-mix(in srgb, var(--ifm-color-emphasis-100) 74%, transparent);
+  border-bottom-color: var(--ifm-color-emphasis-200) !important;
+  color: var(--ifm-font-color-base);
+  font-weight: 600;
+}
+
+.paramTable :global(.ant-table-tbody > tr > td) {
+  border-bottom-color: var(--ifm-color-emphasis-200) !important;
+  color: var(--ifm-font-color-base);
+}
+
+.paramTable :global(.ant-table-tbody > tr.ant-table-row:hover > td) {
+  background: color-mix(in srgb, var(--ifm-color-primary) 4%, transparent) !important;
+}
+
+.fieldNameCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.fieldIndent {
+  display: inline-flex;
+  align-items: center;
+}
+
+.fieldIndentGuide {
+  margin-right: 0.35rem;
+  color: var(--ifm-color-emphasis-500);
+}
+
+.fieldNameCode {
+  display: inline-flex;
+  max-width: 100%;
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+.fieldDesc {
+  color: var(--ifm-color-emphasis-800);
+}
+
+.requiredTag,
+.optionalTag,
+.typeTag {
+  margin-inline-end: 0 !important;
+  border-radius: 999px;
+}
+
+.requiredTag {
+  color: #b42318;
+  background: rgba(217, 45, 32, 0.12);
+  border-color: rgba(217, 45, 32, 0.18);
+}
+
+.optionalTag {
+  color: #475467;
+  background: rgba(71, 84, 103, 0.12);
+  border-color: rgba(71, 84, 103, 0.18);
+}
+
+.typeTag {
+  background: color-mix(in srgb, var(--ifm-color-primary) 10%, transparent);
+  border-color: transparent;
+  color: var(--ifm-color-primary);
+}
+
+.sectionStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.codeBlockWrapper {
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--ifm-pre-background);
+}
+
+.codeBlockBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  background: color-mix(in srgb, var(--ifm-color-emphasis-100) 70%, transparent);
+}
+
+.codeBlockLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.codeBlockPre {
+  margin: 0;
+  padding: 0.9rem;
+  overflow-x: auto;
+  color: var(--ifm-font-color-base);
+  font-size: 0.88rem;
+  line-height: 1.65;
+}
+
+.responseTabsWrap :global(.ant-tabs-nav) {
+  margin-bottom: 0.85rem !important;
+}
+
+.responseTabsWrap :global(.ant-tabs-tab-btn) {
+  color: var(--ifm-font-color-base) !important;
+}
+
+.responseTabsWrap :global(.ant-tabs-content-holder) {
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 12px;
+  padding: 0.95rem;
+  background: color-mix(in srgb, var(--ifm-background-surface-color) 94%, var(--ifm-color-primary) 6%);
+}
+
+.responseTabsWrap :global(.ant-tabs-content-holder),
+.responseTabsWrap :global(.ant-tabs-content),
+.responseTabsWrap :global(.ant-tabs-tabpane) {
+  min-width: 0;
+}
+
+.respTab2xx,
+.respTab4xx,
+.respTab5xx {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.respTab2xx {
+  color: #067647;
+  background: rgba(6, 118, 71, 0.12);
+}
+
+.respTab4xx {
+  color: #b54708;
+  background: rgba(181, 71, 8, 0.12);
+}
+
+.respTab5xx {
+  color: #b42318;
+  background: rgba(180, 35, 24, 0.12);
+}
+
+[data-theme='dark'] .apiCollapse :global(.ant-collapse-item),
+[data-theme='dark'] .apiCollapse :global(.ant-collapse-content),
+[data-theme='dark'] .responseTabsWrap,
+[data-theme='dark'] .responseTabsWrap :global(.ant-tabs-content-holder),
+[data-theme='dark'] .codeBlockWrapper,
+[data-theme='dark'] .codeBlockBar {
+  border-color: var(--ifm-color-emphasis-300);
+}
+
+[data-theme='dark'] .apiTitle,
+[data-theme='dark'] .apiDescription,
+[data-theme='dark'] .apiCollapse :global(.ant-collapse-header),
+[data-theme='dark'] .apiCollapse :global(.ant-collapse-arrow),
+[data-theme='dark'] .apiCollapse :global(.ant-collapse-header-text),
+[data-theme='dark'] .responseTabsWrap :global(.ant-tabs-tab-btn),
+[data-theme='dark'] .responseTabsWrap :global(.ant-tabs-tab),
+[data-theme='dark'] .responseTabsWrap :global(.ant-tabs-tabpane),
+[data-theme='dark'] .paramTable :global(.ant-table),
+[data-theme='dark'] .paramTable :global(.ant-table-cell),
+[data-theme='dark'] .paramTable :global(.ant-table-thead > tr > th),
+[data-theme='dark'] .paramTable :global(.ant-table-tbody > tr > td),
+[data-theme='dark'] .fieldDesc,
+[data-theme='dark'] .codeBlockLabel,
+[data-theme='dark'] .codeBlockPre,
+[data-theme='dark'] .sectionHeaderTitle {
+  color: var(--ifm-font-color-base) !important;
+}
+
+[data-theme='dark'] .apiPath {
+  background: color-mix(in srgb, var(--ifm-color-emphasis-200) 24%, transparent);
+}
+
+[data-theme='dark'] .optionalTag {
+  color: #cbd5e1;
+  background: rgba(148, 163, 184, 0.16);
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+@media (max-width: 768px) {
+  .apiDoc {
+    padding: 0.9rem;
+  }
+
+  .apiCollapse :global(.ant-collapse-content-box) {
+    padding: 0.85rem !important;
+  }
+
+  .responseTabsWrap {
+    padding: 0.75rem;
+  }
+
+  .responseTabsWrap :global(.ant-tabs-content-holder) {
+    padding: 0.85rem;
+  }
+
+  .apiEndpointRow {
+    align-items: flex-start;
+  }
+
+  .fieldNameCell {
+    flex-wrap: wrap;
+  }
+}
