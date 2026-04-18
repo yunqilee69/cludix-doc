@@ -1,9 +1,9 @@
 ---
 slug: /operations/debian12-lid-switch-ignore
-title: "[草稿] Debian 12 笔记本合盖不休眠配置"
+title: "Debian 12 笔记本合盖不休眠配置"
 ---
 
-# [草稿] Debian 12 笔记本合盖不休眠配置
+# Debian 12 笔记本合盖不休眠配置
 
 本文档说明如何在 Debian 12 笔记本上关闭“合盖进入休眠/挂起”行为。下面这组 `systemd-logind` 配置已实测可用，适合需要外接显示器、远程连接或长期后台运行的场景。
 
