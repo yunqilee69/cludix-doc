@@ -106,7 +106,67 @@ alias ls
 alias ll
 ```
 
-## 4. 添加系统管理命令到PATH
+## 4. 配置开发环境Root用户远程SSH登录
+
+在开发或测试环境中，如果需要直接通过 root 用户远程 SSH 登录服务器，可以调整 OpenSSH 服务端配置。
+
+> ⚠️ **安全提示**: 仅建议在开发、测试或受控内网环境中启用 root 远程登录。生产环境更推荐使用普通用户登录后配合 `sudo` 提权。
+
+### 操作步骤
+
+```bash
+# 1. 编辑 SSH 服务端配置
+vim /etc/ssh/sshd_config
+```
+
+在配置文件中确认或修改以下内容：
+
+```conf
+PermitRootLogin yes
+PasswordAuthentication yes
+PubkeyAuthentication yes
+```
+
+如果上述配置项前面带有 `#` 注释，请去掉注释后保存退出。
+
+然后重启 SSH 服务：
+
+```bash
+systemctl restart ssh
+# 如果服务名不存在，也可以尝试
+systemctl restart sshd
+```
+
+### 配置说明
+
+- `PermitRootLogin yes`: 允许 root 用户通过 SSH 远程登录
+- `PasswordAuthentication yes`: 允许使用密码方式登录
+- `PubkeyAuthentication yes`: 允许使用 SSH 密钥方式登录，开发环境中也推荐优先使用密钥登录
+
+### 验证配置
+
+```bash
+# 检查 SSH 配置语法是否正确
+sshd -t
+
+# 查看 SSH 服务状态
+systemctl status ssh
+```
+
+在本地终端测试远程连接：
+
+```bash
+ssh root@服务器IP
+```
+
+如果连接失败，可进一步检查以下内容：
+
+- 云服务器安全组或防火墙是否已放通 `22` 端口
+- `/etc/ssh/sshd_config` 是否存在重复配置，后面的配置会覆盖前面的配置
+- 是否已经执行 `systemctl restart ssh`
+- 如果使用密码登录，确认 root 账户已经设置可用密码
+
+## 5. 添加系统管理命令到PATH
 
 普通用户默认无法执行 `/sbin` 和 `/usr/sbin` 目录下的系统管理命令，需要将这些路径添加到用户PATH环境变量中：
 
@@ -136,7 +196,7 @@ which ifconfig
 which iptables
 ```
 
-## 5. 配置普通用户Sudo权限
+## 6. 配置普通用户Sudo权限
 
 为了允许普通用户执行管理员命令，需要将用户添加到sudo组中：
 
