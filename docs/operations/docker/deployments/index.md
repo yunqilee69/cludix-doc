@@ -24,6 +24,7 @@ title: Docker 部署文档
 
 - [Jenkins 部署示例](./Jenkins部署.md)
 - [Filebrowser 部署示例](./Filebrowser部署.md)
+- [Portainer 部署示例](./Portainer部署.md)
 
 ## 媒体服务
 
