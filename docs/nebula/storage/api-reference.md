@@ -63,19 +63,17 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
 
 <ApiEndpoint
   name="直接上传单文件"
-  description="适用于普通附件场景。上传成功后返回临时上传任务详情，后续仍需要 bind 才会生成正式文件。"
+  description="适用于普通附件场景。上传成功后返回临时上传任务详情，后续仍需要 bind 才会生成正式文件。文件扩展名和 MIME 类型都由后端根据文件名与上传内容上下文自动补齐。"
   method="POST"
   path="/api/storage/upload"
   requestBody={{
     contentType: 'multipart/form-data',
     fields: [
       { name: 'fileName', type: 'string', required: false, description: '自定义文件名，不传时使用上传文件原始文件名' },
-      { name: 'fileMimeType', type: 'string', required: false, description: '自定义 MIME 类型，不传时使用上传文件内容类型' },
       { name: 'file', type: 'file', required: true, description: '上传文件内容' },
     ],
     example: {
       fileName: '合同.pdf',
-      fileMimeType: 'application/pdf',
       file: '(binary)',
     },
   }}

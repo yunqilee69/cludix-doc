@@ -126,10 +126,11 @@ storage 模块最关键的实现设计，是把上传拆成两个阶段。
 `StorageServiceImpl#uploadSimpleFile` 的核心逻辑是：
 
 1. 解析或创建上传任务
-2. 读取文件流内容
-3. 写入 temp 存储区：`storageContentRepository.storeTemp(...)`
-4. 计算 `fileHash`
-5. 更新任务状态为 `COMPLETED`
+2. 根据文件名推导扩展名与 MIME 类型
+3. 读取文件流内容
+4. 写入 temp 存储区：`storageContentRepository.storeTemp(...)`
+5. 计算 `fileHash`
+6. 更新任务状态为 `COMPLETED`
 
 这一步之后，系统里只有临时上传任务，还没有正式文件记录。
 
@@ -159,7 +160,8 @@ storage 模块最关键的实现设计，是把上传拆成两个阶段。
 3. 调用 `mergeTempParts(...)` 合并临时分片
 4. 删除已合并的临时 part 内容
 5. 重新计算完整文件 `fileHash`
-6. 将任务状态更新为 `COMPLETED`
+6. 根据最终文件名补齐 MIME 类型
+7. 将任务状态更新为 `COMPLETED`
 
 ### 4.4 绑定正式文件
 

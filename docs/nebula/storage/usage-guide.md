@@ -168,7 +168,7 @@ nebula:
 
 1. 前端选择文件
 2. 调用 `/api/storage/upload`
-3. 后端返回临时上传任务详情 `taskId`
+3. 后端根据文件名/上传上下文补齐扩展名与 MIME，并返回临时上传任务详情 `taskId`
 4. 业务表单保存成功
 5. 调用 `/api/storage/upload-tasks/{taskId}/bind`
 6. 保存返回的正式 `fileId`
@@ -186,7 +186,7 @@ nebula:
 
 1. 先创建上传任务
 2. 前端循环上传分片
-3. 调用 complete 合并分片
+3. 调用 complete 合并分片，并由后端按文件名补齐 MIME
 4. 业务保存成功后调用 bind
 5. 持久化 `fileId`
 
