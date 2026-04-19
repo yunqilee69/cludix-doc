@@ -310,7 +310,82 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
 
 ---
 
-## 8. 正式文件详情
+## 8. 分页查询临时文件
+
+<ApiEndpoint
+  name="分页查询临时文件"
+  description="按任务类型、文件名、任务状态、上传人等条件分页查询临时文件（即上传任务记录）。适合后台查看 simple / chunk 上传过程中的临时文件与任务状态。"
+  method="POST"
+  path="/api/storage/upload-tasks/page"
+  requestBody={{
+    contentType: 'application/json',
+    fields: [
+      { name: 'pageNum', type: 'number', required: false, description: '当前页码，默认 1' },
+      { name: 'pageSize', type: 'number', required: false, description: '每页大小，默认 20' },
+      { name: 'orderName', type: 'string', required: false, description: '排序字段' },
+      { name: 'orderType', type: 'string', required: false, description: '排序方向，asc/desc' },
+      { name: 'taskMode', type: 'string', required: false, description: '任务类型，常见值 simple / chunk' },
+      { name: 'fileName', type: 'string', required: false, description: '按文件名模糊过滤' },
+      { name: 'status', type: 'string', required: false, description: '按上传任务状态过滤，例如 INIT、UPLOADING、COMPLETED、FAILED' },
+      { name: 'uploadUserId', type: 'string', required: false, description: '按上传用户过滤' },
+    ],
+    example: {
+      pageNum: 1,
+      pageSize: 10,
+      orderName: 'createTime',
+      orderType: 'desc',
+      taskMode: 'simple',
+      fileName: '合同',
+      status: 'COMPLETED',
+      uploadUserId: 'user-001',
+    },
+  }}
+  responses={[
+    {
+      status: 200,
+      label: '成功',
+      fields: [
+        { name: 'data.list', type: 'array', description: '分页数据列表' },
+        { name: 'data.total', type: 'number', description: '总记录数' },
+        { name: 'data.pageNum', type: 'number', description: '当前页码' },
+        { name: 'data.pageSize', type: 'number', description: '每页大小' },
+      ],
+      example: {
+        code: '0',
+        message: 'success',
+        data: {
+          list: [
+            {
+              id: 'task-001',
+              taskMode: 'simple',
+              fileName: '合同.pdf',
+              fileExtension: 'pdf',
+              fileMimeType: 'application/pdf',
+              fileSize: 204800,
+              fileHash: '6f5902ac237024bdd0c176cb93063dc4',
+              chunkSize: null,
+              chunkCount: 1,
+              uploadedChunkCount: 1,
+              status: 'COMPLETED',
+              uploadUserId: 'user-001',
+              lastChunkTime: '2026-04-18T15:20:31',
+              createTime: '2026-04-18T15:20:31',
+              updateTime: '2026-04-18T15:20:31',
+            },
+          ],
+          total: 1,
+          pageNum: 1,
+          pageSize: 10,
+          pages: 1,
+        },
+      },
+    },
+  ]}
+/>
+
+---
+
+## 9. 正式文件详情
 
 <ApiEndpoint
   name="正式文件详情"
@@ -354,7 +429,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
 
 ---
 
-## 9. 分页查询正式文件
+## 10. 分页查询正式文件
 
 <ApiEndpoint
   name="分页查询正式文件"

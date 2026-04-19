@@ -25,7 +25,6 @@ CREATE TABLE storage_upload_task (
     temp_storage_key varchar(500) DEFAULT NULL,
     status varchar(20) NOT NULL,
     upload_user_id char(32) DEFAULT NULL,
-    result_file_id char(32) DEFAULT NULL,
     last_chunk_time datetime DEFAULT NULL,
     create_time datetime DEFAULT CURRENT_TIMESTAMP,
     update_time datetime DEFAULT CURRENT_TIMESTAMP,
