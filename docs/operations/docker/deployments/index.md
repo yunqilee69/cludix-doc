@@ -12,6 +12,7 @@ title: Docker 部署文档
 
 - [Nginx 部署示例](./Nginx部署.md)
 - [MySQL 部署示例](./MySQL部署.md)
+- [PostgreSQL 17 部署示例](./PostgreSQL17部署.md)
 - [Redis 部署示例](./Redis部署.md)
 
 ## 中间件
