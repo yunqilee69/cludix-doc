@@ -8,7 +8,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
 
 - 所有接口返回统一 `ApiResult`
 - 分页接口统一使用 `POST`
-- 字典项支持平铺查询与树查询两种读取方式
+- 字典项按字典编码查询时统一返回树形结构
 - `onlyEnabled` 不传时默认按 `true` 处理
 
 ---
@@ -448,72 +448,10 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
 ## 3. 按字典编码读取接口
 
 <ApiEndpoint
-  name="按字典编码查询平铺字典项"
-  description="按字典编码查询字典项平铺列表，适合下拉框、状态映射和简单枚举展示。"
+  name="按字典编码查询字典项"
+  description="按字典编码查询字典项，统一返回树形结构，适合下拉框、状态映射、简单枚举展示、分类树、区域树和级联选择器。若当前结果集中父节点不存在，节点会以根节点形式返回。"
   method="GET"
   path="/api/dict/items/dict/{dictCode}"
-  queryParams={[
-    { name: 'onlyEnabled', type: 'boolean', required: false, description: '是否仅返回启用项；不传时默认 true' },
-  ]}
-  responses={[
-    {
-      status: 200,
-      label: '成功',
-      fields: [
-        { name: 'data', type: 'array', description: '字典项平铺列表' },
-        { name: 'data[].id', type: 'string', description: '字典项 ID' },
-        { name: 'data[].dictCode', type: 'string', description: '字典编码' },
-        { name: 'data[].name', type: 'string', description: '字典项名称' },
-        { name: 'data[].parentId', type: 'string', description: '父级字典项 ID' },
-        { name: 'data[].itemValue', type: 'string', description: '字典项值' },
-        { name: 'data[].sort', type: 'number', description: '排序值' },
-        { name: 'data[].status', type: 'number', description: '状态' },
-        { name: 'data[].defaultFlag', type: 'boolean', description: '是否默认值' },
-        { name: 'data[].tagColor', type: 'string', description: '标签颜色' },
-      ],
-      example: {
-        code: '0',
-        message: 'success',
-        data: [
-          {
-            id: '019daaa0bc007785bd85b11d78394543',
-            dictCode: 'order_status',
-            name: '新建',
-            parentId: null,
-            itemValue: 'NEW',
-            sort: 1,
-            status: 1,
-            defaultFlag: false,
-            tagColor: null,
-            createTime: '2026-04-20T19:22:33',
-            updateTime: '2026-04-20T19:22:33',
-          },
-          {
-            id: '019daaa0bc0475f98a55dc27a44998be',
-            dictCode: 'order_status',
-            name: '已支付',
-            parentId: null,
-            itemValue: 'PAID',
-            sort: 2,
-            status: 1,
-            defaultFlag: false,
-            tagColor: '#52c41a',
-            createTime: '2026-04-20T19:22:34',
-            updateTime: '2026-04-20T19:22:34',
-          },
-        ],
-      },
-    },
-  ]}
-/>
-
----
-
-<ApiEndpoint
-  name="按字典编码查询字典项树"
-  description="按字典编码查询字典项树，适合分类树、区域树和级联选择器。若当前结果集中父节点不存在，节点会以根节点形式返回。"
-  method="GET"
-  path="/api/dict/items/dict/{dictCode}/tree"
   queryParams={[
     { name: 'onlyEnabled', type: 'boolean', required: false, description: '是否仅返回启用项；不传时默认 true' },
   ]}
@@ -529,6 +467,10 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
         { name: 'data[].parentId', type: 'string', description: '父级字典项 ID' },
         { name: 'data[].path', type: 'string', description: '树路径' },
         { name: 'data[].itemValue', type: 'string', description: '字典项值' },
+        { name: 'data[].sort', type: 'number', description: '排序值' },
+        { name: 'data[].status', type: 'number', description: '状态' },
+        { name: 'data[].defaultFlag', type: 'boolean', description: '是否默认值' },
+        { name: 'data[].tagColor', type: 'string', description: '标签颜色' },
         { name: 'data[].extraJson', type: 'string', description: '扩展属性 JSON' },
         { name: 'data[].remark', type: 'string', description: '备注' },
         { name: 'data[].children', type: 'array', description: '子节点列表' },
@@ -548,8 +490,8 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
             status: 1,
             defaultFlag: false,
             tagColor: null,
-            extraJson: null,
-            remark: null,
+            extraJson: '{"level":1}',
+            remark: '国家',
             createTime: '2026-04-20T19:22:33',
             updateTime: '2026-04-20T19:22:33',
             children: [
@@ -560,12 +502,12 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
                 parentId: '019daaa0bc4370188b6afea800ca4e03',
                 path: '019daaa0bc4370188b6afea800ca4e03,019daaa0bc46770a851b0b31420da04e',
                 itemValue: 'SH',
-                sort: 0,
+                sort: 10,
                 status: 1,
                 defaultFlag: false,
-                tagColor: null,
+                tagColor: '#1677ff',
                 extraJson: '{"level":2}',
-                remark: null,
+                remark: '直辖市',
                 createTime: '2026-04-20T19:22:33',
                 updateTime: '2026-04-20T19:22:33',
                 children: [],

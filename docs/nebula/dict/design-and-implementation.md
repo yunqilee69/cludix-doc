@@ -168,12 +168,12 @@
 
 如果仍有子节点，则直接拒绝删除。
 
-### 3.5 树查询
+### 3.5 按编码查询树形字典
 
-当前树查询接口为：
+当前按字典编码查询接口为：
 
 ```text
-GET /api/dict/items/dict/{dictCode}/tree
+GET /api/dict/items/dict/{dictCode}
 ```
 
 返回模型为 `DictItemTreeDto`，其核心字段包括：
@@ -192,7 +192,7 @@ GET /api/dict/items/dict/{dictCode}/tree
 2. 再递归挂载子节点
 3. 若某节点的父节点不在当前加载结果里，则把它提升为根节点返回
 
-这最后一点很重要，因为在 `onlyEnabled=true` 的场景下，如果父节点被过滤掉、子节点仍然启用，树接口也不会把这个子节点静默丢失。
+这最后一点很重要，因为在 `onlyEnabled=true` 的场景下，如果父节点被过滤掉、子节点仍然启用，按编码查询接口也不会把这个子节点静默丢失。
 
 ---
 
@@ -214,30 +214,19 @@ GET /api/dict/items/dict/{dictCode}/tree
 - `name`
 - `status`
 
-### 4.3 平铺列表查询
+### 4.3 按编码读取字典项
 
-平铺查询接口：
+按编码查询接口：
 
 ```text
 GET /api/dict/items/dict/{dictCode}
 ```
 
-它适合：
+它统一返回树结构，适合：
 
 - 下拉选项
 - 单选项列表
 - 状态值显示
-
-### 4.4 树列表查询
-
-树查询接口：
-
-```text
-GET /api/dict/items/dict/{dictCode}/tree
-```
-
-它适合：
-
 - 分类树
 - 区域树
 - 多级联动选择器
@@ -272,8 +261,8 @@ order_status::false
 
 ### 5.3 缓存读取
 
-- 平铺查询通过 `getOrLoadFlatList(...)` 获取缓存或回源
-- 树查询通过 `getOrLoadTree(...)` 获取缓存或回源
+- 平铺缓存通过 `getOrLoadFlatList(...)` 获取缓存或回源
+- 树形读取通过 `getOrLoadTree(...)` 获取缓存或回源
 
 ### 5.4 缓存失效
 
@@ -351,7 +340,7 @@ order_status::false
 - 传 `null` 时，等价于 `true`
 - 即默认只返回启用状态的字典项
 
-这既适用于平铺列表，也适用于树查询。
+这既适用于树形读取，也适用于服务内部的平铺缓存视图。
 
 ---
 

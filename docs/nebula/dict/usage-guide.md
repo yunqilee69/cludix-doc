@@ -143,17 +143,6 @@ nebula:
 - 状态下拉
 - 单选项
 - 简单枚举展示
-
-调用建议：
-
-```text
-GET /api/dict/items/dict/order_status
-```
-
-### 5.2 树形字典读取
-
-适用于：
-
 - 分类树
 - 区域树
 - 级联选择器
@@ -161,10 +150,12 @@ GET /api/dict/items/dict/order_status
 调用建议：
 
 ```text
-GET /api/dict/items/dict/region/tree
+GET /api/dict/items/dict/order_status
 ```
 
-### 5.3 是否只看启用项
+如果字典本身存在层级关系，接口会直接返回带 `children` 的树节点列表；如果只是单层枚举，则结果通常只有根节点层。
+
+### 5.2 是否只看启用项
 
 通常前台页面建议：
 
@@ -208,7 +199,7 @@ GET /api/dict/items/dict/region/tree
 
 - 由服务端自动维护 `parentId + path`
 - 业务方不要自己拼接 `path`
-- 优先通过树接口获取完整树形结果
+- 直接通过按编码查询接口获取完整树形结果
 
 ### 6.4 富字典建议
 
@@ -240,5 +231,4 @@ GET /api/dict/items/dict/region/tree
 
 - **当前项目内部直接使用字典能力** → 直接走 `local`
 - **多个系统共享统一字典中心** → 部署 `nebula-dict-service`，其他系统走 `remote`
-- **前端做状态映射和下拉** → 调平铺接口
-- **前端做分类树和级联选择** → 调树接口
+- **前端做状态映射、下拉、分类树或级联选择** → 统一调 `/api/dict/items/dict/{dictCode}`
