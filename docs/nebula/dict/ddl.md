@@ -1,6 +1,12 @@
 # Nebula Dict 建表语句
 
-本文档用于说明 `nebula-dict` 当前涉及的数据表结构。
+本文档基于以下实际文件整理：
+
+- `nebula-dict-service/src/test/resources/db/test/dict-schema-mysql.sql`
+
+本文档只描述这份可见 MySQL schema 中实际存在的字段与约束；如果后续还有额外迁移脚本或生产增强索引，应以真实生产 DDL 为准。
+
+---
 
 ## 1. 表结构概览
 
@@ -43,6 +49,10 @@
 - 唯一键：`uk_dict_type_code (code)`
 - 普通索引：`idx_dict_type_status (status)`
 
+说明：
+
+- 当前可见初始化 SQL 额外提供了 `status` 普通索引，便于后台按状态筛选字典类型
+
 ---
 
 ## 3. `sys_dict_item`
@@ -75,6 +85,14 @@
 - 普通索引：`idx_dict_item_status (status)`
 - 复合索引：`idx_dict_item_sort (dict_code, sort)`
 - 普通索引：`idx_dict_item_parent_id (parent_id)`
+
+说明：
+
+- 当前可见初始化 SQL 已对常见查询路径补充索引：
+  - `dict_code`：按字典编码读取字典项
+  - `status`：按启停状态过滤
+  - `(dict_code, sort)`：按编码 + 排序顺序加载树节点或列表
+  - `parent_id`：按父节点查询直接子节点
 
 ### 3.4 树形字段说明
 

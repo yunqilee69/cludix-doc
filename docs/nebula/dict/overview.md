@@ -4,7 +4,7 @@
 
 `nebula-dict` 是 Nebula 中台里的统一数据字典模块，负责把“可配置、可维护、可分页、可缓存、可按字典编码读取”的字典数据收敛到一个标准能力中。
 
-从当前代码可以确认，它不仅支持传统的“字典类型 + 平铺字典项”模型，还支持带 `parentId` 和 `path` 的**树形字典项结构**。
+从当前代码可以确认，它以字典类型 + 树形字典项结构为统一模型，字典项天然支持 `parentId` 和 `path` 层级信息。
 
 因此它适合承载的场景包括：
 
@@ -70,8 +70,7 @@ nebula-dict/
 - 删除字典项
 - 查询字典项详情
 - 分页查询字典项
-- 按字典编码查询字典项平铺列表
-- 按字典编码查询字典项树
+- 按字典编码查询字典项（返回树形结构）
 
 ### 3.3 层级与约束能力
 
@@ -122,12 +121,10 @@ nebula-dict/
 - `GET /api/dict/items/{id}`
 - `POST /api/dict/items/page`
 - `GET /api/dict/items/dict/{dictCode}`
-- `GET /api/dict/items/dict/{dictCode}/tree`
 
 其中：
 
-- `/items/dict/{dictCode}` 返回平铺列表 `List<DictItemDto>`
-- `/items/dict/{dictCode}/tree` 返回树结构 `List<DictItemTreeDto>`
+- `/items/dict/{dictCode}` 返回树结构 `List<DictItemTreeDto>`
 
 ---
 
@@ -183,7 +180,7 @@ nebula-dict/
 1. [设计与实现](./design-and-implementation.md)
    - 先理解字典项树、路径字段、缓存和 remote 模式
 2. [业务功能](./business-capabilities.md)
-   - 再理解字典类型、字典项、树查询分别解决什么问题
+   - 再理解字典类型、字典项和树形读取分别解决什么问题
 3. [接口信息](./api-reference.md)
    - 然后查看具体 API 形态
 4. [使用方式](./usage-guide.md)
