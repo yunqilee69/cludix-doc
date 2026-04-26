@@ -84,15 +84,16 @@ nebula-storage/
 - 文件基本信息 `file_name / file_size / file_mime_type`
 - 分片统计 `chunk_count / uploaded_chunk_count`
 - 临时文件标识 `temp_storage_key`
-- 绑定结果 `result_file_id`
+- 上传用户 `upload_user_id`
 - 流程状态 `status`
+
+> 说明：基于当前仓库中可见的 `storage-schema-h2.sql`，`storage_upload_task` 当前未直接包含 `source_entity / source_id / source_type` 或 `result_file_id` 字段；这些业务归属信息明确落在 `storage_file` 中。
 
 ### 4.2 `storage_upload_part`
 
 用于分片上传场景，主要承载：
 
 - 分片序号 `part_number`
-- 分片大小 `part_size`
 - 分片哈希 `part_hash`
 - 临时分片位置 `part_storage_key`
 - 分片状态 `status`
