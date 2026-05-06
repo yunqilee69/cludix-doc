@@ -25,13 +25,11 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
     fields: [
       { name: 'code', type: 'string', required: true, description: '字典编码，要求唯一，例如 order_status' },
       { name: 'name', type: 'string', required: true, description: '字典名称' },
-      { name: 'status', type: 'number', required: false, description: '状态，通常 1=启用，0=停用' },
       { name: 'remark', type: 'string', required: false, description: '备注' },
     ],
     example: {
       code: 'order_status',
       name: '订单状态',
-      status: 1,
       remark: '订单流程状态字典',
     },
   }}
@@ -57,19 +55,17 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
 
 <ApiEndpoint
   name="更新字典类型"
-  description="更新指定字典类型的名称、状态与备注。"
+  description="更新指定字典类型的名称与备注。"
   method="PUT"
   path="/api/dict/types/{id}"
   requestBody={{
     contentType: 'application/json',
     fields: [
       { name: 'name', type: 'string', required: true, description: '字典名称' },
-      { name: 'status', type: 'number', required: false, description: '状态' },
       { name: 'remark', type: 'string', required: false, description: '备注' },
     ],
     example: {
       name: '订单状态',
-      status: 1,
       remark: '用于订单生命周期展示',
     },
   }}
@@ -125,8 +121,9 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
         { name: 'data.id', type: 'string', description: '字典类型 ID' },
         { name: 'data.code', type: 'string', description: '字典编码' },
         { name: 'data.name', type: 'string', description: '字典名称' },
-        { name: 'data.status', type: 'number', description: '状态' },
         { name: 'data.remark', type: 'string', description: '备注' },
+        { name: 'data.createTime', type: 'string', description: '创建时间' },
+        { name: 'data.updateTime', type: 'string', description: '更新时间' },
       ],
       example: {
         code: '0',
@@ -135,7 +132,6 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
           id: '019daaa0bbcf717c89d1a2515dcfc0eb',
           code: 'order_status',
           name: '订单状态',
-          status: 1,
           remark: '订单流程状态字典',
           createTime: '2026-04-20T19:22:33',
           updateTime: '2026-04-20T19:22:33',
@@ -149,7 +145,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
 
 <ApiEndpoint
   name="分页查询字典类型"
-  description="按字典编码、名称、状态等条件分页查询字典类型。"
+  description="按字典编码、名称等条件分页查询字典类型。"
   method="POST"
   path="/api/dict/types/page"
   requestBody={{
@@ -161,13 +157,11 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
       { name: 'orderType', type: 'string', required: false, description: '排序方向，asc/desc' },
       { name: 'code', type: 'string', required: false, description: '字典编码' },
       { name: 'name', type: 'string', required: false, description: '字典名称' },
-      { name: 'status', type: 'number', required: false, description: '状态' },
     ],
     example: {
       pageNum: 1,
       pageSize: 10,
       code: 'order',
-      status: 1,
     },
   }}
   responses={[
@@ -175,30 +169,30 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
       status: 200,
       label: '成功',
       fields: [
-        { name: 'data.records', type: 'array', description: '分页记录' },
-        { name: 'data.records[].id', type: 'string', description: '字典类型 ID' },
-        { name: 'data.records[].code', type: 'string', description: '字典编码' },
-        { name: 'data.records[].name', type: 'string', description: '字典名称' },
-        { name: 'data.records[].status', type: 'number', description: '状态' },
+        { name: 'data.data', type: 'array', description: '分页记录' },
+        { name: 'data.data[].id', type: 'string', description: '字典类型 ID' },
+        { name: 'data.data[].code', type: 'string', description: '字典编码' },
+        { name: 'data.data[].name', type: 'string', description: '字典名称' },
+        { name: 'data.data[].remark', type: 'string', description: '备注' },
+        { name: 'data.data[].createTime', type: 'string', description: '创建时间' },
+        { name: 'data.data[].updateTime', type: 'string', description: '更新时间' },
         { name: 'data.total', type: 'number', description: '总条数' },
       ],
       example: {
         code: '0',
         message: 'success',
         data: {
-          pageNum: 1,
-          pageSize: 10,
-          total: 1,
-          records: [
+          data: [
             {
               id: '019daaa0bbcf717c89d1a2515dcfc0eb',
               code: 'order_status',
               name: '订单状态',
-              status: 1,
+              remark: '订单流程状态字典',
               createTime: '2026-04-20T19:22:33',
               updateTime: '2026-04-20T19:22:33',
             },
           ],
+          total: 1,
         },
       },
     },
@@ -221,11 +215,9 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
       { name: 'name', type: 'string', required: true, description: '字典项名称' },
       { name: 'parentId', type: 'string', required: false, description: '父级字典项 ID，不传表示根节点' },
       { name: 'itemValue', type: 'string', required: true, description: '字典项值' },
-      { name: 'sort', type: 'number', required: false, description: '排序值' },
-      { name: 'status', type: 'number', required: false, description: '状态' },
-      { name: 'defaultFlag', type: 'boolean', required: false, description: '是否默认值' },
-      { name: 'tagColor', type: 'string', required: false, description: '标签颜色' },
-      { name: 'extraJson', type: 'string', required: false, description: '扩展属性 JSON' },
+      { name: 'sort', type: 'number', required: false, description: '排序值，默认 0' },
+      { name: 'enabled', type: 'boolean', required: false, description: '是否启用，默认 true' },
+      { name: 'tagColor', type: 'string', required: false, description: '标签颜色，格式为 #RRGGBB' },
       { name: 'remark', type: 'string', required: false, description: '备注' },
     ],
     example: {
@@ -234,10 +226,8 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
       parentId: '019daaa0bc4370188b6afea800ca4e03',
       itemValue: 'SH',
       sort: 10,
-      status: 1,
-      defaultFlag: false,
+      enabled: true,
       tagColor: '#1677ff',
-      extraJson: '{"level":2}',
       remark: '直辖市',
     },
   }}
@@ -261,31 +251,25 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
 
 <ApiEndpoint
   name="更新字典项"
-  description="更新指定字典项的展示信息、状态、层级关系与扩展属性。修改 parentId 时服务端会自动维护 path。"
+  description="更新指定字典项的展示信息与状态。注意：不支持修改 parentId，节点迁移需删除后重新创建。"
   method="PUT"
   path="/api/dict/items/{id}"
   requestBody={{
     contentType: 'application/json',
     fields: [
       { name: 'name', type: 'string', required: true, description: '字典项名称' },
-      { name: 'parentId', type: 'string', required: false, description: '父级字典项 ID，可用于节点迁移' },
       { name: 'itemValue', type: 'string', required: true, description: '字典项值' },
-      { name: 'sort', type: 'number', required: false, description: '排序值' },
-      { name: 'status', type: 'number', required: false, description: '状态' },
-      { name: 'defaultFlag', type: 'boolean', required: false, description: '是否默认值' },
-      { name: 'tagColor', type: 'string', required: false, description: '标签颜色' },
-      { name: 'extraJson', type: 'string', required: false, description: '扩展属性 JSON' },
+      { name: 'sort', type: 'number', required: false, description: '排序值，默认 0' },
+      { name: 'enabled', type: 'boolean', required: false, description: '是否启用，默认 true' },
+      { name: 'tagColor', type: 'string', required: false, description: '标签颜色，格式为 #RRGGBB' },
       { name: 'remark', type: 'string', required: false, description: '备注' },
     ],
     example: {
       name: '上海市',
-      parentId: '019daaa0bc4370188b6afea800ca4e03',
       itemValue: 'SH',
       sort: 20,
-      status: 1,
-      defaultFlag: false,
+      enabled: true,
       tagColor: '#1677ff',
-      extraJson: '{"level":2,"hot":true}',
       remark: '华东区域核心城市',
     },
   }}
@@ -330,7 +314,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
 
 <ApiEndpoint
   name="字典项详情"
-  description="根据字典项 ID 查询详情，返回层级信息、扩展属性与路径信息。"
+  description="根据字典项 ID 查询详情，返回层级信息与路径信息。"
   method="GET"
   path="/api/dict/items/{id}"
   responses={[
@@ -344,9 +328,12 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
         { name: 'data.parentId', type: 'string', description: '父级字典项 ID' },
         { name: 'data.path', type: 'string', description: '树路径' },
         { name: 'data.itemValue', type: 'string', description: '字典项值' },
-        { name: 'data.defaultFlag', type: 'boolean', description: '是否默认值' },
+        { name: 'data.sort', type: 'number', description: '排序值' },
+        { name: 'data.enabled', type: 'boolean', description: '是否启用' },
         { name: 'data.tagColor', type: 'string', description: '标签颜色' },
-        { name: 'data.extraJson', type: 'string', description: '扩展属性 JSON' },
+        { name: 'data.remark', type: 'string', description: '备注' },
+        { name: 'data.createTime', type: 'string', description: '创建时间' },
+        { name: 'data.updateTime', type: 'string', description: '更新时间' },
       ],
       example: {
         code: '0',
@@ -359,10 +346,8 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
           path: '019daaa0bc4370188b6afea800ca4e03,019daaa0bc46770a851b0b31420da04e',
           itemValue: 'SH',
           sort: 10,
-          status: 1,
-          defaultFlag: false,
+          enabled: true,
           tagColor: '#1677ff',
-          extraJson: '{"level":2}',
           remark: '直辖市',
           createTime: '2026-04-20T19:22:33',
           updateTime: '2026-04-20T19:22:33',
@@ -376,7 +361,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
 
 <ApiEndpoint
   name="分页查询字典项"
-  description="按字典编码、名称、状态等条件分页查询字典项。"
+  description="按字典编码、名称、启用状态等条件分页查询字典项。"
   method="POST"
   path="/api/dict/items/page"
   requestBody={{
@@ -388,14 +373,14 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
       { name: 'orderType', type: 'string', required: false, description: '排序方向，asc/desc' },
       { name: 'dictCode', type: 'string', required: false, description: '字典编码' },
       { name: 'name', type: 'string', required: false, description: '字典项名称' },
-      { name: 'status', type: 'number', required: false, description: '状态' },
+      { name: 'enabled', type: 'boolean', required: false, description: '是否启用' },
     ],
     example: {
       pageNum: 1,
       pageSize: 10,
       dictCode: 'region',
       name: '上',
-      status: 1,
+      enabled: true,
     },
   }}
   responses={[
@@ -403,26 +388,24 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
       status: 200,
       label: '成功',
       fields: [
-        { name: 'data.records', type: 'array', description: '分页记录' },
-        { name: 'data.records[].id', type: 'string', description: '字典项 ID' },
-        { name: 'data.records[].dictCode', type: 'string', description: '字典编码' },
-        { name: 'data.records[].name', type: 'string', description: '字典项名称' },
-        { name: 'data.records[].parentId', type: 'string', description: '父级字典项 ID' },
-        { name: 'data.records[].itemValue', type: 'string', description: '字典项值' },
-        { name: 'data.records[].sort', type: 'number', description: '排序值' },
-        { name: 'data.records[].status', type: 'number', description: '状态' },
-        { name: 'data.records[].defaultFlag', type: 'boolean', description: '是否默认值' },
-        { name: 'data.records[].tagColor', type: 'string', description: '标签颜色' },
+        { name: 'data.data', type: 'array', description: '分页记录' },
+        { name: 'data.data[].id', type: 'string', description: '字典项 ID' },
+        { name: 'data.data[].dictCode', type: 'string', description: '字典编码' },
+        { name: 'data.data[].name', type: 'string', description: '字典项名称' },
+        { name: 'data.data[].parentId', type: 'string', description: '父级字典项 ID' },
+        { name: 'data.data[].itemValue', type: 'string', description: '字典项值' },
+        { name: 'data.data[].sort', type: 'number', description: '排序值' },
+        { name: 'data.data[].enabled', type: 'boolean', description: '是否启用' },
+        { name: 'data.data[].tagColor', type: 'string', description: '标签颜色' },
+        { name: 'data.data[].createTime', type: 'string', description: '创建时间' },
+        { name: 'data.data[].updateTime', type: 'string', description: '更新时间' },
         { name: 'data.total', type: 'number', description: '总条数' },
       ],
       example: {
         code: '0',
         message: 'success',
         data: {
-          pageNum: 1,
-          pageSize: 10,
-          total: 1,
-          records: [
+          data: [
             {
               id: '019daaa0bc46770a851b0b31420da04e',
               dictCode: 'region',
@@ -430,13 +413,13 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
               parentId: '019daaa0bc4370188b6afea800ca4e03',
               itemValue: 'SH',
               sort: 10,
-              status: 1,
-              defaultFlag: false,
+              enabled: true,
               tagColor: '#1677ff',
               createTime: '2026-04-20T19:22:33',
               updateTime: '2026-04-20T19:22:33',
             },
           ],
+          total: 1,
         },
       },
     },
@@ -465,14 +448,13 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
         { name: 'data[].dictCode', type: 'string', description: '字典编码' },
         { name: 'data[].name', type: 'string', description: '字典项名称' },
         { name: 'data[].parentId', type: 'string', description: '父级字典项 ID' },
-        { name: 'data[].path', type: 'string', description: '树路径' },
         { name: 'data[].itemValue', type: 'string', description: '字典项值' },
         { name: 'data[].sort', type: 'number', description: '排序值' },
-        { name: 'data[].status', type: 'number', description: '状态' },
-        { name: 'data[].defaultFlag', type: 'boolean', description: '是否默认值' },
+        { name: 'data[].enabled', type: 'boolean', description: '是否启用' },
         { name: 'data[].tagColor', type: 'string', description: '标签颜色' },
-        { name: 'data[].extraJson', type: 'string', description: '扩展属性 JSON' },
         { name: 'data[].remark', type: 'string', description: '备注' },
+        { name: 'data[].createTime', type: 'string', description: '创建时间' },
+        { name: 'data[].updateTime', type: 'string', description: '更新时间' },
         { name: 'data[].children', type: 'array', description: '子节点列表' },
       ],
       example: {
@@ -484,13 +466,10 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
             dictCode: 'region',
             name: '中国',
             parentId: null,
-            path: '019daaa0bc4370188b6afea800ca4e03',
             itemValue: 'CN',
             sort: 0,
-            status: 1,
-            defaultFlag: false,
+            enabled: true,
             tagColor: null,
-            extraJson: '{"level":1}',
             remark: '国家',
             createTime: '2026-04-20T19:22:33',
             updateTime: '2026-04-20T19:22:33',
@@ -500,13 +479,10 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
                 dictCode: 'region',
                 name: '上海',
                 parentId: '019daaa0bc4370188b6afea800ca4e03',
-                path: '019daaa0bc4370188b6afea800ca4e03,019daaa0bc46770a851b0b31420da04e',
                 itemValue: 'SH',
                 sort: 10,
-                status: 1,
-                defaultFlag: false,
+                enabled: true,
                 tagColor: '#1677ff',
-                extraJson: '{"level":2}',
                 remark: '直辖市',
                 createTime: '2026-04-20T19:22:33',
                 updateTime: '2026-04-20T19:22:33',
