@@ -2,7 +2,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
 
 # Nebula Param 接口信息
 
-本文档基于 `nebula-param-local` 中当前已经实现的 `SystemParamController` 整理，对外接口入口统一位于 `/api/param/system-params/**`。
+本文档基于 `nebula-param-local` 中当前已经实现的 `SystemParamController` 整理，对外接口入口统一位于 `/api/param/**`。
 
 说明约定：
 
@@ -19,7 +19,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
   name="创建系统参数"
   description="创建一个新的系统参数，同时保存参数元数据、数据类型和校验规则。"
   method="POST"
-  path="/api/param/system-params"
+  path="/api/param"
   requestBody={{
     contentType: 'application/json',
     fields: [
@@ -86,7 +86,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
   name="更新系统参数"
   description="更新指定系统参数的元数据、校验规则和当前参数值。"
   method="PUT"
-  path="/api/param/system-params/{id}"
+  path="/api/param/{id}"
   requestBody={{
     contentType: 'application/json',
     fields: [
@@ -151,7 +151,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
   name="删除系统参数"
   description="删除指定系统参数。当前实现使用软删除，并清理按 key 读取缓存。"
   method="DELETE"
-  path="/api/param/system-params/{id}"
+  path="/api/param/{id}"
   responses={[
     {
       status: 200,
@@ -172,7 +172,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
   name="系统参数详情"
   description="根据系统参数 ID 查询详情。"
   method="GET"
-  path="/api/param/system-params/{id}"
+  path="/api/param/{id}"
   responses={[
     {
       status: 200,
@@ -219,7 +219,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
   name="按参数键查询详情"
   description="根据参数键查询参数详情，更适合配置中心页面按 key 定位某项参数。"
   method="GET"
-  path="/api/param/system-params/key/{paramKey}/detail"
+  path="/api/param/key/{paramKey}/detail"
   responses={[
     {
       status: 200,
@@ -253,7 +253,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
   name="分页查询系统参数"
   description="按参数键、名称、模块编码、数据类型和渲染开关等条件分页查询系统参数。"
   method="POST"
-  path="/api/param/system-params/page"
+  path="/api/param/page"
   requestBody={{
     contentType: 'application/json',
     fields: [
@@ -316,7 +316,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
   name="按模块编码查询参数列表"
   description="按模块编码加载一组可见参数，适合前端设置页渲染。当前结果会按 displayOrder 升序返回。"
   method="GET"
-  path="/api/param/system-params/module/{moduleCode}"
+  path="/api/param/module/{moduleCode}"
   responses={[
     {
       status: 200,
@@ -366,7 +366,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
   name="按参数键保存或更新系统参数"
   description="按 key 直接创建或更新一项系统参数，更适合模块内部程序化写入默认配置。"
   method="PUT"
-  path="/api/param/system-params/key/{paramKey}"
+  path="/api/param/key/{paramKey}"
   requestBody={{
     contentType: 'application/json',
     fields: [
@@ -408,7 +408,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
   name="批量更新参数值"
   description="一次提交多个参数值，服务端逐项校验并返回每项更新结果。适合后台设置页“保存全部设置”。"
   method="POST"
-  path="/api/param/system-params/batch-update-values"
+  path="/api/param/batch-update-values"
   requestBody={{
     contentType: 'application/json',
     fields: [
@@ -470,7 +470,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
   name="按参数键获取原始字符串值"
   description="根据参数键读取原始字符串值。若参数不存在，通常返回 null。"
   method="GET"
-  path="/api/param/system-params/key/{paramKey}"
+  path="/api/param/key/{paramKey}"
   responses={[
     {
       status: 200,
@@ -493,7 +493,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
   name="按参数键获取布尔值"
   description="根据参数键读取布尔型参数值。若底层值不是 true/false，将返回参数值不合法错误。"
   method="GET"
-  path="/api/param/system-params/key/{paramKey}/boolean"
+  path="/api/param/key/{paramKey}/boolean"
   responses={[
     {
       status: 200,
@@ -516,7 +516,7 @@ import ApiEndpoint from '@site/src/components/ApiEndpoint'
   name="按参数键获取整数值"
   description="根据参数键读取整数型参数值。若底层值无法解析为整数，将返回参数值不合法错误。"
   method="GET"
-  path="/api/param/system-params/key/{paramKey}/integer"
+  path="/api/param/key/{paramKey}/integer"
   responses={[
     {
       status: 200,
