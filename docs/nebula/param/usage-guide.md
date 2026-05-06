@@ -175,9 +175,9 @@ public class LoginPolicyService {
 
 推荐流程：
 
-1. 前端先按 `moduleCode` 调用 `/api/param/system-params/module/{moduleCode}`
+1. 前端先按 `moduleCode` 调用 `/api/param/module/{moduleCode}`
 2. 页面根据 `dataType`、`placeholder`、`renderEnabled` 等字段渲染表单
-3. 用户修改后，统一调用 `/api/param/system-params/batch-update-values`
+3. 用户修改后，统一调用 `/api/param/batch-update-values`
 4. 页面根据逐项结果提示保存成功或失败
 
 适合场景：

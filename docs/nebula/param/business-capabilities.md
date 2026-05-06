@@ -67,7 +67,7 @@
 当前接口：
 
 ```text
-GET /api/param/system-params/key/{paramKey}
+GET /api/param/key/{paramKey}
 ```
 
 它适合以下场景：
@@ -81,7 +81,7 @@ GET /api/param/system-params/key/{paramKey}
 当前接口：
 
 ```text
-GET /api/param/system-params/key/{paramKey}/boolean
+GET /api/param/key/{paramKey}/boolean
 ```
 
 适合场景：
@@ -101,7 +101,7 @@ GET /api/param/system-params/key/{paramKey}/boolean
 当前接口：
 
 ```text
-GET /api/param/system-params/key/{paramKey}/integer
+GET /api/param/key/{paramKey}/integer
 ```
 
 适合场景：
@@ -125,7 +125,7 @@ GET /api/param/system-params/key/{paramKey}/integer
 当前接口：
 
 ```text
-GET /api/param/system-params/module/{moduleCode}
+GET /api/param/module/{moduleCode}
 ```
 
 它适合以下场景：
@@ -157,7 +157,7 @@ GET /api/param/system-params/module/{moduleCode}
 当前接口：
 
 ```text
-POST /api/param/system-params/batch-update-values
+POST /api/param/batch-update-values
 ```
 
 请求体为一个列表，每项包括：

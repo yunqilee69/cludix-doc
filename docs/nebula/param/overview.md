@@ -134,28 +134,28 @@ nebula-param/
 当前本地控制器入口统一挂在：
 
 ```text
-/api/param/system-params
+/api/param
 ```
 
 主要包括以下接口分组：
 
 ### 5.1 参数维护
 
-- `POST /api/param/system-params`
-- `PUT /api/param/system-params/{id}`
-- `DELETE /api/param/system-params/{id}`
-- `GET /api/param/system-params/{id}`
-- `GET /api/param/system-params/key/{paramKey}/detail`
-- `PUT /api/param/system-params/key/{paramKey}`
-- `POST /api/param/system-params/page`
-- `GET /api/param/system-params/module/{moduleCode}`
-- `POST /api/param/system-params/batch-update-values`
+- `POST /api/param`
+- `PUT /api/param/{id}`
+- `DELETE /api/param/{id}`
+- `GET /api/param/{id}`
+- `GET /api/param/key/{paramKey}/detail`
+- `PUT /api/param/key/{paramKey}`
+- `POST /api/param/page`
+- `GET /api/param/module/{moduleCode}`
+- `POST /api/param/batch-update-values`
 
 ### 5.2 按键读取
 
-- `GET /api/param/system-params/key/{paramKey}`
-- `GET /api/param/system-params/key/{paramKey}/boolean`
-- `GET /api/param/system-params/key/{paramKey}/integer`
+- `GET /api/param/key/{paramKey}`
+- `GET /api/param/key/{paramKey}/boolean`
+- `GET /api/param/key/{paramKey}/integer`
 
 其中：
 
