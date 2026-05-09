@@ -165,12 +165,29 @@ docker compose version
 docker info | grep -E "containerd|runc"
 ```
 
-如需当前用户免 `sudo` 使用 Docker：
+如需当前用户免 `sudo` 使用 Docker（二进制离线安装通常需手动补齐）：
 
 ```bash
+# 1) 创建 docker 组（若不存在）
+getent group docker >/dev/null || sudo groupadd docker
+
+# 2) 将当前用户加入 docker 组
 sudo usermod -aG docker $USER
+
+# 3) 确保 docker.sock 允许 docker 组访问
+sudo chown root:docker /var/run/docker.sock
+sudo chmod 660 /var/run/docker.sock
+
+# 4) 重新登录使组成员关系生效
 su - $USER
+# 或者退出后重新登录 SSH 会话
 ```
+
+说明：
+
+- `/var/run/docker.sock` 是 `dockerd` 的 Unix Socket，是否可免 `sudo` 取决于该 socket 的属组与权限。
+- 若重启 Docker 后 socket 权限被覆盖，请检查 `dockerd` 启动参数或 systemd 服务配置，确保 socket 以 `root:docker` 和 `0660` 创建。
+- `docker` 组具备较高主机权限，仅应授予受信任用户。
 
 ## 8. 参考链接
 
