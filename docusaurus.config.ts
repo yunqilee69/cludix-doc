@@ -81,22 +81,38 @@ const config: Config = {
           label: "Nebula"
         },
         {
-          type: "docSidebar",
-          sidebarId: 'developmentSidebar',
+          type: "dropdown",
+          label: "教程",
           position: "right",
-          label: "开发"
+          items: [
+            { label: "Linux", to: "/docs/tutorials/linux/" },
+            { label: "Windows", to: "/docs/tutorials/windows/" },
+            { label: "macOS", to: "/docs/tutorials/macos/" },
+            { label: "Docker", to: "/docs/tutorials/docker/" },
+            { label: "Kubernetes", to: "/docs/tutorials/k8s/" },
+            { label: "CI/CD", to: "/docs/tutorials/ci/" },
+            { label: "Java", to: "/docs/tutorials/java/" },
+            { label: "数据库", to: "/docs/tutorials/database/" },
+            { label: "网络", to: "/docs/tutorials/network/" },
+            { label: "其他", to: "/docs/tutorials/other/" },
+          ],
         },
         {
-          type: "docSidebar",
-          sidebarId: 'softwareSidebar',
+          type: "dropdown",
+          label: "踩坑",
           position: "right",
-          label: "软件"
-        },
-        {
-          type: "docSidebar",
-          sidebarId: 'operationsSidebar',
-          position: "right",
-          label: "运维"
+          items: [
+            { label: "Linux", to: "/docs/troubleshooting/linux/" },
+            { label: "Windows", to: "/docs/troubleshooting/windows/" },
+            { label: "macOS", to: "/docs/troubleshooting/macos/" },
+            { label: "Docker", to: "/docs/troubleshooting/docker/" },
+            { label: "Kubernetes", to: "/docs/troubleshooting/k8s/" },
+            { label: "CI/CD", to: "/docs/troubleshooting/ci/" },
+            { label: "Java", to: "/docs/troubleshooting/java/" },
+            { label: "数据库", to: "/docs/troubleshooting/database/" },
+            { label: "网络", to: "/docs/troubleshooting/network/" },
+            { label: "其他", to: "/docs/troubleshooting/other/" },
+          ],
         },
       ],
     },
