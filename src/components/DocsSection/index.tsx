@@ -36,8 +36,8 @@ const docsItems: DocItem[] = [
   },
   {
     id: '3',
-    title: '软件安装',
-    description: '包管理器和工具软件安装文档。',
+    title: '软件',
+    description: '包管理器和工具软件文档。',
     tags: ['安装', '工具'],
     permalink: '/docs/software',
     icon: <FileTextOutlined style={{ fontSize: '32px', color: '#4facfe' }} />,

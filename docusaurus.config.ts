@@ -90,7 +90,7 @@ const config: Config = {
           type: "docSidebar",
           sidebarId: 'softwareSidebar',
           position: "right",
-          label: "软件安装"
+          label: "软件"
         },
         {
           type: "docSidebar",
