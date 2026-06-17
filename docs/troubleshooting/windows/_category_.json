@@ -1,0 +1,9 @@
+{
+  "label": "Windows",
+  "position": 2,
+  "link": {
+    "type": "doc",
+    "id": "troubleshooting/windows/index"
+  }
+}
+

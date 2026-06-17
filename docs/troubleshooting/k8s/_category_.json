@@ -1,0 +1,9 @@
+{
+  "label": "Kubernetes",
+  "position": 5,
+  "link": {
+    "type": "doc",
+    "id": "troubleshooting/k8s/index"
+  }
+}
+
