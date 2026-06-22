@@ -1,35 +1,22 @@
----
-title: Bifrost Docker Compose 配置
----
 # Bifrost AI Gateway
 
-Bifrost 是一个高性能 AI 网关，统一访问 15+ LLM 提供商（OpenAI、Anthropic、AWS Bedrock、Google Vertex、Azure、Cohere、Mistral、Ollama、Groq 等），通过单一 OpenAI 兼容 API 提供服务。本文提供 Bifrost 的配置示例与配置原因说明，遵循本目录统一规范（单应用 compose + 复用 `app-net`）。
+Bifrost 是一个高性能 AI 网关，统一访问 15+ LLM 提供商（OpenAI、Anthropic、AWS Bedrock、Google Vertex、Azure、Cohere、Mistral、Ollama、Groq 等），通过单一 OpenAI 兼容 API 提供服务。本文提供 Bifrost 的配置示例与配置原因说明。
 
 ## 1. 目录与挂载约定
 
 ```text
-/app
-├─ docker-compose.bifrost.yml
-└─ bifrost/
-   └─ data/
+/app/bifrost/
+├─ docker-compose.yml
+└─ data/
 ```
 
 说明：
 
 - `data`：Bifrost 配置数据、请求日志、语义缓存持久化目录
 
-## 2. 目录权限设置
+## 2. Compose 配置示例
 
-Bifrost 官方镜像默认以 root 运行，无需特殊权限设置。创建目录即可：
-
-```bash
-# 创建目录
-mkdir -p /app/bifrost/data
-```
-
-## 3. Compose 配置示例
-
-`/app/docker-compose.bifrost.yml`：
+`/app/bifrost/docker-compose.yml`：
 
 ```yaml
 services:
@@ -42,32 +29,25 @@ services:
     environment:
       - TZ=Asia/Shanghai
     volumes:
-      - /app/bifrost/data:/app/data
+      - ./data:/app/data
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 30s
-    networks:
-      - app-net
-
-networks:
-  app-net:
-    external: true
 ```
 
 配置原因：
 
-- 复用 `app-net`，业务容器可通过容器名直接访问 Bifrost
 - 数据目录挂载，确保配置和缓存持久化，容器重建后不丢失
 - 增加 `healthcheck`，便于在编排层判断 Bifrost 是否可用
 
-## 4. Provider 配置（基于 config.json 初始化）
+## 3. Provider 配置（基于 config.json 初始化）
 
 推荐使用 `config.json + config_store` 进行首次引导初始化，再通过 Web UI 或 HTTP API 持久化修改配置。
 
-### 4.1 初始化文件示例（OpenAI 兼容上游）
+### 3.1 初始化文件示例（OpenAI 兼容上游）
 
 在宿主机创建 `/app/bifrost/data/config.json`（容器内对应 `/app/data/config.json`）：
 
@@ -112,7 +92,7 @@ networks:
 }
 ```
 
-### 4.2 配置模式与常见坑点
+### 3.2 配置模式与常见坑点
 
 Bifrost 有两种配置模式，不能混用：
 

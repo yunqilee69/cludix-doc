@@ -1,12 +1,9 @@
----
-title: DeerFlow Docker 部署指南
----
 # DeerFlow
 
-DeerFlow 是字节跳动开源的 super agent harness，集成了前端、Gateway API、LangGraph、Sandbox、Skills 与 Sub-Agent 能力。它的 Docker 方案不是“单容器 + 单个 compose 文件”模式，而是官方维护的一套多服务编排，因此本文优先遵循官方仓库的 Docker 工作流，而不是强行改造成本目录里常见的单应用 `app-net` 模板。
+DeerFlow 是字节跳动开源的 super agent harness，集成了前端、Gateway API、LangGraph、Sandbox、Skills 与 Sub-Agent 能力。它的 Docker 方案不是"单容器 + 单个 compose 文件"模式，而是官方维护的一套多服务编排，因此本文优先遵循官方仓库的 Docker 工作流。
 
 :::warning
-DeerFlow **不直接适用** 本仓库常见的单应用 Docker 规范：默认不使用 `app-net`、`group_add`、`/app/docker-compose.<app>.yml` 这套约定，除非你后续自行二次改造。部署时请优先按官方仓库提供的 `make docker-start` / `make up` 工作流执行。
+DeerFlow **不直接适用** 本仓库常见的单应用 Docker 规范：默认不使用单目录 docker-compose.yml 模式，除非你后续自行二次改造。部署时请优先按官方仓库提供的 `make docker-start` / `make up` 工作流执行。
 :::
 
 ## 1. 部署方式说明

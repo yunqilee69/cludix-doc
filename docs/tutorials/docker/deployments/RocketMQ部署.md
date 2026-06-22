@@ -1,22 +1,18 @@
----
-title: RocketMQ Docker Compose 配置
----
 # RocketMQ
 
-本文提供 RocketMQ 的配置示例与配置原因说明，遵循本目录统一规范（单应用 compose + 复用 `app-net`）。
+本文提供 RocketMQ 的配置示例与配置原因说明。
 
 ## 1. 目录与挂载约定
 
 ```text
-/app
-├─ docker-compose.rocketmq.yml
-└─ rocketmq/
-   ├─ broker/
-   │  ├─ conf/
-   │  ├─ logs/
-   │  └─ store/
-   └─ namesrv/
-      └─ logs/
+/app/rocketmq/
+├─ docker-compose.yml
+├─ broker/
+│  ├─ conf/
+│  ├─ logs/
+│  └─ store/
+└─ namesrv/
+   └─ logs/
 ```
 
 说明：
@@ -26,21 +22,9 @@ title: RocketMQ Docker Compose 配置
 - `broker/store`：消息存储目录，容器重建后消息不丢失
 - `namesrv/logs`：NameServer 日志目录，便于排障
 
-## 2. 目录权限设置
+## 2. Compose 配置示例
 
-RocketMQ 官方镜像默认以 root 运行，无需特殊权限设置。创建目录即可：
-
-```bash
-# 创建目录
-mkdir -p /app/rocketmq/{broker/{conf,logs,store},namesrv/logs}
-
-# 创建 broker 配置文件
-touch /app/rocketmq/broker/conf/broker.conf
-```
-
-## 3. Compose 配置示例
-
-`/app/docker-compose.rocketmq.yml`：
+`/app/rocketmq/docker-compose.yml`：
 
 ```yaml
 services:
@@ -54,15 +38,13 @@ services:
     environment:
       TZ: Asia/Shanghai
     volumes:
-      - /app/rocketmq/namesrv/logs:/home/rocketmq/logs
+      - ./namesrv/logs:/home/rocketmq/logs
     healthcheck:
       test: ["CMD", "sh", "-c", "nc -z localhost 9876"]
       interval: 30s
       timeout: 20s
       retries: 3
       start_period: 40s
-    networks:
-      - app-net
 
   rocketmq-broker:
     image: apache/rocketmq:5.3.2
@@ -79,21 +61,15 @@ services:
       NAMESRV_ADDR: rocketmq-namesrv:9876
       TZ: Asia/Shanghai
     volumes:
-      - /app/rocketmq/broker/conf/broker.conf:/home/rocketmq/rocketmq-5.3.2/conf/broker.conf:ro
-      - /app/rocketmq/broker/logs:/home/rocketmq/logs
-      - /app/rocketmq/broker/store:/home/rocketmq/store
+      - ./broker/conf/broker.conf:/home/rocketmq/rocketmq-5.3.2/conf/broker.conf:ro
+      - ./broker/logs:/home/rocketmq/logs
+      - ./broker/store:/home/rocketmq/store
     healthcheck:
       test: ["CMD", "sh", "-c", "nc -z localhost 10911"]
       interval: 30s
       timeout: 20s
       retries: 3
       start_period: 60s
-    networks:
-      - app-net
-
-networks:
-  app-net:
-    external: true
 ```
 
 配置原因：
@@ -101,10 +77,9 @@ networks:
 - NameServer 与 Broker 拆分，符合 RocketMQ 基础架构
 - 通过容器名 `rocketmq-namesrv:9876` 直连 NameServer，简化服务发现
 - Broker 日志与消息存储独立挂载，便于监控、备份和容量管理
-- 复用 `app-net`，便于业务容器直连 MQ 服务
 - 增加 `healthcheck`，可快速识别 NameServer/Broker 端口可用状态
 
-## 4. Broker 配置示例
+## 3. Broker 配置示例
 
 `/app/rocketmq/broker/conf/broker.conf`：
 
@@ -116,29 +91,24 @@ deleteWhen=04
 fileReservedTime=48
 brokerRole=ASYNC_MASTER
 flushDiskType=ASYNC_FLUSH
-autoCreateTopicEnable=true
-listenPort=10911
-namesrvAddr=rocketmq-namesrv:9876
+brokerIP1=<宿主机IP>
 ```
 
 配置原因：
 
-- 单机场景使用 `ASYNC_MASTER`，兼顾可用性与资源消耗
-- 设置 `fileReservedTime` 控制消息文件保留时长，避免磁盘无限增长
-- 显式声明 `namesrvAddr`，保证 Broker 启动后可注册到 NameServer
+- `brokerIP1` 必须显式设置为宿主机 IP，否则客户端无法正确连接 Broker
+- `ASYNC_MASTER` + `ASYNC_FLUSH` 是单机部署的常见组合，兼顾性能与可靠性
 
-## 5. 常用命令
+## 4. 常用命令
 
 ```bash
 # 启动 RocketMQ
-docker compose -f /app/docker-compose.rocketmq.yml up -d
+cd /app/rocketmq && docker compose up -d
 
 # 关闭 RocketMQ
-docker compose -f /app/docker-compose.rocketmq.yml down
+cd /app/rocketmq && docker compose down
 
-# 查看 Broker 日志
+# 查看容器日志
+docker logs -f rocketmq-namesrv
 docker logs -f rocketmq-broker
 ```
-
-
-

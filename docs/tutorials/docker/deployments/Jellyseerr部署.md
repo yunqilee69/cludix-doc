@@ -1,38 +1,22 @@
----
-title: Jellyseerr Docker Compose 配置
----
 # Jellyseerr
 
-本文提供 Jellyseerr 媒体请求服务的部署示例、初始化步骤与配置原因说明，遵循本目录统一规范（单应用 compose + 复用 `app-net`）。
+本文提供 Jellyseerr 媒体请求服务的部署示例、初始化步骤与配置原因说明。
 
 也可以参考官方 Docker 文档：[Docker 部署](https://docs.jellyseerr.dev/getting-started/docker)
 
 ## 1. 目录与挂载约定
 
 ```text
-/app
-└─ jellyseerr/
-   ├─ docker-compose.yml
-   └─ config/
+/app/jellyseerr/
+├─ docker-compose.yml
+└─ config/
 ```
 
 说明：
 
 - `config`：Jellyseerr 配置目录，包含应用设置、SQLite 数据库和缓存数据
 
-## 2. 目录权限设置
-
-Jellyseerr 官方镜像默认使用 UID `1000` 运行：
-
-```bash
-# 创建目录
-mkdir -p /app/jellyseerr/config
-
-# 设置目录所有者为容器内用户
-sudo chown -R 1000:1000 /app/jellyseerr
-```
-
-## 3. Compose 配置示例
+## 2. Compose 配置示例
 
 `/app/jellyseerr/docker-compose.yml`：
 
@@ -43,7 +27,6 @@ services:
     container_name: jellyseerr
     init: true
     restart: unless-stopped
-    user: "1000:1000"
     environment:
       - LOG_LEVEL=info
       - TZ=Asia/Shanghai
@@ -58,12 +41,6 @@ services:
       timeout: 3s
       interval: 15s
       retries: 3
-    networks:
-      - app-net
-
-networks:
-  app-net:
-    external: true
 ```
 
 配置原因：
@@ -74,13 +51,12 @@ networks:
 - Compose 文件与数据目录放在同一个服务目录下，迁移、备份和日常维护更直接
 - 持久化 `/app/config`，并通过 `./config:/app/config` 与当前目录下的配置目录对应，确保容器重建后账号、请求记录和应用配置不会丢失
 - `healthcheck` 直接检查 `/api/v1/status`，便于 Docker 判断服务是否真正可用
-- 复用 `app-net`，方便后续与 Jellyfin、Sonarr、Radarr、Prowlarr 等服务互通
 
 :::tip
 官方更推荐使用独立子域名（例如 `jellyseerr.example.com`）做反向代理，而不是子路径。子路径方案通常需要额外改写代理规则，且并不属于官方推荐的标准部署方式。
 :::
 
-## 4. 首次初始化
+## 3. 首次初始化
 
 服务启动后，访问 `http://<SERVER_IP>:5055`（或你配置的实际域名）进入初始化向导，并完成以下设置：
 
@@ -89,9 +65,9 @@ networks:
 - 配置 Sonarr、Radarr 等下载管理服务，用于接收电影和剧集请求
 - 如使用反向代理访问，优先使用独立子域名，并在后台补充正确的 Application URL / 代理相关设置
 
-如果你的 Jellyfin、Sonarr、Radarr 都已接入同一个 `app-net`，通常可以直接在 Jellyseerr 中填写容器名作为服务地址，例如 `http://jellyfin:8096`。
+如果你的 Jellyfin、Sonarr、Radarr 都在同一个宿主机上，通常可以在 Jellyseerr 中填写容器名或 `host.docker.internal` 作为服务地址。
 
-## 5. 常用命令
+## 4. 常用命令
 
 ```bash
 # 启动 Jellyseerr
@@ -107,7 +83,7 @@ cd /app/jellyseerr && docker compose logs -f jellyseerr
 docker inspect --format='{{json .State.Health}}' jellyseerr
 ```
 
-## 6. 访问服务
+## 5. 访问服务
 
 默认访问地址：`http://<SERVER_IP>:5055`
 

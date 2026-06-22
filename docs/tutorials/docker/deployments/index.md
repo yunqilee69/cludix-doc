@@ -1,44 +1,43 @@
----
-title: Docker 部署文档
----
-# Docker 部署文档
+# 容器部署
 
-本目录聚合各类基于 Docker Compose 的应用部署示例，同时包含少量遵循上游官方编排方式的特殊案例文档。
-
-部署前请先完成 [服务器初始化](/docs/tutorials/docker/server-init)。
-
-## 基础服务
-
-- [Nginx 部署示例](./Nginx部署)
-- [MySQL 部署示例](./MySQL部署)
-- [PostgreSQL 17 部署示例](./PostgreSQL17部署)
-- [Redis 部署示例](./Redis部署)
+本目录收录各类常用服务的 Docker Compose 部署文档，统一遵循 [Docker 规范](../index.md) 中的单应用 compose 模式。
 
 ## 中间件
 
-- [Nacos 部署示例](./Nacos部署)
-- [RocketMQ 部署示例](./RocketMQ部署)
-- [Milvus 部署示例](./Milvus部署)
+| 服务 | 说明 |
+| --- | --- |
+| [MySQL](./MySQL部署) | 关系型数据库 |
+| [PostgreSQL 17](./PostgreSQL17部署) | 关系型数据库 |
+| [Redis](./Redis部署) | 缓存与消息队列 |
+| [Nacos](./Nacos部署) | 服务注册与配置中心 |
+| [RocketMQ](./RocketMQ部署) | 消息队列 |
+| [Milvus](./Milvus部署) | 向量数据库 |
 
-## CI/CD
+## 网关与代理
 
-- [Jenkins 部署示例](./Jenkins部署)
-- [Filebrowser 部署示例](./Filebrowser部署)
-- [Portainer 部署示例](./Portainer部署)
+| 服务 | 说明 |
+| --- | --- |
+| [Nginx](./Nginx部署) | 反向代理与静态资源服务 |
+| [NewAPI](./NewAPI部署) | 大模型统一网关 |
+| [Bifrost](./Bifrost部署) | AI 网关 |
+
+## 运维工具
+
+| 服务 | 说明 |
+| --- | --- |
+| [Portainer](./Portainer部署) | Docker 管理面板 |
+| [Jenkins](./Jenkins部署) | CI/CD 服务器 |
+| [Filebrowser](./Filebrowser部署) | 文件管理器 |
 
 ## 媒体服务
 
-- [Jellyfin 部署示例](./Jellyfin部署)
-- [Jellyseerr 部署示例](./Jellyseerr部署)
+| 服务 | 说明 |
+| --- | --- |
+| [Jellyfin](./Jellyfin部署) | 媒体服务器 |
+| [Jellyseerr](./Jellyseerr部署) | 媒体请求管理 |
 
-## AI 网关
+## AI 应用
 
-- [NewAPI 部署示例](./NewAPI部署)
-- [Bifrost 部署示例](./Bifrost部署)
-
-## 特殊案例
-
-- [DeerFlow Docker 部署指南](./DeerFlow部署) - 遵循官方仓库 Docker 工作流，不适用本目录通用规范
-
-
-
+| 服务 | 说明 |
+| --- | --- |
+| [DeerFlow](./DeerFlow部署) | Super Agent Harness（字节跳动开源） |

@@ -1,41 +1,24 @@
----
-title: Portainer Docker Compose 配置
----
 # Portainer
 
-Portainer 是一个常见的 Docker 管理面板，提供容器、镜像、卷、网络、Compose Stack 等可视化管理能力。本文提供基于 Docker Compose 的部署示例、初始化步骤与配置原因说明，遵循本目录统一规范（单应用 compose + 复用 `app-net`）。
+Portainer 是一个常见的 Docker 管理面板，提供容器、镜像、卷、网络、Compose Stack 等可视化管理能力。本文提供基于 Docker Compose 的部署示例、初始化步骤与配置原因说明。
 
 也可以参考官网的部署步骤：[Install Portainer CE with Docker on Linux](https://docs.portainer.io/start/install-ce/server/docker/linux)
 
 ## 1. 目录与挂载约定
 
 ```text
-/app
-├─ docker-compose.portainer.yml
-└─ portainer/
-   └─ data/
+/app/portainer/
+├─ docker-compose.yml
+└─ data/
 ```
 
 说明：
 
 - `data`：Portainer 持久化数据目录，用于保存管理员账号、环境配置、Endpoint 信息、证书及其他运行数据
 
-## 2. 目录权限设置
+## 2. Compose 配置示例
 
-Portainer 官方镜像通常以 root 身份访问 Docker Socket 和数据目录，一般无需额外指定 UID:GID。创建目录即可：
-
-```bash
-# 创建目录
-mkdir -p /app/portainer/data
-```
-
-:::tip
-Portainer 需要挂载 `/var/run/docker.sock` 才能直接管理当前宿主机的 Docker 环境。这相当于授予容器较高的宿主机控制权限，因此建议仅在可信环境中部署，并限制面板访问来源。
-:::
-
-## 3. Compose 配置示例
-
-`/app/docker-compose.portainer.yml`：
+`/app/portainer/docker-compose.yml`：
 
 ```yaml
 services:
@@ -48,13 +31,7 @@ services:
       - "8000:8000"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /app/portainer/data:/data
-    networks:
-      - app-net
-
-networks:
-  app-net:
-    external: true
+      - ./data:/data
 ```
 
 配置原因：
@@ -64,20 +41,21 @@ networks:
 - `8000` 用于 Edge Agent 隧道能力；如果你只管理本机或普通 Docker 主机，也可以移除该端口映射
 - 挂载 `/var/run/docker.sock` 后，Portainer 可以直接管理当前宿主机上的 Docker 资源
 - 数据目录挂载到 `/data`，确保容器重建后初始化信息和管理配置不会丢失
-- 复用 `app-net`，便于后续与 Nginx、反向代理、监控或其他业务容器协同
 
 :::tip
+Portainer 需要挂载 `/var/run/docker.sock` 才能直接管理当前宿主机的 Docker 环境。这相当于授予容器较高的宿主机控制权限，因此建议仅在可信环境中部署，并限制面板访问来源。
+
 如果你明确不使用 Edge Agent，可将 Compose 中的 `8000:8000` 删除，以减少不必要的对外暴露端口。
 :::
 
-## 4. 启动与初始化
+## 3. 启动与初始化
 
 ```bash
 # 启动 Portainer
-docker compose -f /app/docker-compose.portainer.yml up -d
+cd /app/portainer && docker compose up -d
 
 # 查看容器状态
-docker compose -f /app/docker-compose.portainer.yml ps
+cd /app/portainer && docker compose ps
 
 # 查看启动日志
 docker logs -f portainer
@@ -97,7 +75,7 @@ https://<服务器IP>:9443
 - 设置管理员密码（建议使用强密码）
 - 选择要管理的环境，单机部署通常直接选择本地 Docker 环境即可
 
-## 5. 可选：自定义 SSL 证书
+## 4. 可选：自定义 SSL 证书
 
 如果你希望在 Portainer 容器内直接使用自己的证书，可增加证书目录挂载，并为容器追加启动参数：
 

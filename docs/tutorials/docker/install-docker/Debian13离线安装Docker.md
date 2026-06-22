@@ -1,5 +1,6 @@
 ---
 title: Debian 13 离线安装 Docker
+tags: [docker, network]
 ---
 # Debian 13 离线安装 Docker / Docker Compose（二进制）
 
@@ -192,6 +193,10 @@ su - $USER
 - Docker 二进制安装说明：`https://docs.docker.com/engine/install/binaries/`
 - Docker Compose 插件安装说明：`https://docs.docker.com/compose/install/linux/`
 - Docker Compose Standalone（仅兼容场景）：`https://docs.docker.com/compose/install/standalone/`
+
+## 9. 相关文档
+
+- [Docker 配置](./docker-config) - 镜像源和自建 HTTP 仓库配置
 
 
 

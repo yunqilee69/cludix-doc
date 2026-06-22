@@ -1,22 +1,18 @@
----
-title: Milvus Docker Compose 配置
----
 # Milvus
 
-本文提供 Milvus 向量数据库的配置示例与配置原因说明，遵循本目录统一规范（单应用 compose + 复用 `app-net`）。
+本文提供 Milvus 向量数据库的配置示例与配置原因说明。
 
 也可以参考官网的部署步骤：[Docker 部署](https://milvus.io/docs/zh/configure-docker.md?tab=component)
 
 ## 1. 目录与挂载约定
 
 ```text
-/app
-├─ docker-compose.milvus.yml
-└─ milvus/
-   ├─ etcd/
-   ├─ minio/
-   ├─ milvus/
-   └─ user.yaml
+/app/milvus/
+├─ docker-compose.yml
+├─ etcd/
+├─ minio/
+├─ milvus/
+└─ user.yaml
 ```
 
 说明：
@@ -26,19 +22,7 @@ title: Milvus Docker Compose 配置
 - `milvus`：Milvus 数据目录
 - `user.yaml`：Milvus 自定义配置文件
 
-## 2. 目录权限设置
-
-Milvus 及其依赖组件（etcd、minio）官方镜像默认以 root 运行，无需特殊权限设置。创建目录即可：
-
-```bash
-# 创建目录
-mkdir -p /app/milvus/{etcd,minio,milvus}
-
-# 创建配置文件目录（可选）
-touch /app/milvus/user.yaml
-```
-
-## 3. 配置文件说明
+## 2. 配置文件说明
 
 Milvus 支持增量配置，即优先使用用户提供的配置文件。当遇到配置项时，优先使用用户自定义配置，其次才使用 Milvus 的默认配置。
 
@@ -73,9 +57,9 @@ COMMON_SECURITY_DEFAULT_ROOT_PASSWORD: nebula
 环境变量对大小写不敏感，推荐使用全大写格式。对于复杂配置，建议直接使用 `user.yaml` 文件。
 :::
 
-## 4. Compose 配置示例
+## 3. Compose 配置示例
 
-`/app/docker-compose.milvus.yml`：
+`/app/milvus/docker-compose.yml`：
 
 ```yaml
 services:
@@ -88,15 +72,13 @@ services:
       - ETCD_QUOTA_BACKEND_BYTES=4294967296
       - ETCD_SNAPSHOT_COUNT=50000
     volumes:
-      - /app/milvus/etcd:/etcd
+      - ./etcd:/etcd
     command: etcd -advertise-client-urls=http://etcd:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
     healthcheck:
       test: ["CMD", "etcdctl", "endpoint", "health"]
       interval: 30s
       timeout: 20s
       retries: 3
-    networks:
-      - app-net
 
   minio:
     container_name: milvus-minio
@@ -105,30 +87,26 @@ services:
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin
     volumes:
-      - /app/milvus/minio:/minio_data
+      - ./minio:/minio_data
     command: minio server /minio_data --console-address ":9001"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
       timeout: 20s
       retries: 3
-    networks:
-      - app-net
 
-  standalone:
+  milvus:
     container_name: milvus-standalone
-    image: milvusdb/milvus:v2.6.3
+    image: milvusdb/milvus:v2.5.4
     command: ["milvus", "run", "standalone"]
     security_opt:
       - seccomp:unconfined
     environment:
       ETCD_ENDPOINTS: etcd:2379
       MINIO_ADDRESS: minio:9000
-      COMMON_SECURITY_AUTHORIZATIONENABLED: true
-      COMMON_SECURITY_DEFAULTROOTPASSWORD: nebula
     volumes:
-      - /app/milvus/milvus:/var/lib/milvus
-      - /app/milvus/user.yaml:/milvus/configs/user.yaml:ro
+      - ./milvus:/var/lib/milvus
+      - ./user.yaml:/milvus/configs/user.yaml:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9091/healthz"]
       interval: 30s
@@ -141,89 +119,36 @@ services:
     depends_on:
       - etcd
       - minio
-    networks:
-      - app-net
-
-  attu:
-    container_name: attu
-    image: zilliz/attu:latest
-    environment:
-      MILVUS_URL: standalone:19530
-    ports:
-      - "8000:3000"
-    depends_on:
-      - standalone
-    networks:
-      - app-net
-
-networks:
-  app-net:
-    external: true
 ```
 
 配置原因：
 
-- 使用外部网络 `app-net`，便于与其他 compose 中的应用直接互通
-- 配置文件只读挂载，避免运行时意外篡改
-- 数据分离挂载（etcd、minio、milvus），便于备份和管理
-- 集成 Attu 可视化管理工具，便于日常运维
-- 增加 `healthcheck`，便于在编排层判断服务何时真正可用
+- etcd、minio、milvus 拆分部署，符合官方推荐架构
+- 通过容器名直连 etcd 和 minio，简化服务发现
+- 数据目录独立挂载，便于备份和容量管理
+- 增加 `healthcheck`，可在编排层判断各组件是否可用
 
-## 5. 服务说明
-
-### Milvus Standalone
-
-单机版 Milvus 向量数据库服务，端口映射：
-
-- `19530`：Milvus gRPC 服务端口
-- `9091`：健康检查和 metrics 端点
-
-### Attu
-
-Milvus 的可视化管理工具，提供直观的 Web 界面来管理集合、数据和索引。
-
-### Etcd
-
-分布式键值存储，用于 Milvus 的元数据管理。
-
-### MinIO
-
-对象存储服务，用于存储 Milvus 的数据文件。
-
-## 6. 常用命令
+## 4. 常用命令
 
 ```bash
 # 启动 Milvus
-docker compose -f /app/docker-compose.milvus.yml up -d
+cd /app/milvus && docker compose up -d
 
 # 关闭 Milvus
-docker compose -f /app/docker-compose.milvus.yml down
+cd /app/milvus && docker compose down
 
 # 查看容器日志
 docker logs -f milvus-standalone
 ```
 
-## 7. 访问服务
+## 5. 访问服务
 
-- **Milvus 服务**：`localhost:19530`
-- **Attu 管理界面**：http://localhost:8000
-- **健康检查端点**：http://localhost:9091/healthz
+默认访问地址：`http://<服务器IP>:19530`
 
-## 8. 常见问题
+Attu 是 Milvus 官方可视化管理工具，可通过 Docker 单独部署：
 
-### 修改默认密码
+```bash
+docker run -d --name attu -p 3000:3000 -e MILVUS_URL=<服务器IP>:19530 zilliz/attu:latest
+```
 
-在 `docker-compose.milvus.yml` 中修改环境变量 `COMMON_SECURITY_DEFAULTROOTPASSWORD` 的值，或在 `user.yaml` 中修改 `defaultRootPassword`。
-
-### 数据持久化
-
-所有数据都存储在 `/app/milvus/` 目录下的子目录中，备份这些目录即可完成数据备份。
-
-## 9. 相关链接
-
-- [Milvus 官方文档](https://milvus.io/docs)
-- [Attu 管理工具](https://github.com/zilliztech/attu)
-- [系统配置参考](https://milvus.io/docs/zh/system_configuration.md)
-
-
-
+访问 `http://<服务器IP>:3000` 即可使用 Attu 管理 Milvus。

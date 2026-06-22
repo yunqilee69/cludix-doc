@@ -1,21 +1,17 @@
----
-title: Jellyfin Docker Compose 配置
----
 # Jellyfin
 
-本文提供 Jellyfin 媒体服务器的部署示例、初始化步骤与配置原因说明，遵循本目录统一规范（单应用 compose + 复用 `app-net`）。
+本文提供 Jellyfin 媒体服务器的部署示例、初始化步骤与配置原因说明。
 
 也可以参考官网的部署步骤：[Docker 部署](https://jellyfin.org/docs/general/installation/container/)
 
 ## 1. 目录与挂载约定
 
 ```text
-/app
-├─ docker-compose.jellyfin.yml
-└─ jellyfin/
-   ├─ config/
-   ├─ cache/
-   └─ media/
+/app/jellyfin/
+├─ docker-compose.yml
+├─ config/
+├─ cache/
+└─ media/
 ```
 
 说明：
@@ -24,25 +20,9 @@ title: Jellyfin Docker Compose 配置
 - `cache`：缓存和临时文件目录
 - `media`：媒体文件目录（可包含 movies、tv、music 等子目录，也可替换为其他宿主机媒体目录）
 
-## 2. 目录权限设置
+## 2. Compose 配置示例
 
-Jellyfin 官方镜像默认以特定用户运行。建议指定 UID:GID 并设置目录权限：
-
-```bash
-# 创建目录
-mkdir -p /app/jellyfin/{config,cache,media}
-
-# 设置目录所有者（使用你希望的用户 UID:GID）
-sudo chown -R 1000:1000 /app/jellyfin
-```
-
-:::tip
-`1000:1000` 是常见的第一个非 root 用户 UID。你可以根据实际需要修改为其他值，并在 compose 中同步修改 `user` 参数。
-:::
-
-## 3. Compose 配置示例
-
-`/app/docker-compose.jellyfin.yml`：
+`/app/jellyfin/docker-compose.yml`：
 
 ```yaml
 services:
@@ -50,34 +30,25 @@ services:
     image: jellyfin/jellyfin:10
     container_name: jellyfin
     restart: unless-stopped
-    user: "1000:1000"
     ports:
       - "8096:8096/tcp"
       - "7359:7359/udp"
     environment:
       - JELLYFIN_PublishedServerUrl=http://<SERVER_IP>:8096
     volumes:
-      - /app/jellyfin/config:/config
-      - /app/jellyfin/cache:/cache
+      - ./config:/config
+      - ./cache:/cache
       - type: bind
-        source: /app/jellyfin/media
+        source: ./media
         target: /media
         read_only: true
-    networks:
-      - app-net
-
-networks:
-  app-net:
-    external: true
 ```
 
 配置原因：
 
-- 默认使用端口映射 + `app-net`，与本目录其他服务保持一致，后续接反向代理或联动服务更方便
 - 镜像标签固定为大版本 `10`，可降低 `latest` 带来的不可预期升级风险；如需更严格控制，可进一步固定到小版本
 - `8096/tcp` 是 Web 访问端口，`7359/udp` 用于客户端自动发现
 - `JELLYFIN_PublishedServerUrl` 用于告诉客户端服务器对外访问地址，尤其适合内网穿透、反代或多网卡环境
-- `user: "1000:1000"` 指定容器运行用户，避免权限问题
 - 媒体目录使用 bind mount 且默认只读挂载，降低误删或误改媒体文件的风险
 
 :::tip
@@ -89,10 +60,10 @@ networks:
       - JELLYFIN_PublishedServerUrl=http://<SERVER_IP>:8096
 ```
 
-同时删除 `ports` 和 `networks` 配置。官方文档将主机网络模式视为可选项，常见用途是 DLNA；如果只是普通 Web 播放和局域网访问，默认桥接模式已经足够。
+同时删除 `ports` 配置。官方文档将主机网络模式视为可选项，常见用途是 DLNA；如果只是普通 Web 播放和局域网访问，默认桥接模式已经足够。
 :::
 
-## 4. 首次初始化
+## 3. 首次初始化
 
 服务启动后，访问 `http://<SERVER_IP>:8096`（或你配置的实际域名）进入初始化向导，并完成以下设置：
 
@@ -102,20 +73,20 @@ networks:
 
 如果需要挂载多个媒体目录，可继续追加多个只读挂载，例如 `/media2`、`/media3`，再在初始化向导中分别添加媒体库。
 
-## 5. 常用命令
+## 4. 常用命令
 
 ```bash
 # 启动 Jellyfin
-docker compose -f /app/docker-compose.jellyfin.yml up -d
+cd /app/jellyfin && docker compose up -d
 
 # 关闭 Jellyfin
-docker compose -f /app/docker-compose.jellyfin.yml down
+cd /app/jellyfin && docker compose down
 
 # 查看容器日志
 docker logs -f jellyfin
 ```
 
-## 6. 可选：开启硬件加速
+## 5. 可选：开启硬件加速
 
 如果宿主机已经配置好 Intel/AMD GPU 驱动，可在 compose 中追加设备映射：
 
