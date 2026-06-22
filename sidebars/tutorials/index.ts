@@ -4,6 +4,7 @@ import ciSidebar from './ci';
 import k8sSidebar from './k8s';
 import networkSidebar from './network';
 import otherSidebar from './other';
+import javaSidebar from './java';
 
 export {
   dockerSidebar,
@@ -12,4 +13,5 @@ export {
   k8sSidebar,
   networkSidebar,
   otherSidebar,
+  javaSidebar,
 };

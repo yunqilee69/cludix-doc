@@ -7,6 +7,7 @@ import {
   k8sSidebar,
   networkSidebar,
   otherSidebar,
+  javaSidebar,
 } from './tutorials';
 import {
   troubleshootingDockerSidebar,
@@ -24,6 +25,7 @@ const sidebars: SidebarsConfig = {
   tutorialsK8sSidebar: k8sSidebar,
   tutorialsNetworkSidebar: networkSidebar,
   tutorialsOtherSidebar: otherSidebar,
+  tutorialsJavaSidebar: javaSidebar,
   troubleshootingOverviewSidebar: [{ type: 'doc', id: 'troubleshooting/index' }],
   troubleshootingDockerSidebar: troubleshootingDockerSidebar,
   troubleshootingJavaSidebar: troubleshootingJavaSidebar,
