@@ -4,23 +4,23 @@ This website is built using [Docusaurus](https://docusaurus.io/), a modern stati
 
 ## Package Manager
 
-This project currently uses **npm** as the documented and verified package manager.
+This project uses **pnpm** as the package manager.
 
 Requirements:
 
 - Node.js `>=20.0`
-- npm (bundled with Node.js)
+- pnpm `>=9` (enable via `corepack enable` or `npm install -g pnpm`)
 
 ## Installation
 
 ```bash
-npm install
+pnpm install
 ```
 
 ## Local Development
 
 ```bash
-npm run start
+pnpm start
 ```
 
 This command starts a local development server and opens up a browser window. Most changes are reflected live without having to restart the server.
@@ -28,7 +28,7 @@ This command starts a local development server and opens up a browser window. Mo
 ## Build
 
 ```bash
-npm run build
+pnpm build
 ```
 
 This command generates static content into the `build` directory and can be served using any static contents hosting service.
@@ -36,7 +36,7 @@ This command generates static content into the `build` directory and can be serv
 ## Type Check
 
 ```bash
-npm run typecheck
+pnpm typecheck
 ```
 
 ## Deployment
@@ -44,18 +44,13 @@ npm run typecheck
 Using SSH:
 
 ```bash
-USE_SSH=true npm run deploy
+USE_SSH=true pnpm deploy
 ```
 
 Not using SSH:
 
 ```bash
-GIT_USER=<Your GitHub username> npm run deploy
+GIT_USER=<Your GitHub username> pnpm deploy
 ```
 
 If you are using GitHub pages for hosting, this command is a convenient way to build the website and push to the `gh-pages` branch.
-
-## Notes
-
-- The previous `yarn` commands were removed because the current environment and project state do not guarantee Yarn is installed.
-- If you still want to use Yarn locally, enable it explicitly with `corepack`, but the default supported workflow for this repository is now npm.

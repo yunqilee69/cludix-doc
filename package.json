@@ -2,7 +2,7 @@
   "name": "@cludix/doc",
   "version": "0.0.0",
   "private": true,
-  "packageManager": "npm@10.8.2",
+  "packageManager": "pnpm@9.15.9",
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
