@@ -47,6 +47,15 @@ const config: Config = {
           editUrl:
             "https://github.com/yunqilee69/cludix-doc/tree/master/",
         },
+        blog: {
+          path: "./blog",
+          routeBasePath: "blog",
+          blogTitle: "专题记录",
+          blogDescription: "记录跨多个工具、配置和系统的大型问题处理过程。",
+          showReadingTime: true,
+          editUrl:
+            "https://github.com/yunqilee69/cludix-doc/tree/master/",
+        },
         theme: {
           customCss: "./src/css/custom.css",
         },
@@ -72,6 +81,11 @@ const config: Config = {
       items: [
         {
           type: "search",
+          position: "right",
+        },
+        {
+          to: "/blog",
+          label: "专题",
           position: "right",
         },
         {
@@ -132,7 +146,7 @@ const config: Config = {
         hashed: true,
         // 搜索结果配置
         indexDocs: true,
-        indexBlog: false,
+        indexBlog: true,
         indexPages: true,
         // 搜索体验增强
         highlightSearchTermsOnTargetPage: true,
