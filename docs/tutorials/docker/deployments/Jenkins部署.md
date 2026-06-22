@@ -14,6 +14,21 @@
 
 - `data`：Jenkins 主目录，包含配置、任务、插件等所有数据
 
+### 目录权限
+
+`jenkins/jenkins:lts-jdk21` 镜像在容器内以 **UID 1000** 的 `jenkins` 用户运行（非 root）。挂载 `./data:/var/jenkins_home` 后，宿主机 `data/` 目录必须归属 UID 1000，否则容器内 jenkins 用户无写权限，启动时会报：
+
+```
+INSTALL WARNING: User: missing rw permissions on JENKINS_HOME: /var/jenkins_home
+Can not write to /var/jenkins_home/copy_reference_file.log. Wrong volume permissions?
+```
+
+首次启动前，在宿主机执行：
+
+```bash
+sudo chown -R 1000:1000 /app/jenkins/data
+```
+
 ## 2. Compose 配置示例
 
 `/app/jenkins/docker-compose.yml`：

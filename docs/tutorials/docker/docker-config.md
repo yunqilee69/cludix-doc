@@ -136,4 +136,4 @@ docker pull 192.168.100.100:80/sirmapp/mind-backend-test:latest
 ## 5. 相关文档
 
 - [Debian 系统安装 Docker](./install-docker/)
-- [Debian 13 离线安装 Docker](./Debian13离线安装Docker)
+- [Debian 13 离线安装 Docker](./install-docker/Debian13离线安装Docker)

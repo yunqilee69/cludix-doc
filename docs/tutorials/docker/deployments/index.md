@@ -29,6 +29,13 @@
 | [Jenkins](./Jenkins部署) | CI/CD 服务器 |
 | [Filebrowser](./Filebrowser部署) | 文件管理器 |
 
+## 镜像仓库
+
+| 服务 | 说明 |
+| --- | --- |
+| [Docker Registry](./DockerRegistry部署) | 轻量级私有镜像仓库 |
+| [Harbor](./Harbor部署) | 企业级镜像仓库平台 |
+
 ## 媒体服务
 
 | 服务 | 说明 |

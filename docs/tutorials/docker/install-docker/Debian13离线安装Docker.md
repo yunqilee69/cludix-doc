@@ -196,8 +196,7 @@ su - $USER
 
 ## 9. 相关文档
 
-- [Docker 配置](./docker-config) - 镜像源和自建 HTTP 仓库配置
-
+- [Docker 配置](../docker-config) - 镜像源和自建 HTTP 仓库配置
 
 
 

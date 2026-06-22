@@ -46,8 +46,18 @@ const dockerSidebar: SidebarConfig = [
       },
       {
         type: 'doc',
+        id: 'tutorials/docker/deployments/DockerRegistry部署',
+        label: 'Docker Registry',
+      },
+      {
+        type: 'doc',
         id: 'tutorials/docker/deployments/Filebrowser部署',
         label: 'Filebrowser',
+      },
+      {
+        type: 'doc',
+        id: 'tutorials/docker/deployments/Harbor部署',
+        label: 'Harbor',
       },
       {
         type: 'doc',
