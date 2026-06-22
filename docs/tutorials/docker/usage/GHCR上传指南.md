@@ -1,5 +1,6 @@
 ---
 title: GHCR 镜像上传指南
+tags: [docker, ghcr, tutorial]
 ---
 # GHCR 镜像上传指南
 

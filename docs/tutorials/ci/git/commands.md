@@ -1,5 +1,6 @@
 ---
 title: Git 常用命令
+tags: [git, tutorial]
 ---
 # Git 常用命令
 
