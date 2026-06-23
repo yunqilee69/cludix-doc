@@ -1,28 +1,34 @@
+---
+title: Docker Registry 部署
+date: 2026-06-23 15:00
+tags: [docker, deployment]
+---
+
 # Docker Registry
 
 Docker Registry 是 Docker 官方提供的镜像仓库服务，适合在内网或私有环境中保存业务镜像、离线交付镜像和缓存常用基础镜像。本文提供基于 Docker Compose 的单节点部署示例，并说明如何将其配置为 Docker 客户端可使用的镜像仓库源。
+
+> **相关文档**: 如果需要 Web 界面管理 Registry 镜像,可参考 [Docker Registry Browser 部署文档](DockerRegistryBrowser部署.md),提供镜像仓库浏览、标签查看和删除等功能。
 
 ## 1. 目录与挂载约定
 
 ```text
 /app/docker-registry/
 ├─ docker-compose.yml
-├─ config/
-│  └─ config.yml
-├─ auth/
-│  └─ htpasswd
+├─ config.yml
+├─ htpasswd
 └─ data/
 ```
 
 说明：
 
-- `config`：Registry 配置目录，用于固定监听地址、存储路径和删除策略
-- `auth`：基础认证文件目录，生产环境建议开启认证，避免任意用户推送镜像
+- `config.yml`：Registry 配置文件，用于固定监听地址、存储路径和删除策略
+- `htpasswd`：基础认证文件，生产环境建议开启认证，避免任意用户推送镜像
 - `data`：镜像层、清单和元数据的持久化目录，容器重建后镜像不会丢失
 
 ## 2. Registry 配置示例
 
-`/app/docker-registry/config/config.yml`：
+`/app/docker-registry/config.yml`：
 
 ```yaml
 version: 0.1
@@ -51,13 +57,11 @@ http:
 如果只在完全可信的隔离内网使用，可以临时不启用认证；生产环境建议创建 `htpasswd` 文件：
 
 ```bash
-mkdir -p /app/docker-registry/auth
-
 docker run --rm \
   --entrypoint htpasswd \
   httpd:2.4-alpine \
   -Bbn registry_user '请替换为强密码' \
-  > /app/docker-registry/auth/htpasswd
+  > /app/docker-registry/htpasswd
 ```
 
 说明：
@@ -83,8 +87,8 @@ services:
       REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
       REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
     volumes:
-      - ./config/config.yml:/etc/docker/registry/config.yml:ro
-      - ./auth:/auth:ro
+      - ./config.yml:/etc/docker/registry/config.yml:ro
+      - ./htpasswd:/auth/htpasswd:ro
       - ./data:/var/lib/registry
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:5000/v2/ || exit 1"]
@@ -98,12 +102,12 @@ services:
 
 - 使用 `registry:3`，这是当前 Docker Distribution/Registry v2 的常用镜像标签
 - 暴露 `5000` 端口，符合 Registry 默认访问端口习惯
-- `config.yml` 和 `auth` 使用只读挂载，避免容器运行时误改关键配置
+- `config.yml` 和 `htpasswd` 使用只读挂载，避免容器运行时误改关键配置
 - `data` 单独持久化，确保镜像数据不会随容器删除而丢失
 - 健康检查访问 `/v2/` 接口，可快速判断 Registry HTTP 服务是否可用
 
 :::tip
-如果不想启用基础认证，可删除 Compose 中的 `REGISTRY_AUTH*` 环境变量，并移除 `./auth:/auth:ro` 挂载。但无认证模式只建议用于临时测试或受防火墙严格限制的内网环境。
+如果不想启用基础认证，可删除 Compose 中的 `REGISTRY_AUTH*` 环境变量，并移除 `./htpasswd:/auth/htpasswd:ro` 挂载。但无认证模式只建议用于临时测试或受防火墙严格限制的内网环境。
 :::
 
 ## 5. 启动与验证
@@ -227,7 +231,7 @@ docker exec -it docker-registry registry garbage-collect /etc/docker/registry/co
 - 生产环境优先使用 HTTPS 域名访问，不建议长期使用明文 HTTP
 - 开启基础认证，并为推送账号设置强密码
 - 使用防火墙限制 `5000` 端口访问来源，避免 Registry 暴露到不可信网络
-- 定期备份 `/app/docker-registry/data` 和 `/app/docker-registry/auth/htpasswd`
+- 定期备份 `/app/docker-registry/data` 和 `/app/docker-registry/htpasswd`
 - 不建议使用会漂移的镜像标签作为业务镜像发布标签，生产镜像应使用明确版本号
 
 ## 11. 参考资料
