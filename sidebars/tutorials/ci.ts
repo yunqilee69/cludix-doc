@@ -19,6 +19,11 @@ const ciSidebar: SidebarConfig = [
         id: 'tutorials/ci/git/commands',
         label: 'Git 常用命令',
       },
+      {
+        type: 'doc',
+        id: 'tutorials/ci/git/git远程分支清理',
+        label: 'Git 远程分支清理',
+      },
     ],
   },
   {

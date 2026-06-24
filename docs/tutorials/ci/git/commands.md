@@ -101,6 +101,8 @@ git push origin --delete <branch-name>
 git fetch -p
 # 或
 git remote prune origin
+
+> 💡 **详细说明**：远程分支删除后本地仍显示的原因和完整解决方案，请参考 [Git 远程分支清理](./git远程分支清理)。
 ```
 
 ### 一键删除本地无用分支
