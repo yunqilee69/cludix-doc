@@ -9,6 +9,7 @@ Jenkins 是一个开源的自动化服务器，用于构建、测试和部署软
 
 - [安装 Jenkins](./install-jenkins/) - Jenkins 安装指南
 - [配置 SSH](./jenkins-ssh-config/) - Jenkins SSH 配置
+- [Publish Over SSH](./publish-over-ssh/) - Publish Over SSH 插件配置与使用
 - [部署示例](./jenkins-deploy/) - Jenkins 部署示例
 
 

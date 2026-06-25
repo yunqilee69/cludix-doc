@@ -61,6 +61,11 @@ const linuxSidebar: SidebarConfig = [
   },
   {
     type: 'doc',
+    id: 'tutorials/linux/用户与组管理',
+    label: '用户与组管理',
+  },
+  {
+    type: 'doc',
     id: 'tutorials/linux/服务器配置vnc',
     label: '服务器配置 VNC',
   },

@@ -49,6 +49,11 @@ const ciSidebar: SidebarConfig = [
         id: 'tutorials/ci/jenkins/jenkins-ssh-config/index',
         label: 'Jenkins SSH 配置',
       },
+      {
+        type: 'doc',
+        id: 'tutorials/ci/jenkins/publish-over-ssh/index',
+        label: 'Publish Over SSH',
+      },
     ],
   },
   {
