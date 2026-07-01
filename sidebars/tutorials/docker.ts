@@ -136,6 +136,11 @@ const dockerSidebar: SidebarConfig = [
     items: [
       {
         type: 'doc',
+        id: 'tutorials/docker/usage/DockerBuildx使用说明',
+        label: 'Docker Buildx 使用说明',
+      },
+      {
+        type: 'doc',
         id: 'tutorials/docker/usage/GHCR上传指南',
         label: 'GHCR 上传指南',
       },
