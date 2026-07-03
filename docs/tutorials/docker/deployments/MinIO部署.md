@@ -29,7 +29,7 @@ tags: [docker, storage, deployment]
 ```yaml
 services:
   minio:
-    image: pgsty/minio:latest
+    image: pgsty/minio:RELEASE.2026-06-18T00-00-00Z
     container_name: minio
     restart: unless-stopped
     ports:
