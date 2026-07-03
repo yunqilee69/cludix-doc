@@ -12,6 +12,7 @@
 | [Nacos](./Nacos部署) | 服务注册与配置中心 |
 | [RocketMQ](./RocketMQ部署) | 消息队列 |
 | [Milvus](./Milvus部署) | 向量数据库 |
+| [MinIO](./MinIO部署) | S3 兼容对象存储 |
 
 ## 网关与代理
 

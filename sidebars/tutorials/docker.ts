@@ -86,6 +86,11 @@ const dockerSidebar: SidebarConfig = [
       },
       {
         type: 'doc',
+        id: 'tutorials/docker/deployments/MinIO部署',
+        label: 'MinIO',
+      },
+      {
+        type: 'doc',
         id: 'tutorials/docker/deployments/MySQL部署',
         label: 'MySQL',
       },
