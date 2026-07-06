@@ -61,6 +61,8 @@
     "spring-boot",
     "ghcr",
     "git",
-    "config"
+    "config",
+    "dufs",
+    "webdav"
   ]
 }

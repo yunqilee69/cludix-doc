@@ -46,6 +46,11 @@ const dockerSidebar: SidebarConfig = [
       },
       {
         type: 'doc',
+        id: 'tutorials/docker/deployments/Dufs部署',
+        label: 'Dufs',
+      },
+      {
+        type: 'doc',
         id: 'tutorials/docker/deployments/DockerRegistry部署',
         label: 'Docker Registry',
       },
