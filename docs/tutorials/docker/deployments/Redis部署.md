@@ -8,12 +8,14 @@
 /app/redis/
 ├─ docker-compose.yml
 ├─ data/
+├─ logs/
 └─ users.acl
 ```
 
 说明：
 
 - `data`：Redis 持久化数据目录（RDB/AOF）
+- `logs`：Redis 日志目录，便于问题定位
 - `users.acl`：Redis ACL 用户配置文件
 
 ## 2. ACL 配置文件
@@ -28,10 +30,12 @@ user default on >change_me ~* &* +@all
 
 - `default`：Redis 默认用户名
 - `on`：启用该用户
-- `>change_me`：设置密码，生产环境务必修改为强密码
-- `~*`：允许访问所有 key
-- `&*`：允许访问所有 Pub/Sub 频道
-- `+@all`：允许执行所有命令
+- `>change_me`：设置密码。**`>` 是 ACL 语法前缀，不可省略**，Redis 靠它区分密码与其他指令；省略会报 `Syntax error`
+- `~*`：允许访问所有 key。`~` 是 key pattern 前缀
+- `&*`：允许访问所有 Pub/Sub 频道。`&` 是 channel pattern 前缀
+- `+@all`：允许执行所有命令。`+` 是权限授予前缀，`@all` 表示所有命令类别
+
+> **注意**：ACL 文件必须使用 LF 换行（Unix 风格），不能是 CRLF（Windows 风格），否则 Redis 会报 `Syntax error`。创建文件时可使用 `printf 'user default on >change_me ~* &* +@all\n' > /app/redis/users.acl`，或在已有文件上执行 `sed -i 's/\r$//' /app/redis/users.acl` 转换行尾。
 
 ## 3. Compose 配置示例
 
@@ -45,9 +49,10 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
-    command: ["redis-server", "--appendonly", "yes", "--aclfile", "/etc/redis/users.acl"]
+    command: ["redis-server", "--appendonly", "yes", "--logfile", "/var/log/redis/redis.log", "--aclfile", "/etc/redis/users.acl"]
     volumes:
       - ./data:/data
+      - ./logs:/var/log/redis
       - ./users.acl:/etc/redis/users.acl:ro
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "change_me", "ping"]
