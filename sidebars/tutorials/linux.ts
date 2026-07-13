@@ -69,6 +69,11 @@ const linuxSidebar: SidebarConfig = [
     id: 'tutorials/linux/服务器配置vnc',
     label: '服务器配置 VNC',
   },
+  {
+    type: 'doc',
+    id: 'tutorials/linux/SSH免密登录',
+    label: 'SSH 免密登录',
+  },
 ];
 
 export default linuxSidebar;
