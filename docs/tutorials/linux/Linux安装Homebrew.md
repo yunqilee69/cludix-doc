@@ -1,5 +1,7 @@
 ---
 title: Linux 安装配置 Homebrew 指南
+date: 2026-07-21 15:30
+tags: [linux, installation, tutorial]
 ---
 # Linux 安装配置 Homebrew 指南
 
@@ -496,7 +498,6 @@ sudo apt install -y ca-certificates
 **文档版本：** v1.0
 **更新日期：** 2026-02-06
 **维护者：** 运维团队
-
 
 
 

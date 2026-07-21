@@ -63,6 +63,7 @@
     "git",
     "config",
     "dufs",
-    "webdav"
+    "webdav",
+    "harmonyos"
   ]
 }

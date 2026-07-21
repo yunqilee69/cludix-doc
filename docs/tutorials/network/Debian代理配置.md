@@ -1,5 +1,7 @@
 ---
 title: Debian 代理自动配置指南
+date: 2026-07-21 15:30
+tags: [debian, network, proxy, configuration]
 ---
 # Debian 代理自动配置指南
 
@@ -149,7 +151,6 @@ curl ifconfig.me
 ```bash
 proxy-status
 ```
-
 
 
 

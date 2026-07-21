@@ -1,5 +1,7 @@
 ---
 title: 有界并发 - Semaphore
+date: 2026-07-21 15:30
+tags: [java, concurrency, tutorial]
 ---
 # 有界并发 - Semaphore
 

@@ -1,5 +1,7 @@
 ---
 title: SSL 证书申请与 Nginx 配置指南
+date: 2026-07-21 15:30
+tags: [nginx, security, network, configuration]
 ---
 # SSL 证书申请与 Nginx 配置指南（acme.sh + DNS-01）
 
@@ -212,7 +214,6 @@ echo | openssl s_client -servername yunke.icu -connect yunke.icu:443 2>/dev/null
 - https://letsencrypt.org/docs/
 - https://nginx.org/en/docs/http/configuring_https_servers.html
 - https://ssl-config.mozilla.org/
-
 
 
 

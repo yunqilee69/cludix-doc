@@ -1,5 +1,7 @@
 ---
 title: MD文档转PDF
+date: 2026-07-21 15:30
+tags: [tutorial, guide, configuration]
 ---
 # 安装扩展
 
@@ -48,7 +50,6 @@ code, pre {
 :::info 提示
 也可以直接将css文件路径修改为绝对路径，这样md文档位置就不会有任何限制了
 :::
-
 
 
 

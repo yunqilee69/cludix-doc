@@ -1,5 +1,7 @@
 ---
 title: "Debian 12 笔记本合盖不休眠配置"
+date: 2026-07-21 15:30
+tags: [linux, debian, configuration]
 ---
 # Debian 12 笔记本合盖不休眠配置
 
@@ -115,7 +117,6 @@ LidSwitchIgnoreInhibited=yes
 ```
 
 这组配置已经实测有效，适合用作外接屏办公、下载机、开发机或轻量家用服务器。
-
 
 
 

@@ -1,5 +1,7 @@
 ---
 title: Rancher 部署指南
+date: 2026-07-21 15:30
+tags: [k8s, rancher, deployment]
 ---
 # 空白集群基础配置与 Rancher 部署指南（国内网络优先）
 
@@ -392,7 +394,6 @@ kubectl get pod -n nfs-provisioner -o wide
 - 确保其值为 `/etc/containerd/certs.d`
 - 重启 `containerd` 与 `kubelet`
 - 在报错节点用 `crictl pull` 实测拉取
-
 
 
 

@@ -1,5 +1,7 @@
 ---
 title: Helm Chart 打包与分享
+date: 2026-07-21 15:30
+tags: [k8s, deployment, tutorial]
 ---
 # 从零构建 Helm Chart 包并分享给他人
 
@@ -190,7 +192,6 @@ helm uninstall myapp -n demo
 ---
 
 如果需要，我可以再补一份适用于生产环境的 Chart 模板（含 Deployment、Service、Ingress、HPA、resources、探针配置和分环境 values 文件）。
-
 
 
 

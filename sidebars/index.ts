@@ -8,6 +8,7 @@ import {
   networkSidebar,
   otherSidebar,
   javaSidebar,
+  macosSidebar,
 } from './tutorials';
 import {
   troubleshootingDockerSidebar,
@@ -26,6 +27,7 @@ const sidebars: SidebarsConfig = {
   tutorialsNetworkSidebar: networkSidebar,
   tutorialsOtherSidebar: otherSidebar,
   tutorialsJavaSidebar: javaSidebar,
+  tutorialsMacosSidebar: macosSidebar,
   troubleshootingOverviewSidebar: [{ type: 'doc', id: 'troubleshooting/index' }],
   troubleshootingDockerSidebar: troubleshootingDockerSidebar,
   troubleshootingJavaSidebar: troubleshootingJavaSidebar,
