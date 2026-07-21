@@ -13,6 +13,7 @@ import {
 import {
   troubleshootingDockerSidebar,
   troubleshootingJavaSidebar,
+  troubleshootingOtherSidebar,
 } from './troubleshooting';
 
 export type SidebarConfig = SidebarsConfig[string];
@@ -31,6 +32,7 @@ const sidebars: SidebarsConfig = {
   troubleshootingOverviewSidebar: [{ type: 'doc', id: 'troubleshooting/index' }],
   troubleshootingDockerSidebar: troubleshootingDockerSidebar,
   troubleshootingJavaSidebar: troubleshootingJavaSidebar,
+  troubleshootingOtherSidebar: troubleshootingOtherSidebar,
 };
 
 export default sidebars;

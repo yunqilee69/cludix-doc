@@ -64,6 +64,7 @@
     "config",
     "dufs",
     "webdav",
-    "harmonyos"
+    "harmonyos",
+    "android"
   ]
 }
