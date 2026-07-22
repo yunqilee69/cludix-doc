@@ -31,6 +31,11 @@ const otherSidebar: SidebarConfig = [
     id: 'tutorials/other/uv-python/index',
     label: 'UV Python',
   },
+  {
+    type: 'doc',
+    id: 'tutorials/other/Bash与Zsh启动模式与配置文件',
+    label: 'Bash 与 Zsh 启动模式',
+  },
 ];
 
 export default otherSidebar;
