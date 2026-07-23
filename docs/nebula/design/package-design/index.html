@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="zh" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-nebula/design/package-design" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">Nebula 包设计 | 云星</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://yunqilee69.github.io/img/docusaurus-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://yunqilee69.github.io/img/docusaurus-social-card.jpg"><meta data-rh="true" property="og:url" content="https://yunqilee69.github.io/docs/nebula/design/package-design"><meta data-rh="true" property="og:locale" content="zh"><meta data-rh="true" name="docusaurus_locale" content="zh"><meta data-rh="true" name="docsearch:language" content="zh"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Nebula 包设计 | 云星"><meta data-rh="true" name="description" content="1. 设计目的"><meta data-rh="true" property="og:description" content="1. 设计目的"><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://yunqilee69.github.io/docs/nebula/design/package-design"><link data-rh="true" rel="alternate" href="https://yunqilee69.github.io/docs/nebula/design/package-design" hreflang="zh"><link data-rh="true" rel="alternate" href="https://yunqilee69.github.io/docs/nebula/design/package-design" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"设计说明","item":"https://yunqilee69.github.io/docs/nebula/design"},{"@type":"ListItem","position":2,"name":"Nebula 包设计","item":"https://yunqilee69.github.io/docs/nebula/design/package-design"}]}</script><link rel="alternate" type="application/rss+xml" href="/blog/rss.xml" title="云星 RSS Feed">
+<link rel="alternate" type="application/atom+xml" href="/blog/atom.xml" title="云星 Atom Feed"><link rel="stylesheet" href="/assets/css/styles.c4124d11.css">
+<script src="/assets/js/runtime~main.137d48a9.js" defer="defer"></script>
+<script src="/assets/js/main.825f6007.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")),document.documentElement.setAttribute("data-theme-choice",t||"system")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><link rel="preload" as="image" href="/img/logo.png"><div role="region" aria-label="跳到主要内容"><a class="skipToContent_db63" href="#__docusaurus_skipToContent_fallback">跳到主要内容</a></div><nav aria-label="主导航" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="切换导航栏" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/logo.png" alt="My Site Logo" class="themedComponent_h8q_ themedComponent--light_T97P"><img src="/img/logo.png" alt="My Site Logo" class="themedComponent_h8q_ themedComponent--dark_pG3C"></div><b class="navbar__title text--truncate">云星</b></a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbarSearchContainer_cQc8"><div class="navbar__search searchBarContainer_uP9J" dir="ltr"><input placeholder="搜索" aria-label="Search" class="navbar__search-input searchInput_DUs6" value=""><div class="loadingRing_d1U1 searchBarLoadingRing_UWur"><div></div><div></div><div></div><div></div></div></div></div><a class="navbar__item navbar__link" href="/blog">专题</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/nebula/auth">Nebula</a><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link">教程</a><ul class="dropdown__menu"><li><a class="dropdown__link" href="/docs/tutorials/linux/">Linux</a></li><li><a class="dropdown__link" href="/docs/tutorials/windows/">Windows</a></li><li><a class="dropdown__link" href="/docs/tutorials/macos/">macOS</a></li><li><a class="dropdown__link" href="/docs/tutorials/docker/">Docker</a></li><li><a class="dropdown__link" href="/docs/tutorials/k8s/">Kubernetes</a></li><li><a class="dropdown__link" href="/docs/tutorials/ci/">CI/CD</a></li><li><a class="dropdown__link" href="/docs/tutorials/java/">Java</a></li><li><a class="dropdown__link" href="/docs/tutorials/database/">数据库</a></li><li><a class="dropdown__link" href="/docs/tutorials/network/">网络</a></li><li><a class="dropdown__link" href="/docs/tutorials/other/">其他</a></li></ul></div><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link">踩坑</a><ul class="dropdown__menu"><li><a class="dropdown__link" href="/docs/troubleshooting/linux/">Linux</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/windows/">Windows</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/macos/">macOS</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/docker/">Docker</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/k8s/">Kubernetes</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/ci/">CI/CD</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/java/">Java</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/database/">数据库</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/network/">网络</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/other/">其他</a></li></ul></div><div class="toggle_e78C colorModeToggle_JRhw"><button class="clean-btn toggleButton_jaTG toggleButtonDisabled_Bzt3" type="button" disabled="" title="system mode" aria-label="切换浅色/暗黑模式（当前为system mode）"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_NHIS lightToggleIcon_cV2k"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_NHIS darkToggleIcon_Xmqk"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_NHIS systemToggleIcon_Q0Jw"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_dZTL"><div class="docsWrapper_CMoq"><button aria-label="回到顶部" class="clean-btn theme-back-to-top-button backToTopButton_lQ6J" type="button"></button><div class="docRoot_tSSZ"><aside class="theme-doc-sidebar-container docSidebarContainer_ds5n"><div class="sidebarViewport_jPS2"><div class="sidebar_OeBc"><nav aria-label="文档侧边栏" class="menu thin-scrollbar menu_Cas_"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_tA5m menu__link menu__link--sublist" href="/docs/nebula/auth"><span title="Nebula Auth 模块" class="categoryLinkLabel_sTtl">Nebula Auth 模块</span></a><button aria-label="展开侧边栏分类 &#x27;Nebula Auth 模块&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_tA5m menu__link menu__link--sublist menu__link--active" href="/docs/nebula/design"><span title="设计说明" class="categoryLinkLabel_sTtl">设计说明</span></a><button aria-label="折叠侧边栏分类 &#x27;设计说明&#x27;" aria-expanded="true" type="button" class="clean-btn menu__caret"></button></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/nebula/design/layered-design"><span title="Nebula 分层设计" class="linkLabel_Grs0">Nebula 分层设计</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/docs/nebula/design/package-design"><span title="Nebula 包设计" class="linkLabel_Grs0">Nebula 包设计</span></a></li></ul></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_tA5m menu__link menu__link--sublist" href="/docs/nebula/dict"><span title="Nebula Dict 模块" class="categoryLinkLabel_sTtl">Nebula Dict 模块</span></a><button aria-label="展开侧边栏分类 &#x27;Nebula Dict 模块&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_tA5m menu__link menu__link--sublist" href="/docs/nebula/frontend"><span title="Nebula Frontend 模块" class="categoryLinkLabel_sTtl">Nebula Frontend 模块</span></a><button aria-label="展开侧边栏分类 &#x27;Nebula Frontend 模块&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/nebula"><span title="Nebula 项目" class="linkLabel_Grs0">Nebula 项目</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_tA5m menu__link menu__link--sublist" href="/docs/nebula/param"><span title="Nebula Param 模块" class="categoryLinkLabel_sTtl">Nebula Param 模块</span></a><button aria-label="展开侧边栏分类 &#x27;Nebula Param 模块&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/nebula/spec"><span title="项目分层对象命名规约说明书" class="linkLabel_Grs0">项目分层对象命名规约说明书</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_tA5m menu__link menu__link--sublist" href="/docs/nebula/storage"><span title="Nebula Storage 模块" class="categoryLinkLabel_sTtl">Nebula Storage 模块</span></a><button aria-label="展开侧边栏分类 &#x27;Nebula Storage 模块&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li></ul></nav></div></div></aside><main class="docMainContainer_QKg6"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_gcse"><div class="docItemContainer_CtD3"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_T6to" aria-label="页面路径"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="主页面" class="breadcrumbs__link" href="/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_Eqkm"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><a class="breadcrumbs__link" href="/docs/nebula/design"><span>设计说明</span></a></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Nebula 包设计</span></li></ul></nav><div class="tocCollapsible_NCmR theme-doc-toc-mobile tocMobile_ZeX1"><button type="button" class="clean-btn tocCollapsibleButton_gDea">本页总览</button></div><div class="theme-doc-markdown markdown"><header><h1>Nebula 包设计</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="1-设计目的">1. 设计目的<a href="#1-设计目的" class="hash-link" aria-label="1. 设计目的的直接链接" title="1. 设计目的的直接链接" translate="no">​</a></h2>
+<p>Nebula 的包设计服务于两个核心目标：</p>
+<ul>
+<li class=""><strong>让模块职责一眼可见</strong>：看到包名就能判断类所处层次与用途；</li>
+<li class=""><strong>让本地接入与远程接入保持统一契约</strong>：通过稳定的包组织避免对象和实现散落。</li>
+</ul>
+<p>从 <code>dict</code>、<code>notify</code>、<code>auth</code>、<code>comms</code> 与 <code>nebula-base</code> 的实际代码看，Nebula 已经形成了比较统一的包组织方式。它不是完全照搬 DDD 的 <code>application/domain/infrastructure</code> 命名，也不是传统项目里松散的 <code>controller/service/mapper/entity</code> 平铺，而是围绕“<strong>模块子工程 + 分层包</strong>”来组织。</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="2-包设计总原则">2. 包设计总原则<a href="#2-包设计总原则" class="hash-link" aria-label="2. 包设计总原则的直接链接" title="2. 包设计总原则的直接链接" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="21-先按模块切分再按层次切分">2.1 先按模块切分，再按层次切分<a href="#21-先按模块切分再按层次切分" class="hash-link" aria-label="2.1 先按模块切分，再按层次切分的直接链接" title="2.1 先按模块切分，再按层次切分的直接链接" translate="no">​</a></h3>
+<p>Nebula 先通过 Maven 模块划出大边界，例如：</p>
+<ul>
+<li class=""><code>nebula-auth</code></li>
+<li class=""><code>nebula-dict</code></li>
+<li class=""><code>nebula-notify</code></li>
+<li class=""><code>nebula-comms</code></li>
+<li class=""><code>nebula-base</code></li>
+</ul>
+<p>然后每个子模块内部再按层次划分包，例如：</p>
+<ul>
+<li class=""><code>controller</code></li>
+<li class=""><code>service</code></li>
+<li class=""><code>model.command</code></li>
+<li class=""><code>model.query</code></li>
+<li class=""><code>model.dto</code></li>
+<li class=""><code>model.entity</code></li>
+<li class=""><code>dao</code></li>
+<li class=""><code>dao.mapper</code></li>
+<li class=""><code>dao.param</code></li>
+</ul>
+<p>因此，Nebula 的包设计顺序是：</p>
+<blockquote>
+<p><strong>先确定领域模块，再确定子模块层次，最后确定类所在包。</strong></p>
+</blockquote>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="22-包名表达职责而不是表达技术细节">2.2 包名表达职责，而不是表达技术细节<a href="#22-包名表达职责而不是表达技术细节" class="hash-link" aria-label="2.2 包名表达职责，而不是表达技术细节的直接链接" title="2.2 包名表达职责，而不是表达技术细节的直接链接" translate="no">​</a></h3>
+<p>例如：</p>
+<ul>
+<li class=""><code>model.command</code> 表达“写入指令对象”；</li>
+<li class=""><code>model.query</code> 表达“查询条件对象”；</li>
+<li class=""><code>model.dto</code> 表达“跨层传输对象”；</li>
+<li class=""><code>model.req</code> / <code>model.resp</code> 表达“HTTP 接入对象”；</li>
+<li class=""><code>dao.param</code> 表达“DAO 查询参数对象”。</li>
+</ul>
+<p>这比把所有对象都堆在 <code>vo</code>、<code>bo</code>、<code>pojo</code> 之类模糊包名里更清晰。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="23-同一语义对象尽量固定落点">2.3 同一语义对象，尽量固定落点<a href="#23-同一语义对象尽量固定落点" class="hash-link" aria-label="2.3 同一语义对象，尽量固定落点的直接链接" title="2.3 同一语义对象，尽量固定落点的直接链接" translate="no">​</a></h3>
+<p>Nebula 中对象落点已经比较稳定：</p>
+<ul>
+<li class="">对外服务契约对象 → <code>*-api</code></li>
+<li class="">Web 请求/响应对象 → <code>*-local</code></li>
+<li class="">数据库存储实体 → <code>*-core</code></li>
+<li class="">分页/DAO 查询参数 → <code>*-core/dao/param</code></li>
+</ul>
+<p>这让新增代码时不需要重新发明组织方式。</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="3-根包命名规则">3. 根包命名规则<a href="#3-根包命名规则" class="hash-link" aria-label="3. 根包命名规则的直接链接" title="3. 根包命名规则的直接链接" translate="no">​</a></h2>
+<p>Nebula 的统一根包前缀是：</p>
+<div class="language-java codeBlockContainer_FIHn theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_tAhz"><pre tabindex="0" class="prism-code language-java codeBlock_dG78 thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_IUK3"><span class="token-line" style="color:#393A34"><span class="token plain">com.cludix.nebula</span><br></span></code></pre></div></div>
+<p>在这个前缀下，包名按照“基础设施域”或“业务域”继续展开。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="31-基础设施模块包名">3.1 基础设施模块包名<a href="#31-基础设施模块包名" class="hash-link" aria-label="3.1 基础设施模块包名的直接链接" title="3.1 基础设施模块包名的直接链接" translate="no">​</a></h3>
+<p>基础设施模块一般直接使用能力名作为二级包，例如：</p>
+<ul>
+<li class=""><code>com.cludix.nebula.common</code></li>
+<li class=""><code>com.cludix.nebula.mybatis</code></li>
+<li class=""><code>com.cludix.nebula.web</code></li>
+<li class=""><code>com.cludix.nebula.cache</code></li>
+<li class=""><code>com.cludix.nebula.cloud</code></li>
+</ul>
+<p>这种命名表达的是“平台级能力域”，不绑定具体业务。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="32-业务模块包名">3.2 业务模块包名<a href="#32-业务模块包名" class="hash-link" aria-label="3.2 业务模块包名的直接链接" title="3.2 业务模块包名的直接链接" translate="no">​</a></h3>
+<p>业务模块使用领域名作为二级包，例如：</p>
+<ul>
+<li class=""><code>com.cludix.nebula.auth</code></li>
+<li class=""><code>com.cludix.nebula.dict</code></li>
+<li class=""><code>com.cludix.nebula.notify</code></li>
+<li class=""><code>com.cludix.nebula.comms</code></li>
+</ul>
+<p>然后再在其下继续划分层级包。</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="4-业务模块的标准包结构">4. 业务模块的标准包结构<a href="#4-业务模块的标准包结构" class="hash-link" aria-label="4. 业务模块的标准包结构的直接链接" title="4. 业务模块的标准包结构的直接链接" translate="no">​</a></h2>
+<p>从 <code>dict</code>、<code>notify</code>、<code>auth</code> 的代码中，可以抽出一个标准模板。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="41--api-的标准包">4.1 <code>*-api</code> 的标准包<a href="#41--api-的标准包" class="hash-link" aria-label="41--api-的标准包的直接链接" title="41--api-的标准包的直接链接" translate="no">​</a></h3>
+<p>典型结构：</p>
+<div class="language-text codeBlockContainer_FIHn theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_tAhz"><pre tabindex="0" class="prism-code language-text codeBlock_dG78 thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_IUK3"><span class="token-line" style="color:#393A34"><span class="token plain">com.cludix.nebula.xxx</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── service</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── model.command</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── model.query</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── model.dto</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── constant</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── config / configuration</span><br></span></code></pre></div></div>
+<p>职责说明：</p>
+<ul>
+<li class=""><code>service</code>：定义服务接口，如 <code>IDictService</code>、<code>INotifyService</code>；</li>
+<li class=""><code>model.command</code>：新增、修改、发送等写操作命令对象；</li>
+<li class=""><code>model.query</code>：详情、分页、列表等读操作查询对象；</li>
+<li class=""><code>model.dto</code>：跨层传输结果对象；</li>
+<li class=""><code>constant</code>：错误码、缓存名、状态枚举、渠道枚举等；</li>
+<li class=""><code>config</code> / <code>configuration</code>：模块守卫、自动配置入口、装配约束。</li>
+</ul>
+<p>代表例子：</p>
+<ul>
+<li class=""><code>com.cludix.nebula.dict.model.command.CreateDictTypeCommand</code></li>
+<li class=""><code>com.cludix.nebula.notify.model.query.PageAnnouncementQuery</code></li>
+<li class=""><code>com.cludix.nebula.auth.service.IUserService</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="42--core-的标准包">4.2 <code>*-core</code> 的标准包<a href="#42--core-的标准包" class="hash-link" aria-label="42--core-的标准包的直接链接" title="42--core-的标准包的直接链接" translate="no">​</a></h3>
+<p>典型结构：</p>
+<div class="language-text codeBlockContainer_FIHn theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_tAhz"><pre tabindex="0" class="prism-code language-text codeBlock_dG78 thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_IUK3"><span class="token-line" style="color:#393A34"><span class="token plain">com.cludix.nebula.xxx</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── service.impl</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── dao</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── dao.mapper</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── dao.param</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── model.entity</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── config / configuration</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── support / security / route（按复杂度扩展）</span><br></span></code></pre></div></div>
+<p>职责说明：</p>
+<ul>
+<li class=""><code>service.impl</code>：接口实现与业务编排；</li>
+<li class=""><code>dao</code>：数据库访问门面；</li>
+<li class=""><code>dao.mapper</code>：MyBatis Mapper；</li>
+<li class=""><code>dao.param</code>：面向持久化层的查询参数；</li>
+<li class=""><code>model.entity</code>：数据库实体；</li>
+<li class=""><code>config/configuration</code>：模块内部缓存定义、属性配置、自动装配；</li>
+<li class=""><code>support/security/route/...</code>：复杂业务模块的内部支撑组件。</li>
+</ul>
+<p>代表例子：</p>
+<ul>
+<li class=""><code>com.cludix.nebula.dict.service.impl.DictServiceImpl</code></li>
+<li class=""><code>com.cludix.nebula.notify.dao.NotifyTemplateDAO</code></li>
+<li class=""><code>com.cludix.nebula.notify.dao.param.NotifyTemplatePageParam</code></li>
+<li class=""><code>com.cludix.nebula.dict.model.entity.DictItemEntity</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="43--local-的标准包">4.3 <code>*-local</code> 的标准包<a href="#43--local-的标准包" class="hash-link" aria-label="43--local-的标准包的直接链接" title="43--local-的标准包的直接链接" translate="no">​</a></h3>
+<p>典型结构：</p>
+<div class="language-text codeBlockContainer_FIHn theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_tAhz"><pre tabindex="0" class="prism-code language-text codeBlock_dG78 thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_IUK3"><span class="token-line" style="color:#393A34"><span class="token plain">com.cludix.nebula.xxx</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── controller</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── model.req</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── model.resp</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── local</span><br></span></code></pre></div></div>
+<p>职责说明：</p>
+<ul>
+<li class=""><code>controller</code>：REST 接口入口；</li>
+<li class=""><code>model.req</code>：入参对象，承接校验与接口协议；</li>
+<li class=""><code>model.resp</code>：出参对象，面向 HTTP 返回；</li>
+<li class=""><code>local</code>：本地模式 marker 或模式识别类。</li>
+</ul>
+<p>代表例子：</p>
+<ul>
+<li class=""><code>com.cludix.nebula.dict.controller.DictController</code></li>
+<li class=""><code>com.cludix.nebula.notify.model.req.CreateAnnouncementReq</code></li>
+<li class=""><code>com.cludix.nebula.auth.model.resp.UserDetailResp</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="44--remote-的标准包">4.4 <code>*-remote</code> 的标准包<a href="#44--remote-的标准包" class="hash-link" aria-label="44--remote-的标准包的直接链接" title="44--remote-的标准包的直接链接" translate="no">​</a></h3>
+<p>典型结构：</p>
+<div class="language-text codeBlockContainer_FIHn theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_tAhz"><pre tabindex="0" class="prism-code language-text codeBlock_dG78 thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_IUK3"><span class="token-line" style="color:#393A34"><span class="token plain">com.cludix.nebula.xxx</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── feign</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── impl</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── config / configuration</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── remote</span><br></span></code></pre></div></div>
+<p>职责说明：</p>
+<ul>
+<li class=""><code>feign</code>：远程调用客户端接口；</li>
+<li class=""><code>impl</code>：对 <code>api</code> 服务接口的远程代理实现；</li>
+<li class=""><code>config/configuration</code>：remote 属性与自动配置；</li>
+<li class=""><code>remote</code>：远程模式 marker。</li>
+</ul>
+<p>代表例子：</p>
+<ul>
+<li class=""><code>com.cludix.nebula.dict.feign.DictFeignClient</code></li>
+<li class=""><code>com.cludix.nebula.dict.impl.DictRemoteServiceImpl</code></li>
+<li class=""><code>com.cludix.nebula.notify.configuration.NotifyRemoteAutoConfiguration</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="45--service-的标准包">4.5 <code>*-service</code> 的标准包<a href="#45--service-的标准包" class="hash-link" aria-label="45--service-的标准包的直接链接" title="45--service-的标准包的直接链接" translate="no">​</a></h3>
+<p>通常比较轻，主要放：</p>
+<div class="language-text codeBlockContainer_FIHn theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_tAhz"><pre tabindex="0" class="prism-code language-text codeBlock_dG78 thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_IUK3"><span class="token-line" style="color:#393A34"><span class="token plain">com.cludix.nebula.xxx</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">└── NebulaXxxServiceApplication</span><br></span></code></pre></div></div>
+<p>职责聚焦在启动入口，不在这里堆业务逻辑。</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="5-对象分类与推荐落点">5. 对象分类与推荐落点<a href="#5-对象分类与推荐落点" class="hash-link" aria-label="5. 对象分类与推荐落点的直接链接" title="5. 对象分类与推荐落点的直接链接" translate="no">​</a></h2>
+<p>Nebula 的包设计里，最容易混淆的是各种对象放在哪里。下面可以作为新增代码时的直接参考。</p>
+<table><thead><tr><th>对象类型</th><th>推荐落点</th><th>说明</th></tr></thead><tbody><tr><td>Service 接口</td><td><code>*-api/service</code></td><td>稳定契约</td></tr><tr><td>Command</td><td><code>*-api/model/command</code></td><td>写操作输入</td></tr><tr><td>Query</td><td><code>*-api/model/query</code></td><td>读操作输入</td></tr><tr><td>DTO</td><td><code>*-api/model/dto</code></td><td>跨层结果对象</td></tr><tr><td>Req</td><td><code>*-local/model/req</code></td><td>Controller 入参</td></tr><tr><td>Resp</td><td><code>*-local/model/resp</code></td><td>Controller 出参</td></tr><tr><td>Entity</td><td><code>*-core/model/entity</code></td><td>持久化实体</td></tr><tr><td>DAO</td><td><code>*-core/dao</code></td><td>持久化访问门面</td></tr><tr><td>Mapper</td><td><code>*-core/dao/mapper</code></td><td>MyBatis Mapper</td></tr><tr><td>DAO Param</td><td><code>*-core/dao/param</code></td><td>DAO 查询参数</td></tr><tr><td>错误码/缓存名/枚举</td><td><code>*-api/constant</code></td><td>领域常量</td></tr><tr><td>AutoConfiguration / Properties</td><td><code>config</code> 或 <code>configuration</code></td><td>装配配置</td></tr><tr><td>Feign Client</td><td><code>*-remote/feign</code></td><td>远程调用接口</td></tr></tbody></table>
+<p>其中一个很重要的边界是：</p>
+<blockquote>
+<p><strong>Req/Resp 属于接入层对象，不应该直接替代 Command/DTO。</strong></p>
+</blockquote>
+<p>从 <code>DictController</code>、<code>UserController</code> 可以看出，Nebula 的实际做法是：</p>
+<ul>
+<li class=""><code>Req -&gt; Command/Query</code></li>
+<li class=""><code>DTO -&gt; Resp</code></li>
+</ul>
+<p>这保证了 API 契约和 Web 协议不会耦合死。</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="6-常见包的实际含义">6. 常见包的实际含义<a href="#6-常见包的实际含义" class="hash-link" aria-label="6. 常见包的实际含义的直接链接" title="6. 常见包的实际含义的直接链接" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="61-modelcommand">6.1 <code>model.command</code><a href="#61-modelcommand" class="hash-link" aria-label="61-modelcommand的直接链接" title="61-modelcommand的直接链接" translate="no">​</a></h3>
+<p>用于承载“写请求”语义，通常对应：</p>
+<ul>
+<li class="">create</li>
+<li class="">update</li>
+<li class="">send</li>
+<li class="">bind</li>
+<li class="">start / complete</li>
+</ul>
+<p>例如：</p>
+<ul>
+<li class=""><code>CreateDictTypeCommand</code></li>
+<li class=""><code>UpdateNotifyTemplateCommand</code></li>
+<li class=""><code>SendNotifyCommand</code></li>
+</ul>
+<p>它强调的是“我要系统执行什么动作”。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="62-modelquery">6.2 <code>model.query</code><a href="#62-modelquery" class="hash-link" aria-label="62-modelquery的直接链接" title="62-modelquery的直接链接" translate="no">​</a></h3>
+<p>用于承载“读请求”语义，通常对应：</p>
+<ul>
+<li class="">get by id</li>
+<li class="">page</li>
+<li class="">list</li>
+<li class="">detail</li>
+</ul>
+<p>例如：</p>
+<ul>
+<li class=""><code>GetDictTypeByIdQuery</code></li>
+<li class=""><code>PageNotifyRecordQuery</code></li>
+<li class=""><code>PageUserQuery</code></li>
+</ul>
+<p>它强调的是“我要怎么查”。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="63-modeldto">6.3 <code>model.dto</code><a href="#63-modeldto" class="hash-link" aria-label="63-modeldto的直接链接" title="63-modeldto的直接链接" translate="no">​</a></h3>
+<p>DTO 是跨层传输结果，既要避免暴露实体，也要避免携带 HTTP 协议语义。</p>
+<p>例如：</p>
+<ul>
+<li class=""><code>DictTypeDto</code></li>
+<li class=""><code>AnnouncementDetailDto</code></li>
+<li class=""><code>UserDetailDto</code></li>
+</ul>
+<p>DTO 常被：</p>
+<ul>
+<li class="">local 层转成 resp；</li>
+<li class="">remote 层直接反序列化返回；</li>
+<li class="">其他模块作为契约结果消费。</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="64-modelreq-与-modelresp">6.4 <code>model.req</code> 与 <code>model.resp</code><a href="#64-modelreq-与-modelresp" class="hash-link" aria-label="64-modelreq-与-modelresp的直接链接" title="64-modelreq-与-modelresp的直接链接" translate="no">​</a></h3>
+<p>这两个包只在 <code>local</code> 层中常见，说明它们是“接口协议对象”，不是领域对象。</p>
+<p>例如：</p>
+<ul>
+<li class=""><code>UserPageReq</code> 继承或复用分页请求语义，面向 Controller；</li>
+<li class=""><code>UserDetailResp</code> 是最终返回前端的对象。</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="65-modelentity">6.5 <code>model.entity</code><a href="#65-modelentity" class="hash-link" aria-label="65-modelentity的直接链接" title="65-modelentity的直接链接" translate="no">​</a></h3>
+<p>Entity 只放在 core 中，说明它属于实现细节与持久化模型。</p>
+<p>例如：</p>
+<ul>
+<li class=""><code>DictTypeEntity</code></li>
+<li class=""><code>NotifyTemplateEntity</code></li>
+<li class=""><code>AnnouncementEntity</code></li>
+</ul>
+<p>它们不应直接作为对外 API 契约返回。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="66-daoparam">6.6 <code>dao.param</code><a href="#66-daoparam" class="hash-link" aria-label="66-daoparam的直接链接" title="66-daoparam的直接链接" translate="no">​</a></h3>
+<p>这是 Nebula 比较有特点的一个包位。它把“数据库查询所需参数”单独抽出来，而不直接复用 Query。</p>
+<p>这样做的好处是：</p>
+<ul>
+<li class="">Query 保持面对服务契约；</li>
+<li class="">DAO Param 保持面对持久化实现；</li>
+<li class="">中间可以自由做字段裁剪、转换、补充。</li>
+</ul>
+<p>例如：</p>
+<ul>
+<li class=""><code>PageAnnouncementQuery</code> 是服务层查询对象；</li>
+<li class=""><code>AnnouncementPageParam</code> 是 DAO 层分页查询参数。</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="7-基础设施模块的包设计">7. 基础设施模块的包设计<a href="#7-基础设施模块的包设计" class="hash-link" aria-label="7. 基础设施模块的包设计的直接链接" title="7. 基础设施模块的包设计的直接链接" translate="no">​</a></h2>
+<p><code>nebula-base</code> 的包结构和业务模块不同，它不是围绕领域，而是围绕平台能力。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="71-nebula-base-common">7.1 <code>nebula-base-common</code><a href="#71-nebula-base-common" class="hash-link" aria-label="71-nebula-base-common的直接链接" title="71-nebula-base-common的直接链接" translate="no">​</a></h3>
+<p>常见包：</p>
+<ul>
+<li class=""><code>common.context</code></li>
+<li class=""><code>common.exception</code></li>
+<li class=""><code>common.model.dto</code></li>
+<li class=""><code>common.model.req</code></li>
+<li class=""><code>common.model.resp</code></li>
+<li class=""><code>common.model.web</code></li>
+<li class=""><code>common.constant</code></li>
+<li class=""><code>common.util</code></li>
+</ul>
+<p>代表对象：</p>
+<ul>
+<li class=""><code>ApiResult</code></li>
+<li class=""><code>PageResp</code></li>
+<li class=""><code>BasePageReq</code></li>
+<li class=""><code>BusinessException</code></li>
+<li class=""><code>IErrorInfo</code></li>
+</ul>
+<p>这说明 common 层主要负责：公共模型、异常契约、上下文、工具。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="72-nebula-base-mybatis">7.2 <code>nebula-base-mybatis</code><a href="#72-nebula-base-mybatis" class="hash-link" aria-label="72-nebula-base-mybatis的直接链接" title="72-nebula-base-mybatis的直接链接" translate="no">​</a></h3>
+<p>常见包：</p>
+<ul>
+<li class=""><code>mybatis.entity</code></li>
+<li class=""><code>mybatis.config</code></li>
+<li class=""><code>mybatis.handler</code></li>
+<li class=""><code>mybatis.id</code></li>
+<li class=""><code>mybatis.typehandler</code></li>
+<li class=""><code>mybatis.util</code></li>
+</ul>
+<p>代表对象：</p>
+<ul>
+<li class=""><code>BaseIdEntity</code></li>
+<li class=""><code>BaseEntity</code></li>
+<li class=""><code>TreeEntity</code></li>
+<li class=""><code>NebulaMybatisConfig</code></li>
+</ul>
+<p>这说明 mybatis 子模块负责 ORM 基础设施，而不是具体业务。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="73-nebula-base-web">7.3 <code>nebula-base-web</code><a href="#73-nebula-base-web" class="hash-link" aria-label="73-nebula-base-web的直接链接" title="73-nebula-base-web的直接链接" translate="no">​</a></h3>
+<p>常见包：</p>
+<ul>
+<li class=""><code>web.advice</code></li>
+<li class=""><code>web.config</code></li>
+<li class=""><code>web.filter</code></li>
+<li class=""><code>web.wrapper</code></li>
+<li class=""><code>web.i18n</code></li>
+<li class=""><code>web.annotation</code></li>
+</ul>
+<p>代表对象：</p>
+<ul>
+<li class=""><code>ApiResultAdvice</code></li>
+<li class=""><code>ExceptionHandlerAdvice</code></li>
+<li class=""><code>RequestContextFilter</code></li>
+</ul>
+<p>这说明 web 子模块负责统一响应包装、异常处理、请求上下文等横切能力。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="74-nebula-base-cache-与-nebula-base-cloud">7.4 <code>nebula-base-cache</code> 与 <code>nebula-base-cloud</code><a href="#74-nebula-base-cache-与-nebula-base-cloud" class="hash-link" aria-label="74-nebula-base-cache-与-nebula-base-cloud的直接链接" title="74-nebula-base-cache-与-nebula-base-cloud的直接链接" translate="no">​</a></h3>
+<p>它们也遵循类似做法，按能力域划包：</p>
+<ul>
+<li class=""><code>cache.config</code></li>
+<li class=""><code>cache.dynamic</code></li>
+<li class=""><code>cache.service</code></li>
+<li class=""><code>cache.model.dto</code></li>
+<li class=""><code>cloud.config</code></li>
+<li class=""><code>cloud.filter</code></li>
+<li class=""><code>cloud.interceptor</code></li>
+<li class=""><code>cloud.support</code></li>
+</ul>
+<p>这说明 Nebula 对基础设施的组织原则是：</p>
+<blockquote>
+<p><strong>以能力域为一级包，以职责为二级包。</strong></p>
+</blockquote>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="8-类命名与包位置的搭配规则">8. 类命名与包位置的搭配规则<a href="#8-类命名与包位置的搭配规则" class="hash-link" aria-label="8. 类命名与包位置的搭配规则的直接链接" title="8. 类命名与包位置的搭配规则的直接链接" translate="no">​</a></h2>
+<p>Nebula 的包设计和命名通常是配套出现的。</p>
+<table><thead><tr><th>包</th><th>常见类名后缀</th><th>例子</th></tr></thead><tbody><tr><td><code>service</code></td><td><code>I...Service</code></td><td><code>INotifyService</code></td></tr><tr><td><code>service.impl</code></td><td><code>...ServiceImpl</code></td><td><code>NotifyServiceImpl</code></td></tr><tr><td><code>controller</code></td><td><code>...Controller</code></td><td><code>DictController</code></td></tr><tr><td><code>dao</code></td><td><code>...DAO</code></td><td><code>NotifyTemplateDAO</code></td></tr><tr><td><code>dao.mapper</code></td><td><code>...Mapper</code></td><td><code>DictTypeMapper</code></td></tr><tr><td><code>model.command</code></td><td><code>...Command</code></td><td><code>CreateUserCommand</code></td></tr><tr><td><code>model.query</code></td><td><code>...Query</code></td><td><code>PageUserQuery</code></td></tr><tr><td><code>model.dto</code></td><td><code>...Dto</code> / <code>...DetailDto</code></td><td><code>UserDto</code></td></tr><tr><td><code>model.req</code></td><td><code>...Req</code> / <code>...PageReq</code></td><td><code>CreateAnnouncementReq</code></td></tr><tr><td><code>model.resp</code></td><td><code>...Resp</code> / <code>...DetailResp</code></td><td><code>UserDetailResp</code></td></tr><tr><td><code>model.entity</code></td><td><code>...Entity</code></td><td><code>AnnouncementEntity</code></td></tr><tr><td><code>feign</code></td><td><code>...FeignClient</code></td><td><code>DictFeignClient</code></td></tr><tr><td><code>config/configuration</code></td><td><code>...Properties</code> / <code>...AutoConfiguration</code></td><td><code>NotifyRemoteProperties</code></td></tr></tbody></table>
+<p>这类命名方式的优点是：即使不打开文件，也能通过“包 + 类名”快速判断其职责。</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="9-新增模块或新增包时的建议">9. 新增模块或新增包时的建议<a href="#9-新增模块或新增包时的建议" class="hash-link" aria-label="9. 新增模块或新增包时的建议的直接链接" title="9. 新增模块或新增包时的建议的直接链接" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="91-优先复用现有包名不轻易创造新术语">9.1 优先复用现有包名，不轻易创造新术语<a href="#91-优先复用现有包名不轻易创造新术语" class="hash-link" aria-label="9.1 优先复用现有包名，不轻易创造新术语的直接链接" title="9.1 优先复用现有包名，不轻易创造新术语的直接链接" translate="no">​</a></h3>
+<p>如果语义明确落在现有结构里，优先使用：</p>
+<ul>
+<li class=""><code>model.command</code></li>
+<li class=""><code>model.query</code></li>
+<li class=""><code>model.dto</code></li>
+<li class=""><code>model.req</code></li>
+<li class=""><code>model.resp</code></li>
+<li class=""><code>model.entity</code></li>
+<li class=""><code>dao</code></li>
+<li class=""><code>dao.mapper</code></li>
+<li class=""><code>dao.param</code></li>
+</ul>
+<p>避免随意扩展出：</p>
+<ul>
+<li class=""><code>vo</code></li>
+<li class=""><code>bo</code></li>
+<li class=""><code>po</code></li>
+<li class=""><code>form</code></li>
+<li class=""><code>param2</code></li>
+<li class=""><code>wrapper</code></li>
+</ul>
+<p>这类不稳定命名。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="92-新包必须有稳定语义边界">9.2 新包必须有稳定语义边界<a href="#92-新包必须有稳定语义边界" class="hash-link" aria-label="9.2 新包必须有稳定语义边界的直接链接" title="9.2 新包必须有稳定语义边界的直接链接" translate="no">​</a></h3>
+<p>只有在模块复杂度明显提升时，才建议新增包，例如：</p>
+<ul>
+<li class=""><code>support</code></li>
+<li class=""><code>security</code></li>
+<li class=""><code>route</code></li>
+<li class=""><code>adapter</code></li>
+<li class=""><code>listener</code></li>
+</ul>
+<p>新增前最好先回答两个问题：</p>
+<ol>
+<li class="">这个包是否对应一类长期稳定职责？</li>
+<li class="">这个职责是否已经能被现有包表达？</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="93-不要让-controller-直接操作-entity">9.3 不要让 controller 直接操作 entity<a href="#93-不要让-controller-直接操作-entity" class="hash-link" aria-label="9.3 不要让 controller 直接操作 entity的直接链接" title="9.3 不要让 controller 直接操作 entity的直接链接" translate="no">​</a></h3>
+<p>按照 Nebula 已有代码风格，应保持：</p>
+<ul>
+<li class="">controller 用 req/resp</li>
+<li class="">service 接口用 command/query/dto</li>
+<li class="">core 内部再处理 entity/dao</li>
+</ul>
+<p>这样包边界才不会被打穿。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="94-不要让-remote-复制一套新模型">9.4 不要让 remote 复制一套新模型<a href="#94-不要让-remote-复制一套新模型" class="hash-link" aria-label="9.4 不要让 remote 复制一套新模型的直接链接" title="9.4 不要让 remote 复制一套新模型的直接链接" translate="no">​</a></h3>
+<p>remote 层应尽量复用 <code>api</code> 中已有的 command/query/dto，而不是重新建 remote 专属对象。这样才能维持真正的统一契约。</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="10-推荐的包模板">10. 推荐的包模板<a href="#10-推荐的包模板" class="hash-link" aria-label="10. 推荐的包模板的直接链接" title="10. 推荐的包模板的直接链接" translate="no">​</a></h2>
+<p>如果后续新增一个 <code>nebula-foo</code> 模块，可以参考下面的包模板。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="101-nebula-foo-api">10.1 <code>nebula-foo-api</code><a href="#101-nebula-foo-api" class="hash-link" aria-label="101-nebula-foo-api的直接链接" title="101-nebula-foo-api的直接链接" translate="no">​</a></h3>
+<div class="language-text codeBlockContainer_FIHn theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_tAhz"><pre tabindex="0" class="prism-code language-text codeBlock_dG78 thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_IUK3"><span class="token-line" style="color:#393A34"><span class="token plain">com.cludix.nebula.foo</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── service</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── model.command</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── model.query</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── model.dto</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── constant</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">└── configuration</span><br></span></code></pre></div></div>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="102-nebula-foo-core">10.2 <code>nebula-foo-core</code><a href="#102-nebula-foo-core" class="hash-link" aria-label="102-nebula-foo-core的直接链接" title="102-nebula-foo-core的直接链接" translate="no">​</a></h3>
+<div class="language-text codeBlockContainer_FIHn theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_tAhz"><pre tabindex="0" class="prism-code language-text codeBlock_dG78 thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_IUK3"><span class="token-line" style="color:#393A34"><span class="token plain">com.cludix.nebula.foo</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── service.impl</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── dao</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── dao.mapper</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── dao.param</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── model.entity</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── configuration</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">└── support</span><br></span></code></pre></div></div>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="103-nebula-foo-local">10.3 <code>nebula-foo-local</code><a href="#103-nebula-foo-local" class="hash-link" aria-label="103-nebula-foo-local的直接链接" title="103-nebula-foo-local的直接链接" translate="no">​</a></h3>
+<div class="language-text codeBlockContainer_FIHn theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_tAhz"><pre tabindex="0" class="prism-code language-text codeBlock_dG78 thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_IUK3"><span class="token-line" style="color:#393A34"><span class="token plain">com.cludix.nebula.foo</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── controller</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── model.req</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── model.resp</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">└── local</span><br></span></code></pre></div></div>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="104-nebula-foo-remote">10.4 <code>nebula-foo-remote</code><a href="#104-nebula-foo-remote" class="hash-link" aria-label="104-nebula-foo-remote的直接链接" title="104-nebula-foo-remote的直接链接" translate="no">​</a></h3>
+<div class="language-text codeBlockContainer_FIHn theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_tAhz"><pre tabindex="0" class="prism-code language-text codeBlock_dG78 thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_IUK3"><span class="token-line" style="color:#393A34"><span class="token plain">com.cludix.nebula.foo</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── feign</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── impl</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">├── configuration</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">└── remote</span><br></span></code></pre></div></div>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="105-nebula-foo-service">10.5 <code>nebula-foo-service</code><a href="#105-nebula-foo-service" class="hash-link" aria-label="105-nebula-foo-service的直接链接" title="105-nebula-foo-service的直接链接" translate="no">​</a></h3>
+<div class="language-text codeBlockContainer_FIHn theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_tAhz"><pre tabindex="0" class="prism-code language-text codeBlock_dG78 thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_IUK3"><span class="token-line" style="color:#393A34"><span class="token plain">com.cludix.nebula.foo</span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">└── NebulaFooServiceApplication</span><br></span></code></pre></div></div>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="11-小结">11. 小结<a href="#11-小结" class="hash-link" aria-label="11. 小结的直接链接" title="11. 小结的直接链接" translate="no">​</a></h2>
+<p>Nebula 的包设计可以概括为三句话：</p>
+<ol>
+<li class=""><strong>先按业务模块划边界，再按分层职责组织包。</strong></li>
+<li class=""><strong>对象按语义落包，而不是按习惯缩写乱放。</strong></li>
+<li class=""><strong>通过统一的包位设计，保证 local / remote / core 共用一套 api 契约。</strong></li>
+</ol>
+<p>对于维护者来说，只要掌握下面这条主线，基本就不会放错位置：</p>
+<blockquote>
+<p><strong>接口契约进 api，核心实现进 core，HTTP 协议对象进 local，远程代理进 remote，启动入口留在 service。</strong></p>
+</blockquote>
+<p>这也是当前 Nebula 项目最稳定、最值得继续沿用的包组织方式。</p></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_tsoH"><a href="https://github.com/yunqilee69/cludix-doc/tree/master/docs/nebula/design/package-design.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Bcmd" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>编辑此页</a></div><div class="col lastUpdated_T7TT"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="文件选项卡"><a class="pagination-nav__link pagination-nav__link--prev" href="/docs/nebula/design/layered-design"><div class="pagination-nav__sublabel">上一页</div><div class="pagination-nav__label">Nebula 分层设计</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/docs/nebula/dict"><div class="pagination-nav__sublabel">下一页</div><div class="pagination-nav__label">Nebula Dict 模块</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_Tz3h thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#1-设计目的" class="table-of-contents__link toc-highlight">1. 设计目的</a></li><li><a href="#2-包设计总原则" class="table-of-contents__link toc-highlight">2. 包设计总原则</a><ul><li><a href="#21-先按模块切分再按层次切分" class="table-of-contents__link toc-highlight">2.1 先按模块切分，再按层次切分</a></li><li><a href="#22-包名表达职责而不是表达技术细节" class="table-of-contents__link toc-highlight">2.2 包名表达职责，而不是表达技术细节</a></li><li><a href="#23-同一语义对象尽量固定落点" class="table-of-contents__link toc-highlight">2.3 同一语义对象，尽量固定落点</a></li></ul></li><li><a href="#3-根包命名规则" class="table-of-contents__link toc-highlight">3. 根包命名规则</a><ul><li><a href="#31-基础设施模块包名" class="table-of-contents__link toc-highlight">3.1 基础设施模块包名</a></li><li><a href="#32-业务模块包名" class="table-of-contents__link toc-highlight">3.2 业务模块包名</a></li></ul></li><li><a href="#4-业务模块的标准包结构" class="table-of-contents__link toc-highlight">4. 业务模块的标准包结构</a><ul><li><a href="#41--api-的标准包" class="table-of-contents__link toc-highlight">4.1 <code>*-api</code> 的标准包</a></li><li><a href="#42--core-的标准包" class="table-of-contents__link toc-highlight">4.2 <code>*-core</code> 的标准包</a></li><li><a href="#43--local-的标准包" class="table-of-contents__link toc-highlight">4.3 <code>*-local</code> 的标准包</a></li><li><a href="#44--remote-的标准包" class="table-of-contents__link toc-highlight">4.4 <code>*-remote</code> 的标准包</a></li><li><a href="#45--service-的标准包" class="table-of-contents__link toc-highlight">4.5 <code>*-service</code> 的标准包</a></li></ul></li><li><a href="#5-对象分类与推荐落点" class="table-of-contents__link toc-highlight">5. 对象分类与推荐落点</a></li><li><a href="#6-常见包的实际含义" class="table-of-contents__link toc-highlight">6. 常见包的实际含义</a><ul><li><a href="#61-modelcommand" class="table-of-contents__link toc-highlight">6.1 <code>model.command</code></a></li><li><a href="#62-modelquery" class="table-of-contents__link toc-highlight">6.2 <code>model.query</code></a></li><li><a href="#63-modeldto" class="table-of-contents__link toc-highlight">6.3 <code>model.dto</code></a></li><li><a href="#64-modelreq-与-modelresp" class="table-of-contents__link toc-highlight">6.4 <code>model.req</code> 与 <code>model.resp</code></a></li><li><a href="#65-modelentity" class="table-of-contents__link toc-highlight">6.5 <code>model.entity</code></a></li><li><a href="#66-daoparam" class="table-of-contents__link toc-highlight">6.6 <code>dao.param</code></a></li></ul></li><li><a href="#7-基础设施模块的包设计" class="table-of-contents__link toc-highlight">7. 基础设施模块的包设计</a><ul><li><a href="#71-nebula-base-common" class="table-of-contents__link toc-highlight">7.1 <code>nebula-base-common</code></a></li><li><a href="#72-nebula-base-mybatis" class="table-of-contents__link toc-highlight">7.2 <code>nebula-base-mybatis</code></a></li><li><a href="#73-nebula-base-web" class="table-of-contents__link toc-highlight">7.3 <code>nebula-base-web</code></a></li><li><a href="#74-nebula-base-cache-与-nebula-base-cloud" class="table-of-contents__link toc-highlight">7.4 <code>nebula-base-cache</code> 与 <code>nebula-base-cloud</code></a></li></ul></li><li><a href="#8-类命名与包位置的搭配规则" class="table-of-contents__link toc-highlight">8. 类命名与包位置的搭配规则</a></li><li><a href="#9-新增模块或新增包时的建议" class="table-of-contents__link toc-highlight">9. 新增模块或新增包时的建议</a><ul><li><a href="#91-优先复用现有包名不轻易创造新术语" class="table-of-contents__link toc-highlight">9.1 优先复用现有包名，不轻易创造新术语</a></li><li><a href="#92-新包必须有稳定语义边界" class="table-of-contents__link toc-highlight">9.2 新包必须有稳定语义边界</a></li><li><a href="#93-不要让-controller-直接操作-entity" class="table-of-contents__link toc-highlight">9.3 不要让 controller 直接操作 entity</a></li><li><a href="#94-不要让-remote-复制一套新模型" class="table-of-contents__link toc-highlight">9.4 不要让 remote 复制一套新模型</a></li></ul></li><li><a href="#10-推荐的包模板" class="table-of-contents__link toc-highlight">10. 推荐的包模板</a><ul><li><a href="#101-nebula-foo-api" class="table-of-contents__link toc-highlight">10.1 <code>nebula-foo-api</code></a></li><li><a href="#102-nebula-foo-core" class="table-of-contents__link toc-highlight">10.2 <code>nebula-foo-core</code></a></li><li><a href="#103-nebula-foo-local" class="table-of-contents__link toc-highlight">10.3 <code>nebula-foo-local</code></a></li><li><a href="#104-nebula-foo-remote" class="table-of-contents__link toc-highlight">10.4 <code>nebula-foo-remote</code></a></li><li><a href="#105-nebula-foo-service" class="table-of-contents__link toc-highlight">10.5 <code>nebula-foo-service</code></a></li></ul></li><li><a href="#11-小结" class="table-of-contents__link toc-highlight">11. 小结</a></li></ul></div></div></div></div></main></div></div></div></div>
+</body>
+</html>

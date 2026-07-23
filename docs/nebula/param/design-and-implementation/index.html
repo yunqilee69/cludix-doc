@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="zh" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-nebula/param/design-and-implementation" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">Nebula Param 设计与实现 | 云星</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://yunqilee69.github.io/img/docusaurus-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://yunqilee69.github.io/img/docusaurus-social-card.jpg"><meta data-rh="true" property="og:url" content="https://yunqilee69.github.io/docs/nebula/param/design-and-implementation"><meta data-rh="true" property="og:locale" content="zh"><meta data-rh="true" name="docusaurus_locale" content="zh"><meta data-rh="true" name="docsearch:language" content="zh"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Nebula Param 设计与实现 | 云星"><meta data-rh="true" name="description" content="1. 设计目标"><meta data-rh="true" property="og:description" content="1. 设计目标"><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://yunqilee69.github.io/docs/nebula/param/design-and-implementation"><link data-rh="true" rel="alternate" href="https://yunqilee69.github.io/docs/nebula/param/design-and-implementation" hreflang="zh"><link data-rh="true" rel="alternate" href="https://yunqilee69.github.io/docs/nebula/param/design-and-implementation" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Nebula Param 模块","item":"https://yunqilee69.github.io/docs/nebula/param"},{"@type":"ListItem","position":2,"name":"Nebula Param 设计与实现","item":"https://yunqilee69.github.io/docs/nebula/param/design-and-implementation"}]}</script><link rel="alternate" type="application/rss+xml" href="/blog/rss.xml" title="云星 RSS Feed">
+<link rel="alternate" type="application/atom+xml" href="/blog/atom.xml" title="云星 Atom Feed"><link rel="stylesheet" href="/assets/css/styles.c4124d11.css">
+<script src="/assets/js/runtime~main.137d48a9.js" defer="defer"></script>
+<script src="/assets/js/main.825f6007.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")),document.documentElement.setAttribute("data-theme-choice",t||"system")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><link rel="preload" as="image" href="/img/logo.png"><div role="region" aria-label="跳到主要内容"><a class="skipToContent_db63" href="#__docusaurus_skipToContent_fallback">跳到主要内容</a></div><nav aria-label="主导航" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="切换导航栏" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/logo.png" alt="My Site Logo" class="themedComponent_h8q_ themedComponent--light_T97P"><img src="/img/logo.png" alt="My Site Logo" class="themedComponent_h8q_ themedComponent--dark_pG3C"></div><b class="navbar__title text--truncate">云星</b></a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbarSearchContainer_cQc8"><div class="navbar__search searchBarContainer_uP9J" dir="ltr"><input placeholder="搜索" aria-label="Search" class="navbar__search-input searchInput_DUs6" value=""><div class="loadingRing_d1U1 searchBarLoadingRing_UWur"><div></div><div></div><div></div><div></div></div></div></div><a class="navbar__item navbar__link" href="/blog">专题</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/nebula/auth">Nebula</a><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link">教程</a><ul class="dropdown__menu"><li><a class="dropdown__link" href="/docs/tutorials/linux/">Linux</a></li><li><a class="dropdown__link" href="/docs/tutorials/windows/">Windows</a></li><li><a class="dropdown__link" href="/docs/tutorials/macos/">macOS</a></li><li><a class="dropdown__link" href="/docs/tutorials/docker/">Docker</a></li><li><a class="dropdown__link" href="/docs/tutorials/k8s/">Kubernetes</a></li><li><a class="dropdown__link" href="/docs/tutorials/ci/">CI/CD</a></li><li><a class="dropdown__link" href="/docs/tutorials/java/">Java</a></li><li><a class="dropdown__link" href="/docs/tutorials/database/">数据库</a></li><li><a class="dropdown__link" href="/docs/tutorials/network/">网络</a></li><li><a class="dropdown__link" href="/docs/tutorials/other/">其他</a></li></ul></div><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link">踩坑</a><ul class="dropdown__menu"><li><a class="dropdown__link" href="/docs/troubleshooting/linux/">Linux</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/windows/">Windows</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/macos/">macOS</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/docker/">Docker</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/k8s/">Kubernetes</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/ci/">CI/CD</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/java/">Java</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/database/">数据库</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/network/">网络</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/other/">其他</a></li></ul></div><div class="toggle_e78C colorModeToggle_JRhw"><button class="clean-btn toggleButton_jaTG toggleButtonDisabled_Bzt3" type="button" disabled="" title="system mode" aria-label="切换浅色/暗黑模式（当前为system mode）"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_NHIS lightToggleIcon_cV2k"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_NHIS darkToggleIcon_Xmqk"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_NHIS systemToggleIcon_Q0Jw"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_dZTL"><div class="docsWrapper_CMoq"><button aria-label="回到顶部" class="clean-btn theme-back-to-top-button backToTopButton_lQ6J" type="button"></button><div class="docRoot_tSSZ"><aside class="theme-doc-sidebar-container docSidebarContainer_ds5n"><div class="sidebarViewport_jPS2"><div class="sidebar_OeBc"><nav aria-label="文档侧边栏" class="menu thin-scrollbar menu_Cas_"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_tA5m menu__link menu__link--sublist" href="/docs/nebula/auth"><span title="Nebula Auth 模块" class="categoryLinkLabel_sTtl">Nebula Auth 模块</span></a><button aria-label="展开侧边栏分类 &#x27;Nebula Auth 模块&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_tA5m menu__link menu__link--sublist" href="/docs/nebula/design"><span title="设计说明" class="categoryLinkLabel_sTtl">设计说明</span></a><button aria-label="展开侧边栏分类 &#x27;设计说明&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_tA5m menu__link menu__link--sublist" href="/docs/nebula/dict"><span title="Nebula Dict 模块" class="categoryLinkLabel_sTtl">Nebula Dict 模块</span></a><button aria-label="展开侧边栏分类 &#x27;Nebula Dict 模块&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_tA5m menu__link menu__link--sublist" href="/docs/nebula/frontend"><span title="Nebula Frontend 模块" class="categoryLinkLabel_sTtl">Nebula Frontend 模块</span></a><button aria-label="展开侧边栏分类 &#x27;Nebula Frontend 模块&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/nebula"><span title="Nebula 项目" class="linkLabel_Grs0">Nebula 项目</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_tA5m menu__link menu__link--sublist menu__link--active" href="/docs/nebula/param"><span title="Nebula Param 模块" class="categoryLinkLabel_sTtl">Nebula Param 模块</span></a><button aria-label="折叠侧边栏分类 &#x27;Nebula Param 模块&#x27;" aria-expanded="true" type="button" class="clean-btn menu__caret"></button></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/nebula/param/api-reference"><span title="Nebula Param 接口信息" class="linkLabel_Grs0">Nebula Param 接口信息</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/nebula/param/business-capabilities"><span title="Nebula Param 业务功能" class="linkLabel_Grs0">Nebula Param 业务功能</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/nebula/param/configuration"><span title="Nebula Param 配置说明" class="linkLabel_Grs0">Nebula Param 配置说明</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/nebula/param/ddl"><span title="Nebula Param 建表语句" class="linkLabel_Grs0">Nebula Param 建表语句</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/docs/nebula/param/design-and-implementation"><span title="Nebula Param 设计与实现" class="linkLabel_Grs0">Nebula Param 设计与实现</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/nebula/param/overview"><span title="Nebula Param 模块总览" class="linkLabel_Grs0">Nebula Param 模块总览</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/nebula/param/usage-guide"><span title="Nebula Param 使用方式" class="linkLabel_Grs0">Nebula Param 使用方式</span></a></li></ul></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/nebula/spec"><span title="项目分层对象命名规约说明书" class="linkLabel_Grs0">项目分层对象命名规约说明书</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_tA5m menu__link menu__link--sublist" href="/docs/nebula/storage"><span title="Nebula Storage 模块" class="categoryLinkLabel_sTtl">Nebula Storage 模块</span></a><button aria-label="展开侧边栏分类 &#x27;Nebula Storage 模块&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li></ul></nav></div></div></aside><main class="docMainContainer_QKg6"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_gcse"><div class="docItemContainer_CtD3"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_T6to" aria-label="页面路径"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="主页面" class="breadcrumbs__link" href="/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_Eqkm"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><a class="breadcrumbs__link" href="/docs/nebula/param"><span>Nebula Param 模块</span></a></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Nebula Param 设计与实现</span></li></ul></nav><div class="tocCollapsible_NCmR theme-doc-toc-mobile tocMobile_ZeX1"><button type="button" class="clean-btn tocCollapsibleButton_gDea">本页总览</button></div><div class="theme-doc-markdown markdown"><header><h1>Nebula Param 设计与实现</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="1-设计目标">1. 设计目标<a href="#1-设计目标" class="hash-link" aria-label="1. 设计目标的直接链接" title="1. 设计目标的直接链接" translate="no">​</a></h2>
+<p><code>nebula-param</code> 要解决的不是单一“把配置存到数据库里”这么简单的问题，而是要同时解决下面几类系统级需求：</p>
+<ul>
+<li class="">参数如何支持多种数据类型，而不是只有字符串</li>
+<li class="">参数如何在保存时完成范围、长度、格式和选项合法性校验</li>
+<li class="">参数如何既能作为后台配置中心，又能作为业务代码运行期读取入口</li>
+<li class="">参数如何支持前端设置页按模块展示和批量保存</li>
+<li class="">单体与微服务模式下如何复用同一套参数契约</li>
+</ul>
+<p>因此它的设计是“<strong>统一参数模型 + 类型化校验 + 按 key 缓存读取 + local/remote 可切换接入方式</strong>”的组合。</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="2-分层结构">2. 分层结构<a href="#2-分层结构" class="hash-link" aria-label="2. 分层结构的直接链接" title="2. 分层结构的直接链接" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="21-nebula-param-api">2.1 <code>nebula-param-api</code><a href="#21-nebula-param-api" class="hash-link" aria-label="21-nebula-param-api的直接链接" title="21-nebula-param-api的直接链接" translate="no">​</a></h3>
+<p>这一层定义稳定契约，主要包括：</p>
+<ul>
+<li class=""><code>ISystemParamService</code></li>
+<li class=""><code>CreateSystemParamCommand</code> / <code>UpdateSystemParamCommand</code></li>
+<li class=""><code>SaveOrUpdateSystemParamByKeyCommand</code></li>
+<li class=""><code>PageSystemParamQuery</code></li>
+<li class=""><code>SystemParamDto</code> / <code>SystemParamDetailDto</code></li>
+<li class=""><code>SystemParamDataTypeEnum</code></li>
+<li class=""><code>ParamErrorInfo</code></li>
+</ul>
+<p>它的意义是让业务模块、local 层和 remote 层都围绕同一套参数对象协作。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="22-nebula-param-core">2.2 <code>nebula-param-core</code><a href="#22-nebula-param-core" class="hash-link" aria-label="22-nebula-param-core的直接链接" title="22-nebula-param-core的直接链接" translate="no">​</a></h3>
+<p>核心实现层主要承载：</p>
+<ul>
+<li class="">参数新增、更新、删除</li>
+<li class="">参数按键读取与类型转换</li>
+<li class="">分页查询与按模块加载</li>
+<li class="">批量更新参数值</li>
+<li class="">数据类型校验与字典选项校验</li>
+<li class="">缓存清理与软删除支持</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="23-nebula-param-local">2.3 <code>nebula-param-local</code><a href="#23-nebula-param-local" class="hash-link" aria-label="23-nebula-param-local的直接链接" title="23-nebula-param-local的直接链接" translate="no">​</a></h3>
+<p>这一层负责把参数能力暴露成 HTTP 接口。</p>
+<p>设计上，Controller 主要做三件事：</p>
+<ul>
+<li class="">接收请求参数</li>
+<li class="">把 req 转成 command / query</li>
+<li class="">调用 service 并组装 resp</li>
+</ul>
+<p>这样接口层比较薄，业务逻辑集中在 core 层，便于本地接入和远程接入共用同一套语义。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="24-nebula-param-remote">2.4 <code>nebula-param-remote</code><a href="#24-nebula-param-remote" class="hash-link" aria-label="24-nebula-param-remote的直接链接" title="24-nebula-param-remote的直接链接" translate="no">​</a></h3>
+<p>这一层提供远程代理实现，适用于参数中心独立部署时的服务消费方。</p>
+<p>它的价值在于：</p>
+<ul>
+<li class="">业务系统仍然可以面向 <code>ISystemParamService</code> 编程</li>
+<li class="">业务侧不需要手工拼接参数中心 HTTP 请求</li>
+<li class="">切换本地模式和远程模式时，业务层改动较小</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="25-nebula-param-service">2.5 <code>nebula-param-service</code><a href="#25-nebula-param-service" class="hash-link" aria-label="25-nebula-param-service的直接链接" title="25-nebula-param-service的直接链接" translate="no">​</a></h3>
+<p>这一层是独立参数中心服务入口。</p>
+<p>它的职责不是新增业务逻辑，而是把 local + core 组合成可独立部署的参数中心服务。</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="3-参数模型设计">3. 参数模型设计<a href="#3-参数模型设计" class="hash-link" aria-label="3. 参数模型设计的直接链接" title="3. 参数模型设计的直接链接" translate="no">​</a></h2>
+<p><code>SystemParamEntity</code> 当前映射表为 <code>sys_param</code>，字段设计体现了它不是单纯的 <code>param_key / param_value</code> 二元模型，而是一个可治理的系统参数定义。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="31-基础标识字段">3.1 基础标识字段<a href="#31-基础标识字段" class="hash-link" aria-label="3.1 基础标识字段的直接链接" title="3.1 基础标识字段的直接链接" translate="no">​</a></h3>
+<ul>
+<li class=""><code>paramKey</code>：参数键，唯一约束</li>
+<li class=""><code>paramName</code>：参数名称</li>
+<li class=""><code>description</code>：参数说明</li>
+<li class=""><code>moduleCode</code>：所属模块编码</li>
+<li class=""><code>displayOrder</code>：展示顺序</li>
+</ul>
+<p>这些字段解决的是“这个参数是谁、给谁看、按什么顺序展示”的问题。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="32-值与类型字段">3.2 值与类型字段<a href="#32-值与类型字段" class="hash-link" aria-label="3.2 值与类型字段的直接链接" title="3.2 值与类型字段的直接链接" translate="no">​</a></h3>
+<ul>
+<li class=""><code>paramValue</code>：当前参数值</li>
+<li class=""><code>dataType</code>：参数数据类型</li>
+<li class=""><code>defaultValue</code>：默认值</li>
+<li class=""><code>optionCode</code>：选项编码</li>
+</ul>
+<p>这些字段解决的是“这个参数应该按什么规则解释”的问题。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="33-校验字段">3.3 校验字段<a href="#33-校验字段" class="hash-link" aria-label="3.3 校验字段的直接链接" title="3.3 校验字段的直接链接" translate="no">​</a></h3>
+<ul>
+<li class=""><code>minValue / maxValue</code></li>
+<li class=""><code>minLength / maxLength</code></li>
+<li class=""><code>validatorRegex / validatorMessage</code></li>
+</ul>
+<p>这些字段解决的是“参数值是不是合法”的问题。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="34-前端治理字段">3.4 前端治理字段<a href="#34-前端治理字段" class="hash-link" aria-label="3.4 前端治理字段的直接链接" title="3.4 前端治理字段的直接链接" translate="no">​</a></h3>
+<ul>
+<li class=""><code>renderEnabled</code></li>
+<li class=""><code>placeholder</code></li>
+<li class=""><code>visibleFlag</code></li>
+<li class=""><code>editableFlag</code></li>
+</ul>
+<p>这些字段说明参数模块并不只给后端程序员使用，还带有面向前端设置页和后台配置中心的建模意图。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="35-安全与生命周期字段">3.5 安全与生命周期字段<a href="#35-安全与生命周期字段" class="hash-link" aria-label="3.5 安全与生命周期字段的直接链接" title="3.5 安全与生命周期字段的直接链接" translate="no">​</a></h3>
+<ul>
+<li class=""><code>sensitiveFlag</code></li>
+<li class=""><code>builtinFlag</code></li>
+<li class=""><code>deletedFlag</code></li>
+</ul>
+<p>这些字段分别对应：</p>
+<ul>
+<li class="">敏感参数值需要特殊处理</li>
+<li class="">内建参数不应被随意删除</li>
+<li class="">删除采用软删除，而不是物理删除</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="4-数据类型校验设计">4. 数据类型校验设计<a href="#4-数据类型校验设计" class="hash-link" aria-label="4. 数据类型校验设计的直接链接" title="4. 数据类型校验设计的直接链接" translate="no">​</a></h2>
+<p><code>SystemParamServiceImpl</code> 的核心设计之一，是在参数保存和批量更新时统一走校验逻辑，而不是让非法值先落库再让读取方兜底。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="41-校验入口">4.1 校验入口<a href="#41-校验入口" class="hash-link" aria-label="4.1 校验入口的直接链接" title="4.1 校验入口的直接链接" translate="no">​</a></h3>
+<p>创建和更新参数时，会先统一调用：</p>
+<ul>
+<li class=""><code>validateBeforeSave(...)</code></li>
+</ul>
+<p>该方法会串联以下检查：</p>
+<ol>
+<li class=""><code>validateDataType(dataType)</code></li>
+<li class=""><code>validateRange(minValue, maxValue)</code></li>
+<li class=""><code>validateLengthRange(minLength, maxLength)</code></li>
+<li class=""><code>validateRegex(validatorRegex)</code></li>
+<li class=""><code>validateValueByDataType(...)</code></li>
+</ol>
+<p>也就是说，系统同时校验：</p>
+<ul>
+<li class="">元数据配置是否合理</li>
+<li class="">当前参数值本身是否符合配置要求</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="42-string-类型">4.2 STRING 类型<a href="#42-string-类型" class="hash-link" aria-label="4.2 STRING 类型的直接链接" title="4.2 STRING 类型的直接链接" translate="no">​</a></h3>
+<p><code>STRING</code> 类型当前支持：</p>
+<ul>
+<li class="">最小长度</li>
+<li class="">最大长度</li>
+<li class="">正则表达式校验</li>
+</ul>
+<p>适合场景：</p>
+<ul>
+<li class="">平台标题</li>
+<li class="">URL 前缀</li>
+<li class="">编码规则</li>
+<li class="">JSON 字符串配置</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="43-int--double-类型">4.3 INT / DOUBLE 类型<a href="#43-int--double-类型" class="hash-link" aria-label="4.3 INT / DOUBLE 类型的直接链接" title="4.3 INT / DOUBLE 类型的直接链接" translate="no">​</a></h3>
+<p>数值类型当前支持：</p>
+<ul>
+<li class="">最小值</li>
+<li class="">最大值</li>
+<li class="">格式合法性校验</li>
+</ul>
+<p>适合场景：</p>
+<ul>
+<li class="">登录失败次数上限</li>
+<li class="">超时时间</li>
+<li class="">默认分页大小</li>
+<li class="">比例系数与阈值</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="44-boolean-类型">4.4 BOOLEAN 类型<a href="#44-boolean-类型" class="hash-link" aria-label="4.4 BOOLEAN 类型的直接链接" title="4.4 BOOLEAN 类型的直接链接" translate="no">​</a></h3>
+<p>布尔类型要求值必须能解析为：</p>
+<ul>
+<li class=""><code>true</code></li>
+<li class=""><code>false</code></li>
+</ul>
+<p>这意味着它适合承载各种功能开关，而不会因为录入了 <code>1/0/yes/no</code> 这类非标准值造成语义不一致。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="45-single--multiple-类型">4.5 SINGLE / MULTIPLE 类型<a href="#45-single--multiple-类型" class="hash-link" aria-label="4.5 SINGLE / MULTIPLE 类型的直接链接" title="4.5 SINGLE / MULTIPLE 类型的直接链接" translate="no">​</a></h3>
+<p>这两类参数不是自由输入，而是依赖 <code>optionCode</code> 关联字典模块的选项列表：</p>
+<ul>
+<li class=""><code>SINGLE</code>：单选</li>
+<li class=""><code>MULTIPLE</code>：多选，通常为逗号分隔值集合</li>
+</ul>
+<p>服务层会调用 <code>IDictService.listDictItems()</code> 拉取合法选项，再验证当前值是否落在可选集合中。</p>
+<p>这使参数模块和字典模块形成了一个很实用的组合：</p>
+<blockquote>
+<p><strong>字典模块负责维护“可选项全集”，参数模块负责维护“当前选了哪个或哪些值”。</strong></p>
+</blockquote>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="5-参数维护流程设计">5. 参数维护流程设计<a href="#5-参数维护流程设计" class="hash-link" aria-label="5. 参数维护流程设计的直接链接" title="5. 参数维护流程设计的直接链接" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="51-创建参数">5.1 创建参数<a href="#51-创建参数" class="hash-link" aria-label="5.1 创建参数的直接链接" title="5.1 创建参数的直接链接" translate="no">​</a></h3>
+<p><code>createSystemParam</code> 的核心流程是：</p>
+<ol>
+<li class="">校验 <code>paramKey</code> 是否唯一</li>
+<li class="">校验参数值与参数元数据是否合法</li>
+<li class="">构建 <code>SystemParamEntity</code></li>
+<li class="">写入数据库</li>
+<li class="">清理按 key 读取缓存</li>
+</ol>
+<p>设计意图：</p>
+<ul>
+<li class="">从入口阻断重复参数键</li>
+<li class="">把非法参数配置挡在落库前</li>
+<li class="">保证后续按 key 读取不会读到脏数据</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="52-更新参数">5.2 更新参数<a href="#52-更新参数" class="hash-link" aria-label="5.2 更新参数的直接链接" title="5.2 更新参数的直接链接" translate="no">​</a></h3>
+<p><code>updateSystemParam</code> 的核心流程是：</p>
+<ol>
+<li class="">读取参数实体，不存在则报错</li>
+<li class="">再次执行完整校验</li>
+<li class="">更新元数据和参数值</li>
+<li class="">持久化</li>
+<li class="">清理缓存</li>
+</ol>
+<p>它的特点是：</p>
+<ul>
+<li class="">更新不是只改 <code>paramValue</code></li>
+<li class="">参数定义本身也可以被维护</li>
+<li class="">每次更新后都保证缓存失效</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="53-按-key-保存或更新参数">5.3 按 key 保存或更新参数<a href="#53-按-key-保存或更新参数" class="hash-link" aria-label="5.3 按 key 保存或更新参数的直接链接" title="5.3 按 key 保存或更新参数的直接链接" translate="no">​</a></h3>
+<p><code>saveOrUpdateSystemParamByKey</code> 的设计更偏向“平台内部程序化写参数”的场景。</p>
+<p>核心流程：</p>
+<ol>
+<li class="">按 key 查参数</li>
+<li class="">不存在就新建</li>
+<li class="">已存在就更新</li>
+<li class="">清理缓存</li>
+</ol>
+<p>这类接口很适合：</p>
+<ul>
+<li class="">frontend 模块保存自己的平台配置</li>
+<li class="">各业务模块写入模块级默认参数</li>
+<li class="">启动初始化时自动补齐缺失参数</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="6-按键读取与缓存设计">6. 按键读取与缓存设计<a href="#6-按键读取与缓存设计" class="hash-link" aria-label="6. 按键读取与缓存设计的直接链接" title="6. 按键读取与缓存设计的直接链接" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="61-按-key-读取字符串">6.1 按 key 读取字符串<a href="#61-按-key-读取字符串" class="hash-link" aria-label="6.1 按 key 读取字符串的直接链接" title="6.1 按 key 读取字符串的直接链接" translate="no">​</a></h3>
+<p><code>getParamValueByKey(paramKey)</code> 是最基础的读取方式。</p>
+<p>它返回原始字符串值，适合：</p>
+<ul>
+<li class="">保留业务自己解释值含义</li>
+<li class="">读取 JSON 字符串或复杂文本配置</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="62-按-key-读取布尔与整数">6.2 按 key 读取布尔与整数<a href="#62-按-key-读取布尔与整数" class="hash-link" aria-label="6.2 按 key 读取布尔与整数的直接链接" title="6.2 按 key 读取布尔与整数的直接链接" translate="no">​</a></h3>
+<p>在原始字符串读取之上，模块还提供：</p>
+<ul>
+<li class=""><code>getBooleanParamByKey</code></li>
+<li class=""><code>getIntegerParamByKey</code></li>
+</ul>
+<p>这样做的价值是：</p>
+<ul>
+<li class="">把常见类型转换封装在参数模块内</li>
+<li class="">避免业务方各自重复解析和处理异常</li>
+<li class="">对非法值统一抛出参数错误</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="63-缓存设计">6.3 缓存设计<a href="#63-缓存设计" class="hash-link" aria-label="6.3 缓存设计的直接链接" title="6.3 缓存设计的直接链接" translate="no">​</a></h3>
+<p>当前核心缓存为：</p>
+<ul>
+<li class=""><code>systemParamByKey</code></li>
+</ul>
+<p>在以下操作完成后会主动清理对应缓存：</p>
+<ul>
+<li class="">create</li>
+<li class="">update</li>
+<li class="">delete</li>
+<li class="">saveOrUpdateByKey</li>
+<li class="">batchUpdateParamValues</li>
+</ul>
+<p>也就是说，参数模块的读取模型是：</p>
+<blockquote>
+<p><strong>读尽量走缓存，写完立即失效。</strong></p>
+</blockquote>
+<p>这非常适合“读多写少”的系统参数场景。</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="7-按模块展示与批量更新设计">7. 按模块展示与批量更新设计<a href="#7-按模块展示与批量更新设计" class="hash-link" aria-label="7. 按模块展示与批量更新设计的直接链接" title="7. 按模块展示与批量更新设计的直接链接" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="71-按模块展示">7.1 按模块展示<a href="#71-按模块展示" class="hash-link" aria-label="7.1 按模块展示的直接链接" title="7.1 按模块展示的直接链接" translate="no">​</a></h3>
+<p><code>listParamsByModule(moduleCode)</code> 的查询条件里，当前明确只返回：</p>
+<ul>
+<li class="">指定 <code>moduleCode</code></li>
+<li class=""><code>visibleFlag = true</code></li>
+<li class="">按 <code>displayOrder</code> 排序</li>
+</ul>
+<p>这说明它不是面向后台审计全量参数的接口，而更像“给设置页渲染一组当前可展示参数”的接口。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="72-批量更新参数值">7.2 批量更新参数值<a href="#72-批量更新参数值" class="hash-link" aria-label="7.2 批量更新参数值的直接链接" title="7.2 批量更新参数值的直接链接" translate="no">​</a></h3>
+<p><code>batchUpdateParamValues</code> 的设计非常适合后台设置页：</p>
+<ol>
+<li class="">前端一次提交多个 <code>paramKey + paramValue</code></li>
+<li class="">服务端逐条处理</li>
+<li class="">每条结果都记录成功或失败</li>
+<li class="">返回成功数、失败数和逐项信息</li>
+</ol>
+<p>它还有两个关键约束：</p>
+<ul>
+<li class="">参数不存在时不会静默忽略</li>
+<li class=""><code>editableFlag != true</code> 时会拒绝修改</li>
+</ul>
+<p>这使“页面一键保存设置”具备更稳定的治理能力，而不是所有参数都能随便改。</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="8-错误码与治理策略">8. 错误码与治理策略<a href="#8-错误码与治理策略" class="hash-link" aria-label="8. 错误码与治理策略的直接链接" title="8. 错误码与治理策略的直接链接" translate="no">​</a></h2>
+<p>从 <code>ParamErrorInfo</code> 可确认，当前主要错误包括：</p>
+<ul>
+<li class="">参数键已存在</li>
+<li class="">参数不存在</li>
+<li class="">参数值与数据类型不匹配</li>
+<li class="">参数可选项配置不合法</li>
+<li class="">参数最小值不能大于最大值</li>
+</ul>
+<p>这类错误码设计反映出模块最关心的两个问题：</p>
+<ol>
+<li class=""><strong>参数定义是否合理</strong></li>
+<li class=""><strong>参数值是否符合定义</strong></li>
+</ol>
+<p>因此它的设计重点不是复杂权限编排，而是“把运行期配置数据治理好”。</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="9-本地--远程模式切换设计">9. 本地 / 远程模式切换设计<a href="#9-本地--远程模式切换设计" class="hash-link" aria-label="9. 本地 / 远程模式切换设计的直接链接" title="9. 本地 / 远程模式切换设计的直接链接" translate="no">​</a></h2>
+<p>从配置和模块守卫可以确认，param 模块明确支持两类运行方式。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="91-local">9.1 local<a href="#91-local" class="hash-link" aria-label="9.1 local的直接链接" title="9.1 local的直接链接" translate="no">​</a></h3>
+<ul>
+<li class="">Controller 在当前应用中直接生效</li>
+<li class="">Service 使用本地实现</li>
+<li class="">适合单体应用或参数中心不拆分的场景</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="92-remote">9.2 remote<a href="#92-remote" class="hash-link" aria-label="9.2 remote的直接链接" title="9.2 remote的直接链接" translate="no">​</a></h3>
+<ul>
+<li class="">当前应用只依赖 remote 代理</li>
+<li class="">通过 <code>service-name</code> 或 <code>service-url</code> 访问独立参数服务</li>
+<li class="">适合多个业务系统共享一套参数中心</li>
+</ul>
+<p>这种设计的价值在于：</p>
+<blockquote>
+<p><strong>业务侧依旧围绕同一套参数 service 和 DTO 契约编程，而不是随着部署方式切换重写参数调用逻辑。</strong></p>
+</blockquote>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="10-小结">10. 小结<a href="#10-小结" class="hash-link" aria-label="10. 小结的直接链接" title="10. 小结的直接链接" translate="no">​</a></h2>
+<p>Nebula Param 的实现可以概括为下面几条：</p>
+<ol>
+<li class=""><strong>参数不是简单字符串键值，而是有完整元数据和治理属性的配置模型</strong></li>
+<li class=""><strong>保存参数时统一完成类型、范围、长度、格式和选项校验</strong></li>
+<li class=""><strong>读取参数时支持按 key 获取字符串、布尔和整数值</strong></li>
+<li class=""><strong>按模块加载和批量更新使它天然适合做后台设置页</strong></li>
+<li class=""><strong>缓存围绕按 key 读取构建，写后立即失效</strong></li>
+<li class=""><strong>与字典模块协作后，可以把“参数值必须从可选项中选”这类场景治理得更稳</strong></li>
+</ol>
+<p>这套设计使 param 模块既能服务于业务代码中的运行期配置读取，也能覆盖后台系统设置、前端配置中心和模块化参数管理等更复杂的场景。</p></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_tsoH"><a href="https://github.com/yunqilee69/cludix-doc/tree/master/docs/nebula/param/design-and-implementation.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Bcmd" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>编辑此页</a></div><div class="col lastUpdated_T7TT"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="文件选项卡"><a class="pagination-nav__link pagination-nav__link--prev" href="/docs/nebula/param/ddl"><div class="pagination-nav__sublabel">上一页</div><div class="pagination-nav__label">Nebula Param 建表语句</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/docs/nebula/param/overview"><div class="pagination-nav__sublabel">下一页</div><div class="pagination-nav__label">Nebula Param 模块总览</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_Tz3h thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#1-设计目标" class="table-of-contents__link toc-highlight">1. 设计目标</a></li><li><a href="#2-分层结构" class="table-of-contents__link toc-highlight">2. 分层结构</a><ul><li><a href="#21-nebula-param-api" class="table-of-contents__link toc-highlight">2.1 <code>nebula-param-api</code></a></li><li><a href="#22-nebula-param-core" class="table-of-contents__link toc-highlight">2.2 <code>nebula-param-core</code></a></li><li><a href="#23-nebula-param-local" class="table-of-contents__link toc-highlight">2.3 <code>nebula-param-local</code></a></li><li><a href="#24-nebula-param-remote" class="table-of-contents__link toc-highlight">2.4 <code>nebula-param-remote</code></a></li><li><a href="#25-nebula-param-service" class="table-of-contents__link toc-highlight">2.5 <code>nebula-param-service</code></a></li></ul></li><li><a href="#3-参数模型设计" class="table-of-contents__link toc-highlight">3. 参数模型设计</a><ul><li><a href="#31-基础标识字段" class="table-of-contents__link toc-highlight">3.1 基础标识字段</a></li><li><a href="#32-值与类型字段" class="table-of-contents__link toc-highlight">3.2 值与类型字段</a></li><li><a href="#33-校验字段" class="table-of-contents__link toc-highlight">3.3 校验字段</a></li><li><a href="#34-前端治理字段" class="table-of-contents__link toc-highlight">3.4 前端治理字段</a></li><li><a href="#35-安全与生命周期字段" class="table-of-contents__link toc-highlight">3.5 安全与生命周期字段</a></li></ul></li><li><a href="#4-数据类型校验设计" class="table-of-contents__link toc-highlight">4. 数据类型校验设计</a><ul><li><a href="#41-校验入口" class="table-of-contents__link toc-highlight">4.1 校验入口</a></li><li><a href="#42-string-类型" class="table-of-contents__link toc-highlight">4.2 STRING 类型</a></li><li><a href="#43-int--double-类型" class="table-of-contents__link toc-highlight">4.3 INT / DOUBLE 类型</a></li><li><a href="#44-boolean-类型" class="table-of-contents__link toc-highlight">4.4 BOOLEAN 类型</a></li><li><a href="#45-single--multiple-类型" class="table-of-contents__link toc-highlight">4.5 SINGLE / MULTIPLE 类型</a></li></ul></li><li><a href="#5-参数维护流程设计" class="table-of-contents__link toc-highlight">5. 参数维护流程设计</a><ul><li><a href="#51-创建参数" class="table-of-contents__link toc-highlight">5.1 创建参数</a></li><li><a href="#52-更新参数" class="table-of-contents__link toc-highlight">5.2 更新参数</a></li><li><a href="#53-按-key-保存或更新参数" class="table-of-contents__link toc-highlight">5.3 按 key 保存或更新参数</a></li></ul></li><li><a href="#6-按键读取与缓存设计" class="table-of-contents__link toc-highlight">6. 按键读取与缓存设计</a><ul><li><a href="#61-按-key-读取字符串" class="table-of-contents__link toc-highlight">6.1 按 key 读取字符串</a></li><li><a href="#62-按-key-读取布尔与整数" class="table-of-contents__link toc-highlight">6.2 按 key 读取布尔与整数</a></li><li><a href="#63-缓存设计" class="table-of-contents__link toc-highlight">6.3 缓存设计</a></li></ul></li><li><a href="#7-按模块展示与批量更新设计" class="table-of-contents__link toc-highlight">7. 按模块展示与批量更新设计</a><ul><li><a href="#71-按模块展示" class="table-of-contents__link toc-highlight">7.1 按模块展示</a></li><li><a href="#72-批量更新参数值" class="table-of-contents__link toc-highlight">7.2 批量更新参数值</a></li></ul></li><li><a href="#8-错误码与治理策略" class="table-of-contents__link toc-highlight">8. 错误码与治理策略</a></li><li><a href="#9-本地--远程模式切换设计" class="table-of-contents__link toc-highlight">9. 本地 / 远程模式切换设计</a><ul><li><a href="#91-local" class="table-of-contents__link toc-highlight">9.1 local</a></li><li><a href="#92-remote" class="table-of-contents__link toc-highlight">9.2 remote</a></li></ul></li><li><a href="#10-小结" class="table-of-contents__link toc-highlight">10. 小结</a></li></ul></div></div></div></div></main></div></div></div></div>
+</body>
+</html>

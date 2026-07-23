@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="zh" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-nebula/storage/design-and-implementation" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">Nebula Storage 设计与实现 | 云星</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://yunqilee69.github.io/img/docusaurus-social-card.jpg"><meta data-rh="true" name="twitter:image" content="https://yunqilee69.github.io/img/docusaurus-social-card.jpg"><meta data-rh="true" property="og:url" content="https://yunqilee69.github.io/docs/nebula/storage/design-and-implementation"><meta data-rh="true" property="og:locale" content="zh"><meta data-rh="true" name="docusaurus_locale" content="zh"><meta data-rh="true" name="docsearch:language" content="zh"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Nebula Storage 设计与实现 | 云星"><meta data-rh="true" name="description" content="1. 设计目标"><meta data-rh="true" property="og:description" content="1. 设计目标"><link data-rh="true" rel="icon" href="/img/favicon.ico"><link data-rh="true" rel="canonical" href="https://yunqilee69.github.io/docs/nebula/storage/design-and-implementation"><link data-rh="true" rel="alternate" href="https://yunqilee69.github.io/docs/nebula/storage/design-and-implementation" hreflang="zh"><link data-rh="true" rel="alternate" href="https://yunqilee69.github.io/docs/nebula/storage/design-and-implementation" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Nebula Storage 模块","item":"https://yunqilee69.github.io/docs/nebula/storage"},{"@type":"ListItem","position":2,"name":"Nebula Storage 设计与实现","item":"https://yunqilee69.github.io/docs/nebula/storage/design-and-implementation"}]}</script><link rel="alternate" type="application/rss+xml" href="/blog/rss.xml" title="云星 RSS Feed">
+<link rel="alternate" type="application/atom+xml" href="/blog/atom.xml" title="云星 Atom Feed"><link rel="stylesheet" href="/assets/css/styles.c4124d11.css">
+<script src="/assets/js/runtime~main.137d48a9.js" defer="defer"></script>
+<script src="/assets/js/main.825f6007.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")),document.documentElement.setAttribute("data-theme-choice",t||"system")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><link rel="preload" as="image" href="/img/logo.png"><div role="region" aria-label="跳到主要内容"><a class="skipToContent_db63" href="#__docusaurus_skipToContent_fallback">跳到主要内容</a></div><nav aria-label="主导航" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="切换导航栏" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/logo.png" alt="My Site Logo" class="themedComponent_h8q_ themedComponent--light_T97P"><img src="/img/logo.png" alt="My Site Logo" class="themedComponent_h8q_ themedComponent--dark_pG3C"></div><b class="navbar__title text--truncate">云星</b></a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><div class="navbarSearchContainer_cQc8"><div class="navbar__search searchBarContainer_uP9J" dir="ltr"><input placeholder="搜索" aria-label="Search" class="navbar__search-input searchInput_DUs6" value=""><div class="loadingRing_d1U1 searchBarLoadingRing_UWur"><div></div><div></div><div></div><div></div></div></div></div><a class="navbar__item navbar__link" href="/blog">专题</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/docs/nebula/auth">Nebula</a><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link">教程</a><ul class="dropdown__menu"><li><a class="dropdown__link" href="/docs/tutorials/linux/">Linux</a></li><li><a class="dropdown__link" href="/docs/tutorials/windows/">Windows</a></li><li><a class="dropdown__link" href="/docs/tutorials/macos/">macOS</a></li><li><a class="dropdown__link" href="/docs/tutorials/docker/">Docker</a></li><li><a class="dropdown__link" href="/docs/tutorials/k8s/">Kubernetes</a></li><li><a class="dropdown__link" href="/docs/tutorials/ci/">CI/CD</a></li><li><a class="dropdown__link" href="/docs/tutorials/java/">Java</a></li><li><a class="dropdown__link" href="/docs/tutorials/database/">数据库</a></li><li><a class="dropdown__link" href="/docs/tutorials/network/">网络</a></li><li><a class="dropdown__link" href="/docs/tutorials/other/">其他</a></li></ul></div><div class="navbar__item dropdown dropdown--hoverable dropdown--right"><a href="#" aria-haspopup="true" aria-expanded="false" role="button" class="navbar__link">踩坑</a><ul class="dropdown__menu"><li><a class="dropdown__link" href="/docs/troubleshooting/linux/">Linux</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/windows/">Windows</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/macos/">macOS</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/docker/">Docker</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/k8s/">Kubernetes</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/ci/">CI/CD</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/java/">Java</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/database/">数据库</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/network/">网络</a></li><li><a class="dropdown__link" href="/docs/troubleshooting/other/">其他</a></li></ul></div><div class="toggle_e78C colorModeToggle_JRhw"><button class="clean-btn toggleButton_jaTG toggleButtonDisabled_Bzt3" type="button" disabled="" title="system mode" aria-label="切换浅色/暗黑模式（当前为system mode）"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_NHIS lightToggleIcon_cV2k"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_NHIS darkToggleIcon_Xmqk"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_NHIS systemToggleIcon_Q0Jw"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_dZTL"><div class="docsWrapper_CMoq"><button aria-label="回到顶部" class="clean-btn theme-back-to-top-button backToTopButton_lQ6J" type="button"></button><div class="docRoot_tSSZ"><aside class="theme-doc-sidebar-container docSidebarContainer_ds5n"><div class="sidebarViewport_jPS2"><div class="sidebar_OeBc"><nav aria-label="文档侧边栏" class="menu thin-scrollbar menu_Cas_"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_tA5m menu__link menu__link--sublist" href="/docs/nebula/auth"><span title="Nebula Auth 模块" class="categoryLinkLabel_sTtl">Nebula Auth 模块</span></a><button aria-label="展开侧边栏分类 &#x27;Nebula Auth 模块&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_tA5m menu__link menu__link--sublist" href="/docs/nebula/design"><span title="设计说明" class="categoryLinkLabel_sTtl">设计说明</span></a><button aria-label="展开侧边栏分类 &#x27;设计说明&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_tA5m menu__link menu__link--sublist" href="/docs/nebula/dict"><span title="Nebula Dict 模块" class="categoryLinkLabel_sTtl">Nebula Dict 模块</span></a><button aria-label="展开侧边栏分类 &#x27;Nebula Dict 模块&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_tA5m menu__link menu__link--sublist" href="/docs/nebula/frontend"><span title="Nebula Frontend 模块" class="categoryLinkLabel_sTtl">Nebula Frontend 模块</span></a><button aria-label="展开侧边栏分类 &#x27;Nebula Frontend 模块&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/nebula"><span title="Nebula 项目" class="linkLabel_Grs0">Nebula 项目</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_tA5m menu__link menu__link--sublist" href="/docs/nebula/param"><span title="Nebula Param 模块" class="categoryLinkLabel_sTtl">Nebula Param 模块</span></a><button aria-label="展开侧边栏分类 &#x27;Nebula Param 模块&#x27;" aria-expanded="false" type="button" class="clean-btn menu__caret"></button></div></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/docs/nebula/spec"><span title="项目分层对象命名规约说明书" class="linkLabel_Grs0">项目分层对象命名规约说明书</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_tA5m menu__link menu__link--sublist menu__link--active" href="/docs/nebula/storage"><span title="Nebula Storage 模块" class="categoryLinkLabel_sTtl">Nebula Storage 模块</span></a><button aria-label="折叠侧边栏分类 &#x27;Nebula Storage 模块&#x27;" aria-expanded="true" type="button" class="clean-btn menu__caret"></button></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/nebula/storage/api-reference"><span title="Nebula Storage 接口信息" class="linkLabel_Grs0">Nebula Storage 接口信息</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/nebula/storage/business-capabilities"><span title="Nebula Storage 业务功能" class="linkLabel_Grs0">Nebula Storage 业务功能</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/nebula/storage/configuration"><span title="Nebula Storage 配置说明" class="linkLabel_Grs0">Nebula Storage 配置说明</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/nebula/storage/ddl"><span title="Nebula Storage 建表语句" class="linkLabel_Grs0">Nebula Storage 建表语句</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/docs/nebula/storage/design-and-implementation"><span title="Nebula Storage 设计与实现" class="linkLabel_Grs0">Nebula Storage 设计与实现</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/nebula/storage/overview"><span title="Nebula Storage 模块总览" class="linkLabel_Grs0">Nebula Storage 模块总览</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/docs/nebula/storage/usage-guide"><span title="Nebula Storage 使用方式" class="linkLabel_Grs0">Nebula Storage 使用方式</span></a></li></ul></li></ul></nav></div></div></aside><main class="docMainContainer_QKg6"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_gcse"><div class="docItemContainer_CtD3"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_T6to" aria-label="页面路径"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="主页面" class="breadcrumbs__link" href="/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_Eqkm"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><a class="breadcrumbs__link" href="/docs/nebula/storage"><span>Nebula Storage 模块</span></a></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">Nebula Storage 设计与实现</span></li></ul></nav><div class="tocCollapsible_NCmR theme-doc-toc-mobile tocMobile_ZeX1"><button type="button" class="clean-btn tocCollapsibleButton_gDea">本页总览</button></div><div class="theme-doc-markdown markdown"><header><h1>Nebula Storage 设计与实现</h1></header>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="1-设计目标">1. 设计目标<a href="#1-设计目标" class="hash-link" aria-label="1. 设计目标的直接链接" title="1. 设计目标的直接链接" translate="no">​</a></h2>
+<p><code>nebula-storage</code> 的设计目标不是只解决“文件能不能传上来”，而是同时解决下面几个实际问题：</p>
+<ul>
+<li class="">上传过程如何支持普通文件和分片文件</li>
+<li class="">上传完成后如何与业务实体建立归属关系</li>
+<li class="">正式文件如何避免重复存储</li>
+<li class="">下载如何区分登录态下载和可分享下载</li>
+<li class="">二进制内容如何在 filesystem / db / minio 之间切换</li>
+<li class="">单体与微服务模式下如何复用同一套契约</li>
+</ul>
+<p>因此它的设计是“<strong>两阶段上传模型 + 存储 provider 抽象 + 可切换接入模式</strong>”的组合。</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="2-分层结构">2. 分层结构<a href="#2-分层结构" class="hash-link" aria-label="2. 分层结构的直接链接" title="2. 分层结构的直接链接" translate="no">​</a></h2>
+<p>storage 模块遵循 Nebula 的标准分层。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="21-nebula-storage-api">2.1 <code>nebula-storage-api</code><a href="#21-nebula-storage-api" class="hash-link" aria-label="21-nebula-storage-api的直接链接" title="21-nebula-storage-api的直接链接" translate="no">​</a></h3>
+<p>这一层定义稳定契约，主要包括：</p>
+<ul>
+<li class=""><code>IStorageService</code></li>
+<li class=""><code>StoragePermissionChecker</code></li>
+<li class=""><code>model.command</code></li>
+<li class=""><code>model.query</code></li>
+<li class=""><code>model.dto</code></li>
+<li class=""><code>constant</code></li>
+<li class="">模块守卫配置</li>
+</ul>
+<p>代表文件：</p>
+<ul>
+<li class=""><code>nebula-storage-api/src/main/java/com/cludix/nebula/storage/service/IStorageService.java</code></li>
+<li class=""><code>nebula-storage-api/src/main/java/com/cludix/nebula/storage/service/StoragePermissionChecker.java</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="22-nebula-storage-core">2.2 <code>nebula-storage-core</code><a href="#22-nebula-storage-core" class="hash-link" aria-label="22-nebula-storage-core的直接链接" title="22-nebula-storage-core的直接链接" translate="no">​</a></h3>
+<p>这一层承载核心实现，主要包括：</p>
+<ul>
+<li class=""><code>StorageServiceImpl</code></li>
+<li class=""><code>StorageUploadTaskDAO</code> / <code>StorageUploadPartDAO</code> / <code>StorageFileDAO</code></li>
+<li class=""><code>StorageUploadTaskEntity</code> / <code>StorageUploadPartEntity</code> / <code>StorageFileEntity</code></li>
+<li class=""><code>StorageContentRepository</code></li>
+<li class=""><code>RoutingStorageContentRepository</code></li>
+<li class=""><code>FileSystemStorageBinaryStore</code> / <code>DatabaseStorageBinaryStore</code> / <code>MinioStorageBinaryStore</code></li>
+<li class=""><code>NebulaStorageAutoConfiguration</code></li>
+<li class=""><code>NebulaStorageProperties</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="23-nebula-storage-local">2.3 <code>nebula-storage-local</code><a href="#23-nebula-storage-local" class="hash-link" aria-label="23-nebula-storage-local的直接链接" title="23-nebula-storage-local的直接链接" translate="no">​</a></h3>
+<p>这一层提供 HTTP 接口，核心入口是：</p>
+<ul>
+<li class=""><code>nebula-storage-local/src/main/java/com/cludix/nebula/storage/controller/StorageController.java</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="24-nebula-storage-remote">2.4 <code>nebula-storage-remote</code><a href="#24-nebula-storage-remote" class="hash-link" aria-label="24-nebula-storage-remote的直接链接" title="24-nebula-storage-remote的直接链接" translate="no">​</a></h3>
+<p>这一层提供远程代理：</p>
+<ul>
+<li class=""><code>StorageFeignClient</code>：定义远程 HTTP 协议</li>
+<li class=""><code>StorageRemoteServiceImpl</code>：实现 <code>IStorageService</code>，内部转调 Feign</li>
+</ul>
+<p>这意味着业务方依旧可以面向 <code>IStorageService</code> 编程，而不用关心底层是本地实现还是远程实现。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="25-nebula-storage-service">2.5 <code>nebula-storage-service</code><a href="#25-nebula-storage-service" class="hash-link" aria-label="25-nebula-storage-service的直接链接" title="25-nebula-storage-service的直接链接" translate="no">​</a></h3>
+<p>这一层是独立服务入口：</p>
+<ul>
+<li class="">启动类：<code>NebulaStorageServiceApplication</code></li>
+<li class="">默认端口：<code>17783</code></li>
+<li class="">当前服务资源目录里包含基础启动配置和测试配置</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="3-两阶段上传模型">3. 两阶段上传模型<a href="#3-两阶段上传模型" class="hash-link" aria-label="3. 两阶段上传模型的直接链接" title="3. 两阶段上传模型的直接链接" translate="no">​</a></h2>
+<p>storage 模块最关键的实现设计，是把上传拆成两个阶段。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="31-第一阶段上传临时内容">3.1 第一阶段：上传临时内容<a href="#31-第一阶段上传临时内容" class="hash-link" aria-label="3.1 第一阶段：上传临时内容的直接链接" title="3.1 第一阶段：上传临时内容的直接链接" translate="no">​</a></h3>
+<p>这一阶段只做“把文件内容安全地接收进系统”，不会直接生成正式业务文件。</p>
+<p>可能的入口包括：</p>
+<ul>
+<li class=""><code>POST /api/storage/upload</code></li>
+<li class=""><code>POST /api/storage/upload-tasks</code></li>
+<li class=""><code>PUT /api/storage/upload-tasks/{taskId}/parts/{partNo}</code></li>
+<li class=""><code>POST /api/storage/upload-tasks/{taskId}/complete</code></li>
+</ul>
+<p>结果是：</p>
+<ul>
+<li class="">生成或更新 <code>storage_upload_task</code></li>
+<li class="">分片场景下生成 <code>storage_upload_part</code></li>
+<li class="">临时文件内容落在 temp 区</li>
+<li class="">任务状态进入 <code>INIT / UPLOADING / COMPLETED / FAILED</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="32-第二阶段绑定转正">3.2 第二阶段：绑定转正<a href="#32-第二阶段绑定转正" class="hash-link" aria-label="3.2 第二阶段：绑定转正的直接链接" title="3.2 第二阶段：绑定转正的直接链接" translate="no">​</a></h3>
+<p>这一阶段通过 <code>bind</code> 把临时上传结果转成正式文件：</p>
+<ul>
+<li class="">校验上传任务是否已经完成</li>
+<li class="">校验业务归属字段 <code>sourceEntity/sourceId</code></li>
+<li class="">生成或复用正式文件存储位置</li>
+<li class="">写入 <code>storage_file</code></li>
+<li class="">更新上传任务的结果文件 ID</li>
+<li class="">发布绑定完成事件，异步清理临时内容</li>
+</ul>
+<p>也就是说：</p>
+<blockquote>
+<p><strong>上传成功不等于正式入库，bind 成功才表示这个文件真正归属某个业务实体。</strong></p>
+</blockquote>
+<p>这样设计的好处是：</p>
+<ul>
+<li class="">上传可以先行完成，不依赖业务表事务立即成功</li>
+<li class="">业务保存失败时，不会直接污染正式文件表</li>
+<li class="">一个统一模型同时支持普通上传和分片上传</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="4-核心实现流程">4. 核心实现流程<a href="#4-核心实现流程" class="hash-link" aria-label="4. 核心实现流程的直接链接" title="4. 核心实现流程的直接链接" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="41-普通上传">4.1 普通上传<a href="#41-普通上传" class="hash-link" aria-label="4.1 普通上传的直接链接" title="4.1 普通上传的直接链接" translate="no">​</a></h3>
+<p><code>StorageServiceImpl#uploadSimpleFile</code> 的核心逻辑是：</p>
+<ol>
+<li class="">创建新的 simple 临时上传任务</li>
+<li class="">根据最终文件名推导扩展名与 MIME 类型</li>
+<li class="">读取文件流内容</li>
+<li class="">写入 temp 存储区：<code>storageContentRepository.storeTemp(...)</code></li>
+<li class="">计算 <code>fileHash</code></li>
+<li class="">更新任务状态为 <code>COMPLETED</code></li>
+</ol>
+<p>这一步之后，系统里只有临时上传任务，还没有正式文件记录。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="42-分片上传">4.2 分片上传<a href="#42-分片上传" class="hash-link" aria-label="4.2 分片上传的直接链接" title="4.2 分片上传的直接链接" translate="no">​</a></h3>
+<p><code>StorageServiceImpl#uploadTaskPart</code> 的核心逻辑是：</p>
+<ol>
+<li class="">读取上传任务</li>
+<li class="">把任务状态更新为 <code>UPLOADING</code></li>
+<li class="">读取分片字节并计算 MD5</li>
+<li class="">查询当前分片是否已存在</li>
+<li class="">如果已存在且哈希不一致，则报错</li>
+<li class="">如果不存在，则写入 temp part 区</li>
+<li class="">更新分片表与上传任务统计</li>
+</ol>
+<p>这里体现了两点设计：</p>
+<ul>
+<li class="">分片上传具备幂等保护</li>
+<li class="">通过 <code>partHash</code> 做内容一致性校验；如果调用方传入 <code>partHash</code>，服务端会在首传和重复上传时都要求它与实际内容一致</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="43-完成上传任务">4.3 完成上传任务<a href="#43-完成上传任务" class="hash-link" aria-label="4.3 完成上传任务的直接链接" title="4.3 完成上传任务的直接链接" translate="no">​</a></h3>
+<p><code>StorageServiceImpl#completeUploadTask</code> 在 chunk 场景下会：</p>
+<ol>
+<li class="">校验分片数量是否齐全</li>
+<li class="">读取所有 part key</li>
+<li class="">调用 <code>mergeTempParts(...)</code> 合并临时分片</li>
+<li class="">删除已合并的临时 part 内容</li>
+<li class="">重新计算完整文件 <code>fileHash</code></li>
+<li class="">根据最终文件名补齐 MIME 类型</li>
+<li class="">将任务状态更新为 <code>COMPLETED</code></li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="44-绑定正式文件">4.4 绑定正式文件<a href="#44-绑定正式文件" class="hash-link" aria-label="4.4 绑定正式文件的直接链接" title="4.4 绑定正式文件的直接链接" translate="no">​</a></h3>
+<p><code>StorageServiceImpl#bindUploadTask</code> 的核心逻辑是：</p>
+<ol>
+<li class="">读取上传任务并确认状态为 <code>COMPLETED</code></li>
+<li class="">校验 <code>sourceEntity</code> 和 <code>sourceId</code></li>
+<li class="">检查该任务是否已经绑定过正式文件</li>
+<li class="">按 <code>fileHash + fileSize</code> 查询是否已有可复用正式文件</li>
+<li class="">若可复用，则复用已有 <code>storageKey</code></li>
+<li class="">若不可复用，则将 temp 内容 promote 到 formal 区</li>
+<li class="">创建 <code>storage_file</code> 记录</li>
+<li class="">回填上传任务的业务归属与结果文件 ID</li>
+<li class="">发布 <code>StorageUploadTaskBoundEvent</code></li>
+</ol>
+<p>其中一个很重要的实现点是：</p>
+<blockquote>
+<p><strong>正式文件支持按 hash + size 复用底层内容，避免重复存储相同文件。</strong></p>
+</blockquote>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="45-删除正式文件">4.5 删除正式文件<a href="#45-删除正式文件" class="hash-link" aria-label="4.5 删除正式文件的直接链接" title="4.5 删除正式文件的直接链接" translate="no">​</a></h3>
+<p><code>StorageServiceImpl#deleteStorageFile</code> 的实现不是简单删数据库，而是：</p>
+<ol>
+<li class="">删除 <code>storage_file</code> 记录</li>
+<li class="">查询是否还有其他文件记录引用同一物理位置</li>
+<li class="">只有引用数为 0 时，才删除真实内容</li>
+</ol>
+<p>这保证了“内容复用”场景下不会误删底层二进制。</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="5-provider-抽象设计">5. provider 抽象设计<a href="#5-provider-抽象设计" class="hash-link" aria-label="5. provider 抽象设计的直接链接" title="5. provider 抽象设计的直接链接" translate="no">​</a></h2>
+<p>storage 模块把二进制内容存储抽象为两层。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="51-storagebinarystore">5.1 <code>StorageBinaryStore</code><a href="#51-storagebinarystore" class="hash-link" aria-label="51-storagebinarystore的直接链接" title="51-storagebinarystore的直接链接" translate="no">​</a></h3>
+<p>这是底层 provider 接口，关注的是最基础的二进制操作，例如：</p>
+<ul>
+<li class="">store</li>
+<li class="">open</li>
+<li class="">delete</li>
+<li class="">type</li>
+<li class="">bucket</li>
+</ul>
+<p>当前已确认实现包括：</p>
+<ul>
+<li class=""><code>FileSystemStorageBinaryStore</code></li>
+<li class=""><code>DatabaseStorageBinaryStore</code></li>
+<li class=""><code>MinioStorageBinaryStore</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="52-storagecontentrepository">5.2 <code>StorageContentRepository</code><a href="#52-storagecontentrepository" class="hash-link" aria-label="52-storagecontentrepository的直接链接" title="52-storagecontentrepository的直接链接" translate="no">​</a></h3>
+<p>这是更贴近业务语义的一层抽象，负责：</p>
+<ul>
+<li class=""><code>storeTemp</code></li>
+<li class=""><code>storeTempPart</code></li>
+<li class=""><code>mergeTempParts</code></li>
+<li class=""><code>promoteToFormal</code></li>
+<li class=""><code>openTemp</code></li>
+<li class=""><code>openFormal</code></li>
+<li class=""><code>deleteTemp</code></li>
+<li class=""><code>deleteFormal</code></li>
+</ul>
+<p>它不是简单“存一份 bytes”，而是把“临时区 / 正式区”的生命周期差异封装起来。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="53-routingstoragecontentrepository">5.3 <code>RoutingStorageContentRepository</code><a href="#53-routingstoragecontentrepository" class="hash-link" aria-label="53-routingstoragecontentrepository的直接链接" title="53-routingstoragecontentrepository的直接链接" translate="no">​</a></h3>
+<p>这是实际路由实现：</p>
+<ul>
+<li class="">temp 一律走本地文件系统临时目录</li>
+<li class="">formal 走配置里的正式 provider</li>
+</ul>
+<p>因此当前设计并不是“temp 也支持 db/minio 随便切”，而是有意做了职责分离：</p>
+<ul>
+<li class=""><strong>temp</strong>：上传过程中的中间态，强调简单、稳定、低延迟</li>
+<li class=""><strong>formal</strong>：正式内容区，强调长期保存和可替换 provider</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="6-配置驱动实现">6. 配置驱动实现<a href="#6-配置驱动实现" class="hash-link" aria-label="6. 配置驱动实现的直接链接" title="6. 配置驱动实现的直接链接" translate="no">​</a></h2>
+<p><code>NebulaStorageProperties</code> 把模块配置拆成三块：</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="61-mode">6.1 <code>mode</code><a href="#61-mode" class="hash-link" aria-label="61-mode的直接链接" title="61-mode的直接链接" translate="no">​</a></h3>
+<ul>
+<li class=""><code>local</code></li>
+<li class=""><code>remote</code></li>
+</ul>
+<p>用于切换存储模块在应用中的运行方式。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="62-tempdir">6.2 <code>tempDir</code><a href="#62-tempdir" class="hash-link" aria-label="62-tempdir的直接链接" title="62-tempdir的直接链接" translate="no">​</a></h3>
+<p>用于上传中间态临时目录，例如：</p>
+<ul>
+<li class="">普通上传的临时文件</li>
+<li class="">分片内容</li>
+<li class="">合并后的临时文件</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="63-content">6.3 <code>content</code><a href="#63-content" class="hash-link" aria-label="63-content的直接链接" title="63-content的直接链接" translate="no">​</a></h3>
+<p>用于正式文件内容区配置：</p>
+<ul>
+<li class=""><code>type=filesystem</code></li>
+<li class=""><code>type=db</code></li>
+<li class=""><code>type=minio</code></li>
+</ul>
+<p>其中 MinIO 还需要：</p>
+<ul>
+<li class=""><code>endpoint</code></li>
+<li class=""><code>accessKey</code></li>
+<li class=""><code>secretKey</code></li>
+<li class=""><code>bucket</code></li>
+<li class=""><code>createBucketIfMissing</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="64-signeddownload">6.4 <code>signedDownload</code><a href="#64-signeddownload" class="hash-link" aria-label="64-signeddownload的直接链接" title="64-signeddownload的直接链接" translate="no">​</a></h3>
+<p>用于控制签名下载：</p>
+<ul>
+<li class="">是否启用</li>
+<li class="">HMAC secret</li>
+<li class="">默认有效期</li>
+<li class="">最大有效期</li>
+<li class="">默认最大下载次数</li>
+<li class="">最大下载次数上限</li>
+</ul>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="7-下载与权限设计">7. 下载与权限设计<a href="#7-下载与权限设计" class="hash-link" aria-label="7. 下载与权限设计的直接链接" title="7. 下载与权限设计的直接链接" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="71-登录态下载">7.1 登录态下载<a href="#71-登录态下载" class="hash-link" aria-label="7.1 登录态下载的直接链接" title="7.1 登录态下载的直接链接" translate="no">​</a></h3>
+<p><code>openFileContent(fileId)</code> 的逻辑是：</p>
+<ol>
+<li class="">查询正式文件</li>
+<li class="">读取当前登录用户</li>
+<li class="">调用 <code>StoragePermissionChecker</code></li>
+<li class="">权限通过后打开正式内容流</li>
+</ol>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="72-签名下载">7.2 签名下载<a href="#72-签名下载" class="hash-link" aria-label="7.2 签名下载的直接链接" title="7.2 签名下载的直接链接" translate="no">​</a></h3>
+<p><code>openSignedFileContent(...)</code> 的逻辑是：</p>
+<ol>
+<li class="">查询正式文件</li>
+<li class="">校验 <code>fileId + filename + expireAt + maxDownloadCount + signature</code></li>
+<li class="">校验通过后打开正式内容流</li>
+</ol>
+<p>签名下载不依赖 <code>Authorization</code>，但签名本身通常是由登录态用户通过 <code>createSignedDownload(...)</code> 预先申请得到。</p>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="73-权限扩展点">7.3 权限扩展点<a href="#73-权限扩展点" class="hash-link" aria-label="7.3 权限扩展点的直接链接" title="7.3 权限扩展点的直接链接" translate="no">​</a></h3>
+<p><code>StoragePermissionChecker</code> 被定义在 api 层，默认实现是：</p>
+<ul>
+<li class=""><code>DefaultStoragePermissionChecker</code></li>
+<li class="">默认直接放行</li>
+</ul>
+<p>这意味着 storage 模块只内置了一个最宽松的基线实现，真正的业务权限规则应该由业务系统自行覆盖，例如按：</p>
+<ul>
+<li class="">单据归属</li>
+<li class="">上传人</li>
+<li class="">组织权限</li>
+<li class="">租户边界</li>
+<li class="">角色范围</li>
+</ul>
+<p>进行更细粒度控制。</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="8-事件与清理机制">8. 事件与清理机制<a href="#8-事件与清理机制" class="hash-link" aria-label="8. 事件与清理机制的直接链接" title="8. 事件与清理机制的直接链接" translate="no">​</a></h2>
+<p>bind 成功后，<code>StorageServiceImpl</code> 会发布：</p>
+<ul>
+<li class=""><code>StorageUploadTaskBoundEvent</code></li>
+</ul>
+<p><code>StorageUploadTaskCleanupHandler</code> 会在两种时机进行清理：</p>
+<ol>
+<li class="">收到绑定完成事件时，立即清理 temp 内容与分片记录</li>
+<li class="">定时任务扫描过期已完成任务，兜底清理残留中间数据</li>
+</ol>
+<p>这说明 storage 模块的 temp 区不是长期存储，而是明确的中间态区域。</p>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="9-本地模式与远程模式">9. 本地模式与远程模式<a href="#9-本地模式与远程模式" class="hash-link" aria-label="9. 本地模式与远程模式的直接链接" title="9. 本地模式与远程模式的直接链接" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="91-本地模式">9.1 本地模式<a href="#91-本地模式" class="hash-link" aria-label="9.1 本地模式的直接链接" title="9.1 本地模式的直接链接" translate="no">​</a></h3>
+<p>业务应用引入 <code>nebula-storage-local</code> 后：</p>
+<ul>
+<li class="">Controller 直接暴露 REST 接口</li>
+<li class=""><code>IStorageService</code> 由 core 中的 <code>StorageServiceImpl</code> 提供实现</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_rLmt" id="92-远程模式">9.2 远程模式<a href="#92-远程模式" class="hash-link" aria-label="9.2 远程模式的直接链接" title="9.2 远程模式的直接链接" translate="no">​</a></h3>
+<p>业务应用引入 <code>nebula-storage-remote</code> 后：</p>
+<ul>
+<li class=""><code>StorageRemoteServiceImpl</code> 实现同一个 <code>IStorageService</code></li>
+<li class="">内部通过 <code>StorageFeignClient</code> 转调 <code>nebula-storage-service</code></li>
+<li class="">文件流会在 remote 层先读成字节，再通过 <code>ByteArrayInputStream</code> 交给调用方</li>
+</ul>
+<p>这个设计延续了 Nebula 的统一模式：</p>
+<blockquote>
+<p><strong>不管本地还是远程，业务侧都尽量只依赖同一套 service 接口和 command/query/dto 契约。</strong></p>
+</blockquote>
+<hr>
+<h2 class="anchor anchorTargetStickyNavbar_rLmt" id="10-小结">10. 小结<a href="#10-小结" class="hash-link" aria-label="10. 小结的直接链接" title="10. 小结的直接链接" translate="no">​</a></h2>
+<p>Nebula Storage 的实现可以概括为下面几条：</p>
+<ol>
+<li class=""><strong>上传先落临时态，绑定后才转正式态</strong></li>
+<li class=""><strong>普通上传与分片上传共用上传任务模型</strong></li>
+<li class=""><strong>正式文件底层内容通过 provider 抽象统一管理</strong></li>
+<li class=""><strong>相同内容支持复用物理存储位置</strong></li>
+<li class=""><strong>删除时按引用计数决定是否删除真实内容</strong></li>
+<li class=""><strong>下载分为登录态下载与签名分享下载两条链路</strong></li>
+<li class=""><strong>权限控制与存储 provider 都提供了扩展点</strong></li>
+</ol>
+<p>这套设计使 storage 模块既能服务于普通后台附件场景，也能覆盖大文件上传、对象存储接入和分享下载等更复杂的业务场景。</p></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_tsoH"><a href="https://github.com/yunqilee69/cludix-doc/tree/master/docs/nebula/storage/design-and-implementation.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Bcmd" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>编辑此页</a></div><div class="col lastUpdated_T7TT"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="文件选项卡"><a class="pagination-nav__link pagination-nav__link--prev" href="/docs/nebula/storage/ddl"><div class="pagination-nav__sublabel">上一页</div><div class="pagination-nav__label">Nebula Storage 建表语句</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/docs/nebula/storage/overview"><div class="pagination-nav__sublabel">下一页</div><div class="pagination-nav__label">Nebula Storage 模块总览</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_Tz3h thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#1-设计目标" class="table-of-contents__link toc-highlight">1. 设计目标</a></li><li><a href="#2-分层结构" class="table-of-contents__link toc-highlight">2. 分层结构</a><ul><li><a href="#21-nebula-storage-api" class="table-of-contents__link toc-highlight">2.1 <code>nebula-storage-api</code></a></li><li><a href="#22-nebula-storage-core" class="table-of-contents__link toc-highlight">2.2 <code>nebula-storage-core</code></a></li><li><a href="#23-nebula-storage-local" class="table-of-contents__link toc-highlight">2.3 <code>nebula-storage-local</code></a></li><li><a href="#24-nebula-storage-remote" class="table-of-contents__link toc-highlight">2.4 <code>nebula-storage-remote</code></a></li><li><a href="#25-nebula-storage-service" class="table-of-contents__link toc-highlight">2.5 <code>nebula-storage-service</code></a></li></ul></li><li><a href="#3-两阶段上传模型" class="table-of-contents__link toc-highlight">3. 两阶段上传模型</a><ul><li><a href="#31-第一阶段上传临时内容" class="table-of-contents__link toc-highlight">3.1 第一阶段：上传临时内容</a></li><li><a href="#32-第二阶段绑定转正" class="table-of-contents__link toc-highlight">3.2 第二阶段：绑定转正</a></li></ul></li><li><a href="#4-核心实现流程" class="table-of-contents__link toc-highlight">4. 核心实现流程</a><ul><li><a href="#41-普通上传" class="table-of-contents__link toc-highlight">4.1 普通上传</a></li><li><a href="#42-分片上传" class="table-of-contents__link toc-highlight">4.2 分片上传</a></li><li><a href="#43-完成上传任务" class="table-of-contents__link toc-highlight">4.3 完成上传任务</a></li><li><a href="#44-绑定正式文件" class="table-of-contents__link toc-highlight">4.4 绑定正式文件</a></li><li><a href="#45-删除正式文件" class="table-of-contents__link toc-highlight">4.5 删除正式文件</a></li></ul></li><li><a href="#5-provider-抽象设计" class="table-of-contents__link toc-highlight">5. provider 抽象设计</a><ul><li><a href="#51-storagebinarystore" class="table-of-contents__link toc-highlight">5.1 <code>StorageBinaryStore</code></a></li><li><a href="#52-storagecontentrepository" class="table-of-contents__link toc-highlight">5.2 <code>StorageContentRepository</code></a></li><li><a href="#53-routingstoragecontentrepository" class="table-of-contents__link toc-highlight">5.3 <code>RoutingStorageContentRepository</code></a></li></ul></li><li><a href="#6-配置驱动实现" class="table-of-contents__link toc-highlight">6. 配置驱动实现</a><ul><li><a href="#61-mode" class="table-of-contents__link toc-highlight">6.1 <code>mode</code></a></li><li><a href="#62-tempdir" class="table-of-contents__link toc-highlight">6.2 <code>tempDir</code></a></li><li><a href="#63-content" class="table-of-contents__link toc-highlight">6.3 <code>content</code></a></li><li><a href="#64-signeddownload" class="table-of-contents__link toc-highlight">6.4 <code>signedDownload</code></a></li></ul></li><li><a href="#7-下载与权限设计" class="table-of-contents__link toc-highlight">7. 下载与权限设计</a><ul><li><a href="#71-登录态下载" class="table-of-contents__link toc-highlight">7.1 登录态下载</a></li><li><a href="#72-签名下载" class="table-of-contents__link toc-highlight">7.2 签名下载</a></li><li><a href="#73-权限扩展点" class="table-of-contents__link toc-highlight">7.3 权限扩展点</a></li></ul></li><li><a href="#8-事件与清理机制" class="table-of-contents__link toc-highlight">8. 事件与清理机制</a></li><li><a href="#9-本地模式与远程模式" class="table-of-contents__link toc-highlight">9. 本地模式与远程模式</a><ul><li><a href="#91-本地模式" class="table-of-contents__link toc-highlight">9.1 本地模式</a></li><li><a href="#92-远程模式" class="table-of-contents__link toc-highlight">9.2 远程模式</a></li></ul></li><li><a href="#10-小结" class="table-of-contents__link toc-highlight">10. 小结</a></li></ul></div></div></div></div></main></div></div></div></div>
+</body>
+</html>
