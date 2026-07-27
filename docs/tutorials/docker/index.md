@@ -7,7 +7,7 @@ title: Docker
 
 ## 目录结构
 
-- [安装 Docker](./install-docker/) - Debian 系统安装 Docker
+- [安装 Docker](./install-docker/) - Debian / Rocky Linux 系统安装 Docker
 - [容器部署](./deployments/) - 各类服务的 Docker Compose 部署文档
 - [使用文档](./usage/) - Docker 使用技巧和指南
 

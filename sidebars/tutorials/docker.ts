@@ -24,6 +24,11 @@ const dockerSidebar: SidebarConfig = [
         id: 'tutorials/docker/install-docker/Debian13离线安装Docker',
         label: 'Debian13 离线安装 Docker',
       },
+      {
+        type: 'doc',
+        id: 'tutorials/docker/install-docker/RockyLinux安装Docker',
+        label: 'Rocky Linux 安装 Docker',
+      },
     ],
   },
   {
