@@ -34,6 +34,7 @@
     "windows",
     "ubuntu",
     "centos",
+    "rocky",
     "installation",
     "deployment",
     "configuration",
