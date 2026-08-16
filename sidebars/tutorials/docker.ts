@@ -139,6 +139,11 @@ const dockerSidebar: SidebarConfig = [
         id: 'tutorials/docker/deployments/RocketMQ部署',
         label: 'RocketMQ',
       },
+      {
+        type: 'doc',
+        id: 'tutorials/docker/deployments/XXL-Job部署',
+        label: 'XXL-Job',
+      },
     ],
   },
   {
