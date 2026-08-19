@@ -3,7 +3,7 @@ title: 麒麟v10 tmpfs权限导致Docker MySQL启动失败
 ---
 本文记录在麒麟v10系统上部署Docker MySQL容器时，因cgroupfs tmpfs目录权限配置问题导致的启动失败及其解决方案。
 
-<!-- truncate -->
+{/* truncate */}
 
 ## 问题背景
 
