@@ -69,7 +69,7 @@ OpenCode 通过 MCP（Model Context Protocol）扩展工具能力：浏览器控
     "model-proxy-mcp": {
       "type": "remote",
       "enabled": true,
-      "url": "http://YOUR_SERVER:33391/mcp"
+      "url": "http://YOUR_SERVER:YOUR_PORT/mcp"
     }
   }
 }
