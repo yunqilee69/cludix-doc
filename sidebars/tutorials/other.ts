@@ -18,6 +18,11 @@ const otherSidebar: SidebarConfig = [
   },
   {
     type: 'doc',
+    id: 'tutorials/other/发布管理',
+    label: '发布管理',
+  },
+  {
+    type: 'doc',
     id: 'tutorials/other/openclaw/index',
     label: 'OpenClaw',
   },
