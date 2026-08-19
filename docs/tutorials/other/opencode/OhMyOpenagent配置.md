@@ -29,22 +29,22 @@ tags: [opencode, configuration]
 ```json
 {
   "agents": {
-    "sisyphus": { "model": "llm-proxy-openai/glm-5" },
-    "sisyphus-junior": { "model": "llm-proxy/gpt-5.6" },
-    "explore": { "model": "llm-proxy-openai/glm-5" },
-    "librarian": { "model": "llm-proxy/gpt-5.6" },
-    "oracle": { "model": "llm-proxy-openai/glm-5" },
-    "metis": { "model": "llm-proxy/gpt-5.6" },
-    "momus": { "model": "llm-proxy/gpt-5.6" }
+    "sisyphus": { "model": "model-proxy-openai/glm-5" },
+    "sisyphus-junior": { "model": "model-proxy/gpt-5.6" },
+    "explore": { "model": "model-proxy-openai/glm-5" },
+    "librarian": { "model": "model-proxy/gpt-5.6" },
+    "oracle": { "model": "model-proxy-openai/glm-5" },
+    "metis": { "model": "model-proxy/gpt-5.6" },
+    "momus": { "model": "model-proxy/gpt-5.6" }
   },
   "categories": {
-    "quick": { "model": "llm-proxy/gpt-5.6" },
-    "deep": { "model": "llm-proxy/gpt-5.6" },
-    "ultrabrain": { "model": "llm-proxy/gpt-5.6" },
-    "visual-engineering": { "model": "llm-proxy/gpt-5.6" },
-    "writing": { "model": "llm-proxy-openai/glm-5" },
-    "unspecified-low": { "model": "llm-proxy-openai/glm-5" },
-    "unspecified-high": { "model": "llm-proxy/gpt-5.6" }
+    "quick": { "model": "model-proxy/gpt-5.6" },
+    "deep": { "model": "model-proxy/gpt-5.6" },
+    "ultrabrain": { "model": "model-proxy/gpt-5.6" },
+    "visual-engineering": { "model": "model-proxy/gpt-5.6" },
+    "writing": { "model": "model-proxy-openai/glm-5" },
+    "unspecified-low": { "model": "model-proxy-openai/glm-5" },
+    "unspecified-high": { "model": "model-proxy/gpt-5.6" }
   }
 }
 ```
