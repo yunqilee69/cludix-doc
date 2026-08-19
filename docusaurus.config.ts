@@ -94,16 +94,8 @@ const config: Config = {
           position: "right",
           items: [
             { label: "Nebula", to: "/docs/nebula/" },
-            {
-              type: "html",
-              value:
-                '<span class="dropdown__link" style="opacity: 0.5; cursor: default;">Cludix TOTP（建设中）</span>',
-            },
-            {
-              type: "html",
-              value:
-                '<span class="dropdown__link" style="opacity: 0.5; cursor: default;">Port Cleaner（建设中）</span>',
-            },
+            { label: "Cludix TOTP", to: "/docs/projects/cludix-totp/" },
+            { label: "Port Cleaner", to: "/docs/projects/port-cleaner/" },
           ],
         },
         {
