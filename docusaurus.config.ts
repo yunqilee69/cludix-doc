@@ -94,8 +94,8 @@ const config: Config = {
           position: "right",
           items: [
             { label: "Nebula", to: "/docs/nebula/" },
-            { label: "Cludix TOTP", to: "/docs/projects/cludix-totp/" },
-            { label: "Port Cleaner", to: "/docs/projects/port-cleaner/" },
+            { label: "Cludix TOTP", to: "/docs/projects/cludix-totp" },
+            { label: "Port Cleaner", to: "/docs/projects/port-cleaner" },
           ],
         },
         {
