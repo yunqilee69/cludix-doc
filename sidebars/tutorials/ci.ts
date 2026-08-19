@@ -24,6 +24,11 @@ const ciSidebar: SidebarConfig = [
         id: 'tutorials/ci/git/git远程分支清理',
         label: 'Git 远程分支清理',
       },
+      {
+        type: 'doc',
+        id: 'tutorials/ci/git/git重复认证问题',
+        label: 'Git 重复认证问题',
+      },
     ],
   },
   {
