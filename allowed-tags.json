@@ -70,6 +70,8 @@
     "webdav",
     "harmonyos",
     "android",
-    "opencode"
+    "opencode",
+    "cludix-totp",
+    "port-cleaner"
   ]
 }
