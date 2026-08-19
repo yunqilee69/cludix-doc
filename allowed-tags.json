@@ -67,6 +67,7 @@
     "dufs",
     "webdav",
     "harmonyos",
-    "android"
+    "android",
+    "opencode"
   ]
 }
