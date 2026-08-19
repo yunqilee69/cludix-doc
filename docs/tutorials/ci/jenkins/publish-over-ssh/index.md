@@ -7,7 +7,7 @@ Publish Over SSH 是 Jenkins 中最常用的部署插件之一。它可以在构
 
 适用于 CI/CD 流水线的"部署"环节——构建完 jar/war/前端静态文件后，自动推送到目标机器并重启服务。
 
-:::tip 前置条件
+:::tip[前置条件]
 使用本插件前，请先完成 [Jenkins SSH 免密配置](../jenkins-ssh-config/)，确保 Jenkins 到目标机器的 SSH 密钥认证已就绪。
 :::
 
@@ -41,7 +41,7 @@ Publish Over SSH 是 Jenkins 中最常用的部署插件之一。它可以在构
 | **Key** | 直接粘贴私钥全文（包含 `-----BEGIN ... PRIVATE KEY-----` 头尾）。**如果填了 Key，Path to key 会被忽略** |
 | **Disable exec** | 勾选后全局禁止执行远程命令，只允许传输文件 |
 
-:::warning 二选一
+:::warning[二选一]
 **Path to key** 和 **Key** 两个字段**只需填一个**。如果两个都填了，以 Key（粘贴的私钥）为准，Path to key 会被忽略。
 :::
 
@@ -75,7 +75,7 @@ Publish Over SSH 是 Jenkins 中最常用的部署插件之一。它可以在构
 | **Path to key** | 该服务器专用的私钥文件路径 |
 | **Key** | 该服务器专用的私钥全文（粘贴） |
 
-:::tip 两种认证方式
+:::tip[两种认证方式]
 - **密钥认证（推荐）**：在 Path to key 或 Key 中填入私钥。如果私钥有口令，在 Passphrase / Password 中填入口令
 - **密码认证**：不填任何 Key 和 Path to key，直接在 Passphrase / Password 中填入登录密码
 :::
@@ -125,7 +125,7 @@ Publish Over SSH 是 Jenkins 中最常用的部署插件之一。它可以在构
    - **Exec timeout (ms)**：命令执行超时时间
    - **Exec in pty**：在伪终端中执行命令（某些命令需要）
 
-:::warning 注意
+:::warning[注意]
 **Source files** 和 **Exec command** 至少填一个。两个都为空时构建会失败。
 :::
 
@@ -178,7 +178,7 @@ pipeline {
 | 某台服务器用不同密钥 | 任意 | 勾选，填入专用私钥 | 专用密钥认证 |
 | 不填任何认证信息 | 留空 | 不勾选 | ❌ 无法连接 |
 
-:::tip 安全建议
+:::tip[安全建议]
 1. 推荐使用**密钥认证**而非密码认证
 2. 如果配置页面可能被非管理员看到，务必给私钥设置口令
 3. 密码和口令在 Jenkins 内部是加密存储的，但仍建议定期更换

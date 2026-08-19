@@ -10,7 +10,7 @@ docker exec -u jenkins jenkins \
   ssh-keygen -t ed25519 -f /var/jenkins_home/.ssh/id_deploy -N ""
 ```
 
-:::tip 提示
+:::tip[提示]
 容器重启后 /var/jenkins_home 已挂载到宿主机，私钥不会丢失
 
 本文挂载的目录为 -v /opt/jenkins/data:/var/jenkins_home 后续注意修改
@@ -33,7 +33,7 @@ cat /opt/jenkins/data/.ssh/id_deploy.pub | \
 deploy ALL=(ALL) NOPASSWD: ALL
 ```
 
-:::warning 注意
+:::warning[注意]
 若希望所有命令都免密，把命令部分写成 ALL：
 
 deploy ALL=(ALL) NOPASSWD:ALL

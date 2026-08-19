@@ -94,7 +94,7 @@ sudo systemctl enable webhook
 sudo systemctl start webhook
 ```
 
-:::warning 注意
+:::warning[注意]
 在 `hooks.json` 中配置的所有脚本文件都必须具有执行权限。如遇问题，可查看 `/opt/webhook/webhook.log` 日志文件排查。
 :::
 

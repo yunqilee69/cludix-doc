@@ -64,7 +64,7 @@ NPM_CONFIG_REGISTRY=https://registry.npmmirror.com
 NPM_CONFIG__MYCOMPANY_REGISTRY=https://npm.mycompany.com
 ```
 
-:::note 注意
+:::note[注意]
 环境变量中作用域的 `@` 符号需转换为 `_`（双下划线），如 `@mycompany` → `_mycompany`。
 :::
 
@@ -188,7 +188,7 @@ variables:
 //npm.company.internal/:_password=mypasswordbase64
 ```
 
-:::tip 密码转 Base64
+:::tip[密码转 Base64]
 将密码转为 base64：`echo -n 'mypassword' | base64`
 :::
 

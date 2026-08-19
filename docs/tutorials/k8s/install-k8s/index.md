@@ -813,7 +813,7 @@ systemctl is-active keepalived haproxy
     --pod-network-cidr=10.244.0.0/16
 ```
 
-:::tip 参数说明
+:::tip[参数说明]
 - **apiserver-advertise-address**: API Server服务的绑定地址，使用当前主节点的物理IP（如192.168.100.10）
 - **apiserver-bind-port**: API Server监听的端口，使用标准端口6443
 - **control-plane-endpoint**: Kubernetes集群对外的统一访问地址，使用VIP:8443（如192.168.100.7:8443）
@@ -830,7 +830,7 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
-:::tip 提示
+:::tip[提示]
 这个 kubectl 是在机器上用命令行方式操作 k8s 集群，用可视化管理工具也是可以的，例如 Rancher。
 :::
 

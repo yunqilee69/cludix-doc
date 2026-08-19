@@ -55,7 +55,7 @@ mount | grep cgroup
 
 MySQL容器内部进程以 `mysql` 用户（非root用户）身份运行。当tmpfs目录权限不足时，`mysql` 用户无法在该目录下创建或访问临时文件，导致服务启动失败。
 
-:::info 为什么MySQL使用mysql用户运行
+:::info[为什么MySQL使用mysql用户运行]
 MySQL官方镜像出于安全考虑，容器内服务不以root用户运行。这是Docker安全最佳实践的体现，但也意味着容器对宿主机挂载目录的权限更加敏感。
 :::
 
@@ -79,7 +79,7 @@ MySQL官方镜像出于安全考虑，容器内服务不以root用户运行。�
 chmod 1777 /sys/fs/cgroup/tmpfs
 ```
 
-:::tip 关于1777权限
+:::tip[关于1777权限]
 - `777`：所有人可读写执行
 - `1`（前缀）：设置sticky bit，防止用户删除他人创建的文件
 :::
@@ -151,7 +151,7 @@ services:
     # 其他配置...
 ```
 
-:::info tmpfs挂载说明
+:::info[tmpfs挂载说明]
 通过Compose声明tmpfs时，Docker会创建独立的tmpfs实例，不受宿主机tmpfs配置影响，可直接指定权限模式。
 :::
 

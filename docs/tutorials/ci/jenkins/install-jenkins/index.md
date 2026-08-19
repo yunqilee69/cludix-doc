@@ -22,7 +22,7 @@ docker run -d --name jenkins \
   jenkins/jenkins:lts-jdk21
 ```
 
-:::tip 提示
+:::tip[提示]
 jenkins容器启动时，默认用jenkins用户启动的，所以需要提前建立/opt/jenkins/data目录，并设置权限
 
 sudo chown -R 1000:1000 /opt/jenkins/data 
