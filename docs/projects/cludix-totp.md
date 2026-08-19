@@ -90,7 +90,7 @@ otpauth://totp/[服务商]:[账号]?secret=[密钥]&issuer=[服务商]&algorithm
 }
 ```
 
-:::warning 注意
+:::warning[注意]
 Secret 是敏感信息，请妥善保管 `config.json`，不要提交到公开仓库。
 :::
 
@@ -122,4 +122,4 @@ npm run build:linux-arm64 # Linux ARM64
 - 无网络请求
 - 无数据上传
 
-相关文档：[Port Cleaner](../port-cleaner/) · [项目总览](../)
+相关文档：[Port Cleaner](./port-cleaner) · [项目总览](../projects/)

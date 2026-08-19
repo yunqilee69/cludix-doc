@@ -12,8 +12,8 @@ tags: [cludix-totp, port-cleaner, guide]
 
 | 项目 | 说明 | 仓库地址 |
 | --- | --- | --- |
-| [Cludix TOTP](./cludix-totp/) | 轻量级 TOTP 两步验证码桌面工具（Tauri 2 + React + Rust） | [yunqilee69/cludix-totp](https://github.com/yunqilee69/cludix-totp) |
-| [Port Cleaner](./port-cleaner/) | 本机端口占用查看与进程清理工具（Tauri 2 + Rust + React） | [yunqilee69/port-cleaner](https://github.com/yunqilee69/port-cleaner) |
+| [Cludix TOTP](./cludix-totp) | 轻量级 TOTP 两步验证码桌面工具（Tauri 2 + React + Rust） | [yunqilee69/cludix-totp](https://github.com/yunqilee69/cludix-totp) |
+| [Port Cleaner](./port-cleaner) | 本机端口占用查看与进程清理工具（Tauri 2 + Rust + React） | [yunqilee69/port-cleaner](https://github.com/yunqilee69/port-cleaner) |
 
 ## 其他项目
 

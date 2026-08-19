@@ -36,7 +36,7 @@ tags: [port-cleaner, network, usage, rust]
 
 ## 使用注意
 
-:::warning 终止进程有风险
+:::warning[终止进程有风险]
 终止进程可能导致未保存数据丢失、开发服务中断或系统组件异常。执行前请核对协议、地址、端口、PID 和进程信息。
 :::
 
@@ -65,4 +65,4 @@ npm run tauri build
 
 构建产物位于 `src-tauri/target/release/bundle/` 下。Tauri 只能为当前宿主平台构建对应格式（如 DMG 只能在 macOS 上生成）。
 
-相关文档：[Cludix TOTP](../cludix-totp/) · [项目总览](../)
+相关文档：[Cludix TOTP](./cludix-totp) · [项目总览](../projects/)
