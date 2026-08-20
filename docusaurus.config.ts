@@ -6,8 +6,11 @@ import type * as SearchLocal from "@easyops-cn/docusaurus-search-local";
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: "云星",
-  tagline: "",
+  title: "云寰",
+  tagline: "个人技术知识库",
+  customFields: {
+    description: "云寰 - 个人技术知识库：体系化教程、真实踩坑排查记录与开源项目实践。",
+  },
   favicon: "img/favicon.ico",
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -73,7 +76,7 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: "云星",
+      title: "云寰",
       logo: {
         alt: "My Site Logo",
         src: "img/logo.png",

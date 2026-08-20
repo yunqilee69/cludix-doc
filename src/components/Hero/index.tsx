@@ -17,7 +17,7 @@ function Name() {
     <div className={styles.hero_text}>
       <Translate id="homepage.hero.greet">你好! 我是</Translate>
       <span className={styles.name}>
-        <Translate id="homepage.hero.name">云星</Translate>
+        <Translate id="homepage.hero.name">云寰</Translate>
       </span>
       <span className="ml-1">👋</span>
     </div>
@@ -27,10 +27,10 @@ function Name() {
 function SocialLinks() {
   return (
     <Space size="middle" className={styles.socialLinks}>
-      <a href="https://github.com" target="_blank" rel="noopener noreferrer">
+      <a href="https://github.com/yunqilee69" target="_blank" rel="noopener noreferrer">
         <GithubOutlined style={{ fontSize: '24px' }} />
       </a>
-      <a href="mailto:contact@example.com">
+      <a href="mailto:yunqilee69@gmail.com">
         <MailOutlined style={{ fontSize: '24px' }} />
       </a>
     </Space>
@@ -46,7 +46,7 @@ export default function Hero() {
           <Card className={styles.descriptionCard}>
             <Paragraph className={styles.description}>
               <Translate id="homepage.hero.text">
-                在这里我会分享各类技术栈所遇到问题与解决方案，带你了解最新的技术栈以及实际开发中如何应用，并希望我的开发经历对你有所启发。
+                这里是我的个人技术知识库：沉淀日常积累的教程与配置实践、真实的问题排查记录，以及一些开源小项目。希望这些内容能帮你少踩坑、更快解决问题。
               </Translate>
             </Paragraph>
             <SocialLinks />
