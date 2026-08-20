@@ -5,6 +5,7 @@ import Layout from '@theme/Layout'
 import Hero from '@site/src/components/Hero'
 import Particles from '@site/src/components/Particles'
 import DocsSection from '@site/src/components/DocsSection'
+import PromoSection from '@site/src/components/PromoSection'
 import FeaturesSection from '@site/src/components/FeaturesSection'
 
 import styles from './index.module.css'
@@ -23,6 +24,7 @@ export default function Home(): ReactNode {
 
         <div className={styles.content}>
           <DocsSection />
+          <PromoSection />
           <FeaturesSection />
         </div>
       </main>

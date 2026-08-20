@@ -3,6 +3,9 @@ import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
 import type * as SearchLocal from "@easyops-cn/docusaurus-search-local";
 
+// 闲鱼店铺推广链接（TODO: 替换为真实闲鱼店铺链接）
+const XIANYU_URL = "https://github.com/yunqilee69";
+
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
@@ -10,6 +13,7 @@ const config: Config = {
   tagline: "个人技术知识库",
   customFields: {
     description: "云寰 - 个人技术知识库：体系化教程、真实踩坑排查记录与开源项目实践。",
+    xianyuUrl: XIANYU_URL,
   },
   favicon: "img/favicon.ico",
 
@@ -69,6 +73,13 @@ const config: Config = {
   themeConfig: {
     // Replace with your project's social card
     image: "img/docusaurus-social-card.jpg",
+    announcementBar: {
+      id: "promo-xianyu",
+      content: `🛒 闲鱼小店已上线，欢迎进店逛逛 <a target="_blank" rel="noopener noreferrer" href="${XIANYU_URL}">点击前往 »</a>`,
+      backgroundColor: "var(--ifm-color-emphasis-100)",
+      textColor: "var(--ifm-color-emphasis-900)",
+      isCloseable: true,
+    },
     colorMode: {
       // 默认色彩模式
       defaultMode: 'light',

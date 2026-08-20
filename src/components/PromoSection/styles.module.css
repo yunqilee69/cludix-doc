@@ -1,0 +1,133 @@
+.promoSection {
+  padding: 0 0 80px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0 !important;
+  background: linear-gradient(
+    135deg,
+    var(--ifm-color-primary) 0%,
+    var(--ifm-color-primary-dark) 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.promoLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.promoCard {
+  background: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.promoCard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+  border-color: var(--ifm-color-primary);
+}
+
+.promoContent {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 32px;
+}
+
+.iconWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.promoInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.promoTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 4px !important;
+  color: var(--ifm-heading-color);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.promoDescription {
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 0 !important;
+}
+
+.promoBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fa709a;
+  background: rgba(250, 112, 154, 0.1);
+  border-radius: 12px;
+  padding: 2px 10px;
+  white-space: nowrap;
+}
+
+.promoAction {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--ifm-color-primary);
+  white-space: nowrap;
+}
+
+.arrowIcon {
+  transition: transform 0.3s ease;
+}
+
+.promoCard:hover .arrowIcon {
+  transform: translateX(4px);
+}
+
+@media (max-width: 768px) {
+  .promoSection {
+    padding: 0 0 48px;
+  }
+
+  .promoContent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .promoAction {
+    display: none;
+  }
+}
