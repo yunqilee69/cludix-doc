@@ -10,9 +10,11 @@ title: 欢迎使用云寰文档站
 - 📘 **教程** - 安装、配置、部署和使用流程
 - 🧩 **踩坑** - Bug 解决、异常排查和问题复盘
 - 🔧 **Nebula** - 项目开发规范和最佳实践
+- 💰 **金融** - 金融投资学习笔记（基础 / 进阶 / 实战）
 
 ## 快速导航
 
 - [教程](/docs/tutorials/)
 - [踩坑](/docs/troubleshooting/)
 - [Nebula 项目](/docs/nebula/)
+- [金融](/docs/finance/)

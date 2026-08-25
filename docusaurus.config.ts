@@ -103,6 +103,11 @@ const config: Config = {
           position: "right",
         },
         {
+          to: "/docs/finance/",
+          label: "金融",
+          position: "right",
+        },
+        {
           type: "dropdown",
           label: "项目",
           position: "right",

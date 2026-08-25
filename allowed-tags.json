@@ -72,6 +72,18 @@
     "android",
     "opencode",
     "cludix-totp",
-    "port-cleaner"
+    "port-cleaner",
+    "finance",
+    "investment",
+    "stock",
+    "fund",
+    "bond",
+    "etf",
+    "gold",
+    "macro",
+    "derivative",
+    "valuation",
+    "technical-analysis",
+    "fundamental-analysis"
   ]
 }
