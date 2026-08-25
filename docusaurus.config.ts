@@ -6,6 +6,8 @@ import type * as SearchLocal from "@easyops-cn/docusaurus-search-local";
 // 闲鱼店铺推广链接（TODO: 替换为真实闲鱼店铺链接）
 const XIANYU_URL = "https://github.com/yunqilee69";
 
+const ICP_NUMBER = "皖ICP备2023028796号-1";
+
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
@@ -85,6 +87,10 @@ const config: Config = {
       defaultMode: 'light',
       disableSwitch: false,
       respectPrefersColorScheme: true,
+    },
+    footer: {
+      style: "dark",
+      copyright: `Copyright © ${new Date().getFullYear()} 云寰 · <a target="_blank" rel="noopener noreferrer" href="https://beian.miit.gov.cn/">${ICP_NUMBER}</a>`,
     },
     navbar: {
       title: "云寰",
