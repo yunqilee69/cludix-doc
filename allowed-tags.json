@@ -84,6 +84,12 @@
     "derivative",
     "valuation",
     "technical-analysis",
-    "fundamental-analysis"
+    "fundamental-analysis",
+    "ai",
+    "agent",
+    "llm",
+    "spring-ai",
+    "langchain4j",
+    "harness"
   ]
 }

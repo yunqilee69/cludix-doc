@@ -17,6 +17,7 @@ import {
   troubleshootingJavaSidebar,
   troubleshootingOtherSidebar,
 } from './troubleshooting';
+import aiSidebar from './tutorials/ai';
 
 export type SidebarConfig = SidebarsConfig[string];
 
@@ -33,6 +34,7 @@ const sidebars: SidebarsConfig = {
   tutorialsOtherSidebar: otherSidebar,
   tutorialsJavaSidebar: javaSidebar,
   tutorialsMacosSidebar: macosSidebar,
+  tutorialsAiSidebar: aiSidebar,
   troubleshootingOverviewSidebar: [{ type: 'doc', id: 'troubleshooting/index' }],
   troubleshootingDockerSidebar: troubleshootingDockerSidebar,
   troubleshootingJavaSidebar: troubleshootingJavaSidebar,

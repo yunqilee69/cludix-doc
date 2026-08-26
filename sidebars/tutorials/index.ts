@@ -6,6 +6,7 @@ import networkSidebar from './network';
 import otherSidebar from './other';
 import javaSidebar from './java';
 import macosSidebar from './macos';
+import aiSidebar from './ai';
 
 export {
   dockerSidebar,
@@ -16,4 +17,5 @@ export {
   otherSidebar,
   javaSidebar,
   macosSidebar,
+  aiSidebar,
 };
