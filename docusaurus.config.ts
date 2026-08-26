@@ -135,6 +135,7 @@ const config: Config = {
             { label: "Kubernetes", to: "/docs/tutorials/k8s/" },
             { label: "CI/CD", to: "/docs/tutorials/ci/" },
             { label: "Java", to: "/docs/tutorials/java/" },
+            { label: "AI", to: "/docs/tutorials/ai/" },
             { label: "数据库", to: "/docs/tutorials/database/" },
             { label: "网络", to: "/docs/tutorials/network/" },
             { label: "其他", to: "/docs/tutorials/other/" },
