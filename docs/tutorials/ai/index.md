@@ -13,6 +13,8 @@ tags: [ai, agent, tutorial]
 - **concepts**：理论细节——分类、执行循环、tool calling、context 与 memory
 - **frameworks**：Java 框架对比（Spring AI / Spring AI Alibaba / LangChain4j / 裸调自建），附 Python 生态对照
 - **harness**：工程实践——harness 设计原则、Coding Agent 拆解、编排框架机制
+- **applications**：AI 应用——OpenClaw 等 AI 应用的安装与配置
+- **tools**：AI 开发工具——OpenCode 等 AI 编码/开发工具的使用与配置
 - **后续扩展**：RAG（检索增强生成）、微调与评估等主题，落地时新增子目录
 
 ## 文档清单
@@ -42,6 +44,18 @@ tags: [ai, agent, tutorial]
 | harness概念 | 包裹模型的工程外壳：为什么 demo ≠ 产品，模型决定上限、harness 决定下限 | 规划中 |
 | coding-agent拆解 | 以 Claude Code / OpenCode 为例：规则注入、工具最小权限、subagent 隔离、验证闭环、审批门与沙箱 | 规划中 |
 | 编排框架机制 | 图编排、状态管理与 checkpoint、HITL 人工介入、可观测性 | 规划中 |
+
+### applications（AI 应用）
+
+| 文档 | 说明 | 状态 |
+| --- | --- | --- |
+| [OpenClaw 安装与基础配置](./applications/openclaw/) | npm 安装 OpenClaw 与 Gateway、Docker 运行 Agent 隔离、初始化注意事项 | ✅ 已落地 |
+
+### tools（AI 开发工具）
+
+| 文档 | 说明 | 状态 |
+| --- | --- | --- |
+| [OpenCode](./tools/opencode/) | 终端 AI 编码 agent：安装使用、模型配置、LSP/MCP/Skills 扩展、多 Agent 编排 | ✅ 已落地 |
 
 ## 使用建议
 

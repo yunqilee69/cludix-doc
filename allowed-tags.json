@@ -90,6 +90,7 @@
     "llm",
     "spring-ai",
     "langchain4j",
-    "harness"
+    "harness",
+    "openclaw"
   ]
 }

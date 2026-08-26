@@ -1,5 +1,7 @@
 ---
 title: OpenClaw 安装与基础配置
+date: 2026-08-26 10:00
+tags: [openclaw, ai, installation]
 ---
 # OpenClaw 安装与基础配置
 
