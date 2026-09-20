@@ -39,4 +39,4 @@ tags: [omnitotp, auth, security, usage]
 - 无网络请求
 - 无数据上传
 
-相关文档：[Port Cleaner](../port-cleaner/) · [项目总览](../)
+相关文档：[Port Cleaner](../port-cleaner/)

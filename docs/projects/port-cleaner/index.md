@@ -30,4 +30,4 @@ tags: [port-cleaner, network, rust, usage]
 2. 终止进程前务必阅读 [使用注意](./使用注意)
 3. 自行编译安装包见 [本地构建](./本地构建)
 
-相关文档：[OmniTOTP](../omnitotp/) · [项目总览](../)
+相关文档：[OmniTOTP](../omnitotp/)

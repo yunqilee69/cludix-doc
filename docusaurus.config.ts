@@ -25,10 +25,9 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: "https://yunqilee69.github.io",
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // GitHub Pages 项目站点地址为 https://yunqilee69.github.io/cludix-doc/，须与仓库名一致
-  baseUrl: "/cludix-doc/",
+  url: "https://blog.cloudomni.cn",
+  // 站点由 GitHub Pages 承载，自定义域名 blog.cloudomni.cn 指向站点根路径
+  baseUrl: "/",
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
@@ -118,7 +117,6 @@ const config: Config = {
           label: "项目",
           position: "right",
           items: [
-            { label: "项目总览", to: "/docs/projects/" },
             { label: "Nebula", to: "/docs/nebula/" },
             { label: "OmniTOTP", to: "/docs/projects/omnitotp/" },
             { label: "Port Cleaner", to: "/docs/projects/port-cleaner" },
