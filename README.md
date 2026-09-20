@@ -50,11 +50,6 @@ pnpm build          # onBrokenLinks: "throw"，死链会直接导致构建失败
 
 ## 部署
 
-由 Jenkins 自动部署（完整链路见 [Jenkins 全链路部署实战](./blog/2026-06-22-jenkins全链路部署实战.md)）：
+**手动部署**（没有 CI 流水线）：本地执行 `pnpm build`，把 `build/` 同步到服务器上 nginx 托管的静态目录，再 reload nginx。站点的服务器配置与目录以 `/etc/nginx/conf.d/` 下的实际配置为准。
 
-```
-GitHub push → webhook 触发 Jenkins → pnpm install → pnpm build
-→ SSH 上传 build/ 到云服务器 /var/www/cludix-doc → nginx -t → systemctl reload nginx
-```
-
-服务器上由 nginx 托管 `/var/www/cludix-doc` 的静态产物，每次部署前会先备份上一版目录。
+历史上曾用 Jenkins + Publish Over SSH 自动部署本站（过程记录见 [blog](./blog/2026-06-22-jenkins全链路部署实战.md)），该链路已废弃，配套的 Jenkins / Webhook 教程已删除。

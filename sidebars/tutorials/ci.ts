@@ -32,44 +32,9 @@ const ciSidebar: SidebarConfig = [
     ],
   },
   {
-    type: 'category',
-    label: 'Jenkins',
-    link: {
-      type: 'doc',
-      id: 'tutorials/ci/jenkins/index',
-    },
-    items: [
-      {
-        type: 'doc',
-        id: 'tutorials/ci/jenkins/install-jenkins/index',
-        label: '安装 Jenkins',
-      },
-      {
-        type: 'doc',
-        id: 'tutorials/ci/jenkins/jenkins-deploy/index',
-        label: 'Jenkins 部署',
-      },
-      {
-        type: 'doc',
-        id: 'tutorials/ci/jenkins/jenkins-ssh-config/index',
-        label: 'Jenkins SSH 配置',
-      },
-      {
-        type: 'doc',
-        id: 'tutorials/ci/jenkins/publish-over-ssh/index',
-        label: 'Publish Over SSH',
-      },
-    ],
-  },
-  {
     type: 'doc',
     id: 'tutorials/ci/filebrowser/index',
     label: 'Filebrowser',
-  },
-  {
-    type: 'doc',
-    id: 'tutorials/ci/webhook/index',
-    label: 'Webhook',
   },
 ];
 

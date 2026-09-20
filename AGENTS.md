@@ -247,7 +247,7 @@ tags: [tutorial, docker]
 |---------|---------|---------|------|
 | Linux 安装 Docker | linux, docker | **docker/install-docker** | 安装目标是 docker |
 | Docker 部署 MySQL | docker, mysql | **docker/deployments** | 用 docker 部署 |
-| Jenkins 触发 Git Webhook | jenkins, git | **ci/jenkins** | jenkins 是主角 |
+| Git 清理远程分支 | git | **ci/git** | 纯 git 内容 |
 | Java Semaphore 并发控制 | java | **java** | 纯 java 内容 |
 | Nginx 配置 HTTPS | nginx | **docker/deployments** 或 **network** | 看是否用 docker |
 
