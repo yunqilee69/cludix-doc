@@ -133,7 +133,7 @@ const config: Config = {
             { label: "macOS", to: "/docs/tutorials/macos/" },
             { label: "Docker", to: "/docs/tutorials/docker/" },
             { label: "Kubernetes", to: "/docs/tutorials/k8s/" },
-            { label: "CI/CD", to: "/docs/tutorials/ci/" },
+            { label: "Git", to: "/docs/tutorials/git/" },
             { label: "Java", to: "/docs/tutorials/java/" },
             { label: "AI", to: "/docs/tutorials/ai/" },
             { label: "网络", to: "/docs/tutorials/network/" },

@@ -50,7 +50,7 @@ git config --global credential.helper store
 2. 第一次 `git pull` 或 `git push` 时，**用户名**输入 GitLab 用户名，**密码**处粘贴这个 Token
 3. 配合上面配置的 `cache` 或 `store` 助手，Token 就会被缓存或存储下来
 
-> 另一种免密方式是改用 SSH 协议，配置方法见 [Debian 配置 GitHub 的 SSH 连接](../../network/git-ssh/)。
+> 另一种免密方式是改用 SSH 协议，配置方法见 [Debian 配置 GitHub 的 SSH 连接](../network/git-ssh/)。
 
 ## 常见问题排查
 

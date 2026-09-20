@@ -9,7 +9,7 @@ import financeSidebar from './finance';
 import {
   dockerSidebar,
   linuxSidebar,
-  ciSidebar,
+  gitSidebar,
   k8sSidebar,
   networkSidebar,
   otherSidebar,
@@ -34,7 +34,7 @@ const sidebars: SidebarsConfig = {
   tutorialsOverviewSidebar: [{ type: 'doc', id: 'tutorials/index' }],
   tutorialsDockerSidebar: dockerSidebar,
   tutorialsLinuxSidebar: linuxSidebar,
-  tutorialsCiSidebar: ciSidebar,
+  tutorialsGitSidebar: gitSidebar,
   tutorialsK8sSidebar: k8sSidebar,
   tutorialsNetworkSidebar: networkSidebar,
   tutorialsOtherSidebar: otherSidebar,

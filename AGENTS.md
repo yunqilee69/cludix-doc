@@ -247,7 +247,7 @@ tags: [tutorial, docker]
 |---------|---------|---------|------|
 | Linux 安装 Docker | linux, docker | **docker/install-docker** | 安装目标是 docker |
 | Docker 部署 MySQL | docker, mysql | **docker/deployments** | 用 docker 部署 |
-| Git 清理远程分支 | git | **ci/git** | 纯 git 内容 |
+| Git 清理远程分支 | git | **git** | 纯 git 内容 |
 | Java Semaphore 并发控制 | java | **java** | 纯 java 内容 |
 | Nginx 配置 HTTPS | nginx | **docker/deployments** 或 **network** | 看是否用 docker |
 
@@ -365,7 +365,7 @@ npm run check-doc-tags
 # 输出示例
 ✅ docs/tutorials/docker/docker-config.md
    tags: docker, config
-❌ docs/tutorials/ci/git/commands.md
+❌ docs/tutorials/git/commands.md
    错误: 缺少 tags 字段
 ```
 

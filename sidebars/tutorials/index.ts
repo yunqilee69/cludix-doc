@@ -1,6 +1,6 @@
 import dockerSidebar from './docker';
 import linuxSidebar from './linux';
-import ciSidebar from './ci';
+import gitSidebar from './git';
 import k8sSidebar from './k8s';
 import networkSidebar from './network';
 import otherSidebar from './other';
@@ -11,7 +11,7 @@ import aiSidebar from './ai';
 export {
   dockerSidebar,
   linuxSidebar,
-  ciSidebar,
+  gitSidebar,
   k8sSidebar,
   networkSidebar,
   otherSidebar,
