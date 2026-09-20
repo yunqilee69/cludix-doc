@@ -203,6 +203,18 @@ const nebulaSidebar: SidebarConfig = [
       },
     ],
   },
+  {
+    type: 'category',
+    label: '扩展点与领域事件',
+    link: {
+      type: 'doc',
+      id: 'nebula/extensibility/index',
+    },
+    items: [
+      'nebula/extensibility/index',
+      'nebula/extensibility/hooks-events',
+    ],
+  },
 ];
 
 export default nebulaSidebar;

@@ -9,9 +9,9 @@ slug: /nebula/param
 ## 文档列表
 
 - [模块总览](./overview.md) - param 模块定位、子模块结构、核心能力与阅读入口
-- [设计与实现](./design-and-implementation.md) - 参数模型、数据类型校验、缓存机制与 local/remote 模式
-- [业务功能](./business-capabilities.md) - 面向业务方的能力边界、典型流程与适用场景
-- [使用方式](./usage-guide.md) - 单体接入、独立服务部署、远程消费与调用建议
+- [设计与实现](./design-and-implementation.md) - 参数模型、数据类型校验、写操作 Hook、领域事件、缓存机制与 local/remote 模式
+- [业务功能](./business-capabilities.md) - 面向业务方的能力边界、典型流程、Hook/事件适用场景
+- [使用方式](./usage-guide.md) - 单体接入、独立服务部署、远程消费、Hook 实现与事件监听
 - [配置说明](./configuration.md) - `nebula.param.*` 配置项与服务运行说明
 - [建表语句](./ddl.md) - 参数模块涉及的数据表结构与字段说明
 

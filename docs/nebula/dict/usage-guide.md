@@ -213,7 +213,58 @@ GET /api/dict/items/dict/order_status
 
 ---
 
-## 7. 与 app-starter 的关系
+## 7. 实现写操作 Hook
+
+在真正执行字典写入的应用里声明一个 Bean 即可覆盖默认空实现。
+
+```java
+@Component
+public class MemberLevelDictHook extends NoopDictOperationHook {
+
+    @Override
+    public void beforeDeleteDictItem(DictItemDetailDto existing) {
+        if (!"member_level".equals(existing.getDictCode())) {
+            return;
+        }
+        if (memberService.existsByLevel(existing.getItemValue())) {
+            throw new BusinessException("仍有会员使用该等级，不能删除");
+        }
+    }
+}
+```
+
+注意：
+
+- 只需覆盖关心的方法
+- `before*` 抛异常会阻止写库和事件发布
+- 独立部署 `nebula-dict-service` 时，Hook 必须注册在字典服务进程里
+
+---
+
+## 8. 监听字典事件
+
+使用 `@NebulaEventListener` 消费稳定 `eventType`。字典事件载荷自包含，监听器通常不需要再回查。
+
+```java
+@Component
+@NebulaEventListener(eventType = "dict-itemDeleted")
+public class DictItemDeletedHandler implements NebulaEventHandler<DictItemDeletedEvent.Payload> {
+
+    @Override
+    public void onEvent(NebulaEventContext context, DictItemDeletedEvent.Payload payload) {
+        optionCache.evict(payload.dictCode());
+    }
+}
+```
+
+对应事件类型：
+
+- `dict-typeCreated` / `dict-typeUpdated` / `dict-typeDeleted`
+- `dict-itemCreated` / `dict-itemUpdated` / `dict-itemDeleted`
+
+---
+
+## 9. 与 app-starter 的关系
 
 如果你当前使用的是 `nebula-app-starter`，那么字典模块通常已经被直接集成，无需再额外手动拼装一套模块依赖。
 
@@ -225,10 +276,12 @@ GET /api/dict/items/dict/order_status
 
 ---
 
-## 8. 推荐接入路径
+## 10. 推荐接入路径
 
 如果你的目标是：
 
 - **当前项目内部直接使用字典能力** → 直接走 `local`
 - **多个系统共享统一字典中心** → 部署 `nebula-dict-service`，其他系统走 `remote`
 - **前端做状态映射、下拉、分类树或级联选择** → 统一调 `/api/dict/items/dict/{dictCode}`
+- **删除/变更字典时要同步清理业务数据** → 在写侧实现 `DictOperationHook`
+- **其他模块只需感知字典变化** → 监听 `dict-type*` / `dict-item*` 事件

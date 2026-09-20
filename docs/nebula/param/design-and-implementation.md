@@ -27,6 +27,8 @@
 - `SystemParamDto` / `SystemParamDetailDto`
 - `SystemParamDataTypeEnum`
 - `ParamErrorInfo`
+- `SystemParamOperationHook` / `NoopSystemParamOperationHook`
+- `SystemParamCreatedEvent` / `SystemParamUpdatedEvent` / `SystemParamDeletedEvent`
 
 它的意义是让业务模块、local 层和 remote 层都围绕同一套参数对象协作。
 
@@ -40,6 +42,7 @@
 - 批量更新参数值
 - 数据类型校验与字典选项校验
 - 缓存清理与软删除支持
+- 写操作 Hook 调用与领域事件发布
 
 ### 2.3 `nebula-param-local`
 
@@ -210,15 +213,18 @@
 
 1. 校验 `paramKey` 是否唯一
 2. 校验参数值与参数元数据是否合法
-3. 构建 `SystemParamEntity`
-4. 写入数据库
-5. 清理按 key 读取缓存
+3. 调用 `SystemParamOperationHook.beforeCreateSystemParam`
+4. 构建 `SystemParamEntity` 并写入数据库
+5. 调用 `afterCreateSystemParam`
+6. 发布 `SystemParamCreatedEvent`
+7. 清理按 key 读取缓存
 
 设计意图：
 
 - 从入口阻断重复参数键
 - 把非法参数配置挡在落库前
 - 保证后续按 key 读取不会读到脏数据
+- 给业务留下同事务拦截点和写后通知点
 
 ### 5.2 更新参数
 
@@ -226,15 +232,18 @@
 
 1. 读取参数实体，不存在则报错
 2. 再次执行完整校验
-3. 更新元数据和参数值
-4. 持久化
-5. 清理缓存
+3. 调用 `beforeUpdateSystemParam`（可拿到更新前快照）
+4. 更新元数据和参数值
+5. 持久化并清理缓存
+6. 调用 `afterUpdateSystemParam`
+7. 发布 `SystemParamUpdatedEvent`（带 `old*` 快照和 `valueChanged`）
 
 它的特点是：
 
 - 更新不是只改 `paramValue`
 - 参数定义本身也可以被维护
 - 每次更新后都保证缓存失效
+- 监听器能区分“只改了元数据”还是“参数值真的变了”
 
 ### 5.3 按 key 保存或更新参数
 
@@ -242,10 +251,13 @@
 
 核心流程：
 
-1. 按 key 查参数
-2. 不存在就新建
-3. 已存在就更新
-4. 清理缓存
+1. 校验参数值
+2. 按 key 查参数
+3. 调用 `beforeSaveOrUpdateSystemParamByKey`（`existing == null` 表示即将新建）
+4. 不存在就新建，已存在就更新
+5. 清理缓存
+6. 调用 `afterSaveOrUpdateSystemParamByKey`（`created=true` 表示走了新建分支）
+7. 新建发 `SystemParamCreatedEvent`，更新发 `SystemParamUpdatedEvent`
 
 这类接口很适合：
 
@@ -327,11 +339,80 @@
 - 参数不存在时不会静默忽略
 - `editableFlag != true` 时会拒绝修改
 
+Hook 只在全部项校验通过后调用一次：`beforeBatchUpdateParamValues` → 逐项写库 → `afterBatchUpdateParamValues`。只有**参数值确实变化**的项才会发布 `SystemParamUpdatedEvent`。
+
 这使“页面一键保存设置”具备更稳定的治理能力，而不是所有参数都能随便改。
 
 ---
 
-## 8. 错误码与治理策略
+## 8. 写操作 Hook 设计
+
+`SystemParamOperationHook` 是参数模块的同步扩展点（SPI），接口放在 api 模块，core 通过 `@ConditionalOnMissingBean` 注册 `NoopSystemParamOperationHook`。业务声明同类型 Bean 后，Spring 会优先使用业务实现。
+
+### 8.1 调用时机
+
+统一顺序是：
+
+```text
+既有校验通过 → before* → 写库 / 清缓存 → after* → 发布事件
+```
+
+- `before*`：校验通过之后、写库之前。抛出 `BusinessException` 即中止（不写库、不发事件）
+- `after*`：写库之后、事件发布之前、**同一事务内**。抛出异常会回滚本次操作且不发布事件
+
+因此 Hook 适合做“必须和参数写入一起成功或一起失败”的联动；跨模块异步通知应走事件，而不是 Hook。
+
+### 8.2 参数语义
+
+- `command` / 批量更新的 `items` 是服务层传入的**同一实例**，在 `before*` 中修改会影响本次操作
+- `existing` / `created` / `updated` / `deleted` 是 `SystemParamConverter` 新构建的副本，修改不影响持久化结果
+- `afterCreate*` / `afterUpdate*` / `afterSaveOrUpdate*` 的 DTO 由内存实体转换，`createTime` / `updateTime` 可能为 `null`（未回查数据库），业务不得依赖
+- `beforeSaveOrUpdateSystemParamByKey` 的 `existing` 为 `null` 表示该键不存在、将执行新建
+
+### 8.3 方法清单
+
+| 方法 | 触发操作 |
+| --- | --- |
+| `beforeCreateSystemParam` / `afterCreateSystemParam` | 创建参数 |
+| `beforeUpdateSystemParam` / `afterUpdateSystemParam` | 按 ID 更新参数 |
+| `beforeSaveOrUpdateSystemParamByKey` / `afterSaveOrUpdateSystemParamByKey` | 按 key 保存或更新 |
+| `beforeDeleteSystemParam` / `afterDeleteSystemParam` | 删除参数 |
+| `beforeBatchUpdateParamValues` / `afterBatchUpdateParamValues` | 批量更新参数值 |
+
+---
+
+## 9. 领域事件设计
+
+写成功后，`SystemParamServiceImpl` 通过 `NebulaEventPublisher` 发布事件。事件类同样放在 api 模块，继承 `AbstractNebulaEvent`，`eventType` 由 `@NebulaEventDefinition` 的 `module + code` 拼接。
+
+### 9.1 事件清单
+
+| 事件类 | eventType | 触发时机 |
+| --- | --- | --- |
+| `SystemParamCreatedEvent` | `param-created` | `createSystemParam`，以及 `saveOrUpdateByKey` 的新建分支 |
+| `SystemParamUpdatedEvent` | `param-updated` | `updateSystemParam`、`saveOrUpdateByKey` 的更新分支，以及批量更新中值确实变化的项 |
+| `SystemParamDeletedEvent` | `param-deleted` | `deleteSystemParam` |
+
+### 9.2 载荷约定
+
+三类事件的 Payload **都不含 `paramValue`**，避免敏感配置进入 outbox 与事件日志。需要当前值的监听器，应在同一进程内调用 `ISystemParamService.getParamValueByKey(paramKey)`。
+
+`SystemParamUpdatedEvent.Payload` 额外提供：
+
+- `oldParamName` / `oldOptionCode` / `oldModuleCode`：更新前快照
+- `valueChanged`：参数值是否变化
+
+`dataType` 使用 `SystemParamDataTypeEnum.name()`，例如 `INT`、`BOOLEAN`。
+
+### 9.3 发布与消费边界
+
+- Hook 失败会阻止事件发布
+- 本地模式默认可在事务提交后再分发；远程模式把事件写入 outbox，由 relay 投递
+- Hook 跑在**真正执行写操作的那一侧**（local 应用或独立 param-service），remote 消费方注册 Hook 不会拦截远端写入
+
+---
+
+## 10. 错误码与治理策略
 
 从 `ParamErrorInfo` 可确认，当前主要错误包括：
 
@@ -350,17 +431,17 @@
 
 ---
 
-## 9. 本地 / 远程模式切换设计
+## 11. 本地 / 远程模式切换设计
 
 从配置和模块守卫可以确认，param 模块明确支持两类运行方式。
 
-### 9.1 local
+### 11.1 local
 
 - Controller 在当前应用中直接生效
 - Service 使用本地实现
 - 适合单体应用或参数中心不拆分的场景
 
-### 9.2 remote
+### 11.2 remote
 
 - 当前应用只依赖 remote 代理
 - 通过 `service-name` 或 `service-url` 访问独立参数服务
@@ -372,7 +453,7 @@
 
 ---
 
-## 10. 小结
+## 12. 小结
 
 Nebula Param 的实现可以概括为下面几条：
 
@@ -382,5 +463,6 @@ Nebula Param 的实现可以概括为下面几条：
 4. **按模块加载和批量更新使它天然适合做后台设置页**
 5. **缓存围绕按 key 读取构建，写后立即失效**
 6. **与字典模块协作后，可以把“参数值必须从可选项中选”这类场景治理得更稳**
+7. **写路径提供同事务 Hook 和写后领域事件：Hook 负责拦截与联动，事件负责跨模块通知；事件负载不含参数值**
 
 这套设计使 param 模块既能服务于业务代码中的运行期配置读取，也能覆盖后台系统设置、前端配置中心和模块化参数管理等更复杂的场景。

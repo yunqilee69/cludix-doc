@@ -35,11 +35,12 @@ nebula-param/
 - `nebula-param-api`
   - 放 `ISystemParamService`
   - 放参数相关命令、查询、DTO、错误码和数据类型枚举
+  - 放写操作扩展点 `SystemParamOperationHook` 与领域事件 `SystemParam*Event`
   - 为其他业务模块提供稳定的参数读取与维护契约
 - `nebula-param-core`
   - 放真正的业务实现，如 `SystemParamServiceImpl`
   - 放 DAO / Entity / 分页查询参数对象
-  - 放缓存定义和参数校验逻辑
+  - 放缓存定义、参数校验逻辑，以及 Hook 默认空实现装配
 - `nebula-param-local`
   - 放 REST Controller
   - 适合单体应用直接接入
@@ -78,7 +79,16 @@ nebula-param/
 
 这意味着业务方既可以把它当成“后台配置中心”，也可以把它当成“运行期参数读取接口”。
 
-### 3.3 参数治理属性
+### 3.3 写操作 Hook 与领域事件
+
+参数写路径现在额外提供两类扩展：
+
+- **同步 Hook**：`SystemParamOperationHook`，在写库前后拦截本次操作，适合同事务联动、校验拦截
+- **领域事件**：`SystemParamCreatedEvent` / `SystemParamUpdatedEvent` / `SystemParamDeletedEvent`，写成功后通过 `NebulaEventPublisher` 发布，适合跨模块通知
+
+两者都定义在 `nebula-param-api`，业务工程只依赖 api 即可实现 Hook 或监听事件。事件负载**不含参数值**，避免敏感配置进入 outbox 与事件日志。
+
+### 3.4 参数治理属性
 
 从 `SystemParamEntity` 可以确认，当前参数模型除了基础键值之外，还支持：
 
@@ -214,11 +224,11 @@ nebula-param/
 建议按下面顺序阅读：
 
 1. [设计与实现](./design-and-implementation.md)
-   - 先理解参数模型、数据类型和校验逻辑
+   - 先理解参数模型、数据类型、校验逻辑、写操作 Hook 和领域事件
 2. [业务功能](./business-capabilities.md)
-   - 再理解参数维护、批量更新、按模块加载分别解决什么问题
+   - 再理解参数维护、批量更新、按模块加载、Hook/事件分别解决什么问题
 3. [使用方式](./usage-guide.md)
-   - 最后看如何单体接入、拆服务与远程消费
+   - 最后看如何单体接入、拆服务、远程消费，以及如何实现 Hook 和监听事件
 4. [建表语句](./ddl.md)
    - 若要真正落库，再查看表结构和字段约束
 
@@ -228,9 +238,11 @@ nebula-param/
 
 如果你要继续深入源码，建议优先阅读这些文件：
 
-- `nebula-param/nebula-param-api/src/main/java/com/cludix/nebula/param/service/ISystemParamService.java`
-- `nebula-param/nebula-param-local/src/main/java/com/cludix/nebula/param/controller/SystemParamController.java`
-- `nebula-param/nebula-param-core/src/main/java/com/cludix/nebula/param/service/impl/SystemParamServiceImpl.java`
-- `nebula-param/nebula-param-core/src/main/java/com/cludix/nebula/param/model/entity/SystemParamEntity.java`
+- `nebula-param/nebula-param-api/src/main/java/cn/cloudomni/nebula/param/service/ISystemParamService.java`
+- `nebula-param/nebula-param-api/src/main/java/cn/cloudomni/nebula/param/hook/SystemParamOperationHook.java`
+- `nebula-param/nebula-param-api/src/main/java/cn/cloudomni/nebula/param/event/SystemParamCreatedEvent.java`
+- `nebula-param/nebula-param-local/src/main/java/cn/cloudomni/nebula/param/controller/SystemParamController.java`
+- `nebula-param/nebula-param-core/src/main/java/cn/cloudomni/nebula/param/service/impl/SystemParamServiceImpl.java`
+- `nebula-param/nebula-param-core/src/main/java/cn/cloudomni/nebula/param/model/entity/SystemParamEntity.java`
 - `nebula-param/nebula-param-service/src/main/resources/application.yml`
 - `nebula-param/nebula-param-service/src/test/resources/db/test/param-schema-mysql.sql`

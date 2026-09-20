@@ -201,6 +201,70 @@ public class LoginPolicyService {
 
 frontend 模块当前就采用了这种模式来维护自己的平台配置。
 
+### 5.4 实现写操作 Hook
+
+在真正执行参数写入的应用里声明一个 Bean 即可覆盖默认空实现。业务工程通常依赖 `nebula-param-api`（`local` / `remote` 会把它带进来）。
+
+```java
+@Component
+public class MemberLevelParamHook extends NoopSystemParamOperationHook {
+
+    @Override
+    public void beforeUpdateSystemParam(UpdateSystemParamCommand command, SystemParamDetailDto existing) {
+        if ("member.level.max".equals(existing.getParamKey())
+                && Integer.parseInt(command.getParamValue()) < currentUsedMaxLevel()) {
+            throw new BusinessException("会员等级上限不能低于当前已使用的最高等级");
+        }
+    }
+
+    @Override
+    public void beforeDeleteSystemParam(SystemParamDetailDto existing) {
+        if ("member.level.max".equals(existing.getParamKey())) {
+            throw new BusinessException("该参数仍被会员模块引用，不能删除");
+        }
+    }
+}
+```
+
+注意：
+
+- 只需覆盖关心的方法；其余方法保持默认空实现
+- `before*` 抛异常会阻止写库和事件发布
+- `after*` 仍在同一事务内，失败会回滚
+- 独立部署 `nebula-param-service` 时，Hook 必须注册在参数服务进程里，而不是 remote 消费方
+
+### 5.5 监听参数事件
+
+使用 `@NebulaEventListener` 消费稳定 `eventType`。事件负载不含参数值，需要当前值时再按 key 读取。
+
+```java
+@Component
+@NebulaEventListener(eventType = "param-updated")
+public class ParamUpdatedCacheHandler implements NebulaEventHandler<SystemParamUpdatedEvent.Payload> {
+
+    private final ISystemParamService systemParamService;
+
+    public ParamUpdatedCacheHandler(ISystemParamService systemParamService) {
+        this.systemParamService = systemParamService;
+    }
+
+    @Override
+    public void onEvent(NebulaEventContext context, SystemParamUpdatedEvent.Payload payload) {
+        if (!payload.valueChanged()) {
+            return;
+        }
+        String currentValue = systemParamService.getParamValueByKey(payload.paramKey());
+        refreshLocalCache(payload.paramKey(), currentValue);
+    }
+}
+```
+
+对应事件类型：
+
+- `param-created`
+- `param-updated`
+- `param-deleted`
+
 ---
 
 ## 6. 参数设计建议
@@ -320,5 +384,6 @@ param 模块的最佳使用方式可以概括为：
 2. **后台设置页按 moduleCode 加载并批量保存参数值**
 3. **平台级默认配置通过 saveOrUpdateByKey 程序化维护**
 4. **需要受控选项时，联动字典模块一起治理**
+5. **同事务拦截与联动用 Hook，跨模块通知用 `param-*` 事件**
 
 这样既能保持业务调用简单，又能让系统配置逐步从硬编码演进成统一可维护的参数中心。

@@ -14,6 +14,9 @@
 - `PageDictTypeQuery`、`PageDictItemQuery`
 - `DictTypeDto`、`DictTypeDetailDto`
 - `DictItemDto`、`DictItemDetailDto`、`DictItemTreeDto`
+- `DictOperationHook` / `NoopDictOperationHook`
+- `DictTypeCreatedEvent` / `DictTypeUpdatedEvent` / `DictTypeDeletedEvent`
+- `DictItemCreatedEvent` / `DictItemUpdatedEvent` / `DictItemDeletedEvent`
 - 字典相关错误码与缓存名称常量
 
 ### 1.2 `nebula-dict-core`
@@ -23,8 +26,8 @@
 - `DictServiceImpl`
 - `DictTypeDAO`、`DictItemDAO`
 - `DictTypeEntity`、`DictItemEntity`
-- `DictCacheService`
 - `DictCacheDefinitionConfiguration`
+- `DictHookConfiguration`
 
 ### 1.3 `nebula-dict-local`
 
@@ -144,21 +147,25 @@
 1. 校验字典类型存在
 2. 如果带了 `parentId`，校验父节点存在
 3. 校验父节点与当前项属于同一个 `dictCode`
-4. 保存当前节点
-5. 计算并回写 `path`
-6. 清理该字典编码下的缓存
+4. 调用 `DictOperationHook.beforeCreateDictItem`
+5. 保存当前节点
+6. 计算并回写 `path`
+7. 调用 `afterCreateDictItem`
+8. 发布 `DictItemCreatedEvent`
+9. 清理该字典编码下的缓存
 
 ### 3.3 更新节点
 
-更新字典项时，服务层不仅更新普通字段，还会处理层级关系：
+更新字典项时，服务层会先查询当前节点，再走 Hook 和写后事件：
 
 1. 查询当前节点
-2. 校验新父节点是否合法
-3. 校验不能形成环
-4. 更新 `parentId`
-5. 重建当前节点 `path`
-6. 递归刷新所有后代节点路径
-7. 清理该字典编码下缓存
+2. 调用 `beforeUpdateDictItem`（可拿到更新前快照）
+3. 更新名称、值、排序、启停、颜色和备注等普通字段
+4. 调用 `afterUpdateDictItem`
+5. 发布 `DictItemUpdatedEvent`（带 `oldName` / `oldItemValue` / `oldSort` / `oldEnabled`）
+6. 清理该字典编码下缓存
+
+当前更新接口不改 `parentId` / `path`。层级迁移如果后续开放，仍会受“父节点必须同字典、不能成环、有子节点不可删”这些约束保护。
 
 ### 3.4 删除节点
 
@@ -166,7 +173,7 @@
 
 - 当前节点是否存在子节点
 
-如果仍有子节点，则直接拒绝删除。
+如果仍有子节点，则直接拒绝删除。校验通过后会调用 `beforeDeleteDictItem`，删除成功后再调用 `afterDeleteDictItem` 并发布 `DictItemDeletedEvent`。
 
 ### 3.5 按编码查询树形字典
 
@@ -236,18 +243,22 @@ GET /api/dict/items/dict/{dictCode}
 
 ## 5. 缓存设计
 
-`nebula-dict` 当前使用单独的 `DictCacheService` 统一处理字典读取缓存。
+`nebula-dict` 通过 `DictCacheDefinitionConfiguration` 注册缓存命名空间，读路径走 Spring `@Cacheable`，写路径用 `@CacheEvict` / `@Caching` 失效。
 
 ### 5.1 缓存域
 
-根据 `DictCacheDefinitionConfiguration`，当前存在两个缓存域：
+当前至少包括：
 
-- `dictItemByType`
-- `dictItemTreeByType`
+- `dictItemByType`：按字典编码缓存平铺列表
+- `dictItemTreeByType`：按字典编码缓存树
+- `dictTypePage` / `dictTypeDetail`
+- `dictItemPage` / `dictItemDetail`
+
+TTL 由 `nebula.dict.cache-ttl-seconds` 控制，默认 300 秒。
 
 ### 5.2 缓存键
 
-缓存键由：
+按编码读取的缓存键由：
 
 - `dictCode`
 - `onlyEnabled`
@@ -259,31 +270,90 @@ order_status::true
 order_status::false
 ```
 
-### 5.3 缓存读取
+### 5.3 缓存失效
 
-- 平铺缓存通过 `getOrLoadFlatList(...)` 获取缓存或回源
-- 树形读取通过 `getOrLoadTree(...)` 获取缓存或回源
+当以下操作发生时，会自动清理对应缓存：
 
-### 5.4 缓存失效
+- 创建 / 更新 / 删除字典类型
+- 创建 / 更新 / 删除字典项
 
-当以下操作发生时，会自动清理对应字典编码的平铺缓存和树缓存：
-
-- 更新字典类型
-- 删除字典类型
-- 创建字典项
-- 更新字典项
-- 删除字典项
-
-这意味着：
-
-- 前端读取字典时可以享受缓存收益
-- 后台维护字典时不需要自己额外处理缓存清理
+Hook 和事件都发生在写路径上，缓存失效由 service 的缓存注解处理，业务方通常不需要自己额外清理。
 
 ---
 
-## 6. local / remote 模式设计
+## 6. 写操作 Hook 设计
 
-### 6.1 local 模式
+`DictOperationHook` 是字典模块的同步扩展点（SPI），接口放在 api 模块，core 通过 `@ConditionalOnMissingBean` 注册 `NoopDictOperationHook`。业务声明同类型 Bean 后，Spring 会优先使用业务实现。
+
+### 6.1 调用时机
+
+统一顺序是：
+
+```text
+既有校验通过 → before* → 写库 / 清缓存 → after* → 发布事件
+```
+
+- `before*`：校验通过之后、写库之前。抛出 `BusinessException` 即中止（不写库、不发事件）
+- `after*`：写库之后、事件发布之前、**同一事务内**。抛出异常会回滚本次操作且不发布事件
+
+因此 Hook 适合做“必须和字典写入一起成功或一起失败”的联动，例如删除字典项前先清理依赖该值的业务状态。
+
+### 6.2 参数语义
+
+- `command` 是服务层传入的**同一实例**，在 `before*` 中修改会影响本次操作
+- `existing` / `created` / `updated` / `deleted` 是 `DictConverter` 新构建的副本，修改不影响持久化结果
+- `afterCreate*` / `afterUpdate*` 的 DTO 由内存实体转换，`createTime` / `updateTime` 可能为 `null`（未回查数据库），业务不得依赖
+
+### 6.3 方法清单
+
+| 方法 | 触发操作 |
+| --- | --- |
+| `beforeCreateDictType` / `afterCreateDictType` | 创建字典类型 |
+| `beforeUpdateDictType` / `afterUpdateDictType` | 更新字典类型 |
+| `beforeDeleteDictType` / `afterDeleteDictType` | 删除字典类型 |
+| `beforeCreateDictItem` / `afterCreateDictItem` | 创建字典项 |
+| `beforeUpdateDictItem` / `afterUpdateDictItem` | 更新字典项 |
+| `beforeDeleteDictItem` / `afterDeleteDictItem` | 删除字典项 |
+
+字典类型删除仍会先检查“是否还有字典项”，有子项时在 Hook 之前就拒绝，不会进入 `beforeDeleteDictType`。
+
+---
+
+## 7. 领域事件设计
+
+写成功后，`DictServiceImpl` 通过 `NebulaEventPublisher` 发布事件。事件类放在 api 模块，继承 `AbstractNebulaEvent`，`eventType` 由 `@NebulaEventDefinition` 的 `module + code` 拼接。
+
+### 7.1 事件清单
+
+| 事件类 | eventType | 触发时机 |
+| --- | --- | --- |
+| `DictTypeCreatedEvent` | `dict-typeCreated` | 创建字典类型 |
+| `DictTypeUpdatedEvent` | `dict-typeUpdated` | 更新字典类型 |
+| `DictTypeDeletedEvent` | `dict-typeDeleted` | 删除字典类型 |
+| `DictItemCreatedEvent` | `dict-itemCreated` | 创建字典项 |
+| `DictItemUpdatedEvent` | `dict-itemUpdated` | 更新字典项 |
+| `DictItemDeletedEvent` | `dict-itemDeleted` | 删除字典项 |
+
+### 7.2 载荷约定
+
+字典事件载荷自包含，监听器通常不需要再回查数据库。
+
+- 类型事件带 `id` / `code` / `name`；更新事件额外带 `oldName` / `oldRemark`
+- 字典项事件带 `id` / `dictCode` / `name` / `parentId` / `path` / `itemValue`
+- 创建项事件额外带 `sort` / `enabled`；顶层项的 `parentId` 为 `null`，`path` 为 `"祖先ID,...,当前ID"` 链
+- 更新项事件额外带 `oldName` / `oldItemValue` / `oldSort` / `oldEnabled`
+
+### 7.3 发布与消费边界
+
+- Hook 失败会阻止事件发布
+- 本地模式默认可在事务提交后再分发；远程模式把事件写入 outbox，由 relay 投递
+- Hook 跑在**真正执行写操作的那一侧**（local 应用或独立 dict-service），remote 消费方注册 Hook 不会拦截远端写入
+
+---
+
+## 8. local / remote 模式设计
+
+### 8.1 local 模式
 
 `DictController` 使用了：
 
@@ -296,7 +366,7 @@ order_status::false
 - 本地控制器生效
 - 当前应用直接提供字典能力
 
-### 6.2 remote 模式
+### 8.2 remote 模式
 
 业务应用切换到 `nebula.dict.mode=remote` 后：
 
@@ -304,7 +374,7 @@ order_status::false
 - 通过 `DictFeignClient` 远程转调字典服务
 - 业务代码仍然面向 `IDictService` 编程
 
-### 6.3 设计价值
+### 8.3 设计价值
 
 这套设计的价值在于：
 
@@ -314,26 +384,26 @@ order_status::false
 
 ---
 
-## 7. 当前实现中的约束与边界
+## 9. 当前实现中的约束与边界
 
-### 7.1 唯一性约束
+### 9.1 唯一性约束
 
 - 字典类型 `code` 唯一
 
 当前字典项不再使用 `itemCode` 作为独立身份字段，因此服务与表结构不再保留 `(dict_code, item_code)` 唯一约束。
 
-### 7.2 层级约束
+### 9.2 层级约束
 
 - 父节点必须存在
 - 父节点必须属于同一字典编码
 - 不允许环形引用
 - 有子节点时不允许删除
 
-### 7.3 类型删除约束
+### 9.3 类型删除约束
 
 - 字典类型下仍有字典项时，不允许删除
 
-### 7.4 过滤语义
+### 9.4 过滤语义
 
 `onlyEnabled` 默认语义是：
 
@@ -344,12 +414,14 @@ order_status::false
 
 ---
 
-## 8. 推荐继续阅读入口
+## 10. 推荐继续阅读入口
 
 如果要进一步看源码实现细节，建议重点阅读：
 
-- `nebula-dict/nebula-dict-core/src/main/java/com/cludix/nebula/dict/service/impl/DictServiceImpl.java`
-- `nebula-dict/nebula-dict-core/src/main/java/com/cludix/nebula/dict/service/DictCacheService.java`
-- `nebula-dict/nebula-dict-local/src/main/java/com/cludix/nebula/dict/controller/DictController.java`
-- `nebula-dict/nebula-dict-remote/src/main/java/com/cludix/nebula/dict/feign/DictFeignClient.java`
-- `nebula-dict/nebula-dict-api/src/main/java/com/cludix/nebula/dict/model/dto/DictItemTreeDto.java`
+- `nebula-dict/nebula-dict-core/src/main/java/cn/cloudomni/nebula/dict/service/impl/DictServiceImpl.java`
+- `nebula-dict/nebula-dict-core/src/main/java/cn/cloudomni/nebula/dict/config/DictCacheDefinitionConfiguration.java`
+- `nebula-dict/nebula-dict-api/src/main/java/cn/cloudomni/nebula/dict/hook/DictOperationHook.java`
+- `nebula-dict/nebula-dict-api/src/main/java/cn/cloudomni/nebula/dict/event/DictItemDeletedEvent.java`
+- `nebula-dict/nebula-dict-local/src/main/java/cn/cloudomni/nebula/dict/controller/DictController.java`
+- `nebula-dict/nebula-dict-remote/src/main/java/cn/cloudomni/nebula/dict/feign/DictFeignClient.java`
+- `nebula-dict/nebula-dict-api/src/main/java/cn/cloudomni/nebula/dict/model/dto/DictItemTreeDto.java`

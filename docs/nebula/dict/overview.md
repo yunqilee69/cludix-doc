@@ -34,11 +34,12 @@ nebula-dict/
 - `nebula-dict-api`
   - 放 `IDictService`
   - 放字典类型、字典项相关的命令、查询、DTO
+  - 放写操作扩展点 `DictOperationHook` 与领域事件 `DictType*Event` / `DictItem*Event`
   - 放错误码、缓存常量等稳定契约
 - `nebula-dict-core`
   - 放真正的业务实现，如 `DictServiceImpl`
   - 放 DAO / Entity / 分页查询参数对象
-  - 放缓存定义与 `DictCacheService`
+  - 放缓存定义、`DictHookConfiguration` 以及 Hook 默认空实现装配
 - `nebula-dict-local`
   - 放 REST Controller
   - 适合单体应用直接接入
@@ -93,6 +94,15 @@ nebula-dict/
 - 有子节点的字典项不允许直接删除
 - 有字典项的字典类型不允许直接删除
 
+### 3.4 写操作 Hook 与领域事件
+
+字典写路径现在额外提供两类扩展：
+
+- **同步 Hook**：`DictOperationHook`，在写库前后拦截字典类型 / 字典项操作，适合同事务联动、删除前清理依赖
+- **领域事件**：`DictTypeCreatedEvent` / `DictTypeUpdatedEvent` / `DictTypeDeletedEvent` 与 `DictItemCreatedEvent` / `DictItemUpdatedEvent` / `DictItemDeletedEvent`，写成功后通过 `NebulaEventPublisher` 发布
+
+两者都定义在 `nebula-dict-api`。事件载荷自包含，监听器通常不需要再回查数据库。
+
 ---
 
 ## 4. 当前接口边界
@@ -132,7 +142,7 @@ nebula-dict/
 
 `nebula-dict` 当前不仅支持查询，还内置了字典读取缓存。
 
-根据 `DictCacheService` 与缓存定义配置，可以确认当前存在两类缓存：
+根据 `DictCacheDefinitionConfiguration` 与 `DictServiceImpl` 上的缓存注解，可以确认当前存在两类按编码读取缓存：
 
 - `dictItemByType`：按字典编码缓存字典项平铺列表
 - `dictItemTreeByType`：按字典编码缓存字典项树
@@ -178,11 +188,11 @@ nebula-dict/
 建议按下面顺序阅读：
 
 1. [设计与实现](./design-and-implementation.md)
-   - 先理解字典项树、路径字段、缓存和 remote 模式
+   - 先理解字典项树、路径字段、缓存、写操作 Hook、领域事件和 remote 模式
 2. [业务功能](./business-capabilities.md)
-   - 再理解字典类型、字典项和树形读取分别解决什么问题
+   - 再理解字典类型、字典项、树形读取、Hook/事件分别解决什么问题
 3. [使用方式](./usage-guide.md)
-   - 最后看如何单体接入、拆服务与远程消费
+   - 最后看如何单体接入、拆服务、远程消费，以及如何实现 Hook 和监听事件
 4. [建表语句](./ddl.md)
    - 若要真正落库，再查看表结构和字段约束
 
@@ -192,9 +202,11 @@ nebula-dict/
 
 如果你要继续深入源码，建议优先阅读这些文件：
 
-- `nebula-dict/nebula-dict-api/src/main/java/com/cludix/nebula/dict/service/IDictService.java`
-- `nebula-dict/nebula-dict-local/src/main/java/com/cludix/nebula/dict/controller/DictController.java`
-- `nebula-dict/nebula-dict-core/src/main/java/com/cludix/nebula/dict/service/impl/DictServiceImpl.java`
-- `nebula-dict/nebula-dict-core/src/main/java/com/cludix/nebula/dict/service/DictCacheService.java`
-- `nebula-dict/nebula-dict-core/src/main/java/com/cludix/nebula/dict/config/DictCacheDefinitionConfiguration.java`
+- `nebula-dict/nebula-dict-api/src/main/java/cn/cloudomni/nebula/dict/service/IDictService.java`
+- `nebula-dict/nebula-dict-api/src/main/java/cn/cloudomni/nebula/dict/hook/DictOperationHook.java`
+- `nebula-dict/nebula-dict-api/src/main/java/cn/cloudomni/nebula/dict/event/DictItemDeletedEvent.java`
+- `nebula-dict/nebula-dict-local/src/main/java/cn/cloudomni/nebula/dict/controller/DictController.java`
+- `nebula-dict/nebula-dict-core/src/main/java/cn/cloudomni/nebula/dict/service/impl/DictServiceImpl.java`
+- `nebula-dict/nebula-dict-core/src/main/java/cn/cloudomni/nebula/dict/config/DictCacheDefinitionConfiguration.java`
+- `nebula-dict/nebula-dict-core/src/main/java/cn/cloudomni/nebula/dict/config/DictHookConfiguration.java`
 - `nebula-dict/nebula-dict-service/src/test/resources/db/test/dict-schema-mysql.sql`
