@@ -27,8 +27,8 @@ const config: Config = {
   // Set the production url of your site here
   url: "https://yunqilee69.github.io",
   // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: "/",
+  // GitHub Pages 项目站点地址为 https://yunqilee69.github.io/cludix-doc/，须与仓库名一致
+  baseUrl: "/cludix-doc/",
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
