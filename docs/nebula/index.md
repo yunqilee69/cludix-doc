@@ -50,15 +50,16 @@ Nebula 是一个基于 Spring 生态的 **Java 模块化中台工程**。它不�
 | `nebula-storage` | 统一文件存储：普通/分片上传、鉴权下载、短时签名分享下载 | [Storage 模块](./storage/index.md) |
 | `nebula-frontend` | 前端支撑：启动配置、主题/语言/导航布局偏好、动态缓存治理 | [Frontend 模块](./frontend/index.md) |
 
-各模块文档采用统一结构：`overview → design-and-implementation → business-capabilities → api-reference → usage-guide → configuration → ddl`。
+各模块文档采用统一结构：`overview → design-and-implementation → business-capabilities → usage-guide → configuration → ddl`。
 
 ## 📚 文档分类
 
-- [Auth 模块](./auth/index.md) - nebula-auth 模块的总览、业务功能、设计实现、接口、接入方式、配置与建表说明
-- [Dict 模块](./dict/index.md) - nebula-dict 模块的总览、业务功能、设计实现、接口、接入方式、配置与建表说明
-- [Param 模块](./param/index.md) - nebula-param 模块的总览、业务功能、设计实现、接口、接入方式、配置与建表说明
-- [Storage 模块](./storage/index.md) - nebula-storage 模块的总览、业务功能、设计实现、接口、接入方式、配置与建表说明
-- [Frontend 模块](./frontend/index.md) - nebula-frontend 模块的总览、业务功能、设计实现、接口、接入方式、配置与建表说明
+- [Auth 模块](./auth/index.md) - nebula-auth 模块的总览、业务功能、设计实现、接入方式、配置与建表说明
+- [Dict 模块](./dict/index.md) - nebula-dict 模块的总览、业务功能、设计实现、接入方式、配置与建表说明
+- [Param 模块](./param/index.md) - nebula-param 模块的总览、业务功能、设计实现、接入方式、配置与建表说明
+- [Storage 模块](./storage/index.md) - nebula-storage 模块的总览、业务功能、设计实现、接入方式、配置与建表说明
+- [Frontend 模块](./frontend/index.md) - nebula-frontend 模块的总览、业务功能、设计实现、接入方式、配置与建表说明
+- **接口文档**：模块对外接口不再在本站维护，接入 nebula 后端运行时 OpenAPI 文档（启动后访问 `doc.html` / `swagger-ui.html`），与代码实时一致
 - [设计说明](./design/index.md) - 项目分层设计与包设计说明
 - [规范说明](./spec/index.md) - 项目分层对象命名规约说明书
 
@@ -71,6 +72,7 @@ Nebula 是一个基于 Spring 生态的 **Java 模块化中台工程**。它不�
 2. 再看目标模块的 `index / overview`
    - 快速建立该模块的能力边界和文档地图
 3. 然后按统一顺序阅读模块页
-   - `design-and-implementation` → `business-capabilities` → `api-reference` → `usage-guide` → `configuration` → `ddl`
-4. 最后看 [规范说明](./spec/index.md)
+   - `design-and-implementation` → `business-capabilities` → `usage-guide` → `configuration` → `ddl`
+4. 需要具体接口契约时，查看 nebula 后端运行时 OpenAPI 文档（`doc.html` / `swagger-ui.html`），与代码实时一致
+5. 最后看 [规范说明](./spec/index.md)
    - 对照对象命名规约和分层约定，帮助把文档理解映射回代码结构

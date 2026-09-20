@@ -181,11 +181,9 @@ nebula-dict/
    - 先理解字典项树、路径字段、缓存和 remote 模式
 2. [业务功能](./business-capabilities.md)
    - 再理解字典类型、字典项和树形读取分别解决什么问题
-3. [接口信息](./api-reference.md)
-   - 然后查看具体 API 形态
-4. [使用方式](./usage-guide.md)
+3. [使用方式](./usage-guide.md)
    - 最后看如何单体接入、拆服务与远程消费
-5. [建表语句](./ddl.md)
+4. [建表语句](./ddl.md)
    - 若要真正落库，再查看表结构和字段约束
 
 ---

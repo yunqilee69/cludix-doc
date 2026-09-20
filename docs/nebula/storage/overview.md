@@ -142,11 +142,9 @@ nebula-storage/
    - 先理解 storage 模块为什么采用“两阶段上传 + provider 抽象”模型
 2. [业务功能](./business-capabilities.md)
    - 再理解普通上传、分片上传、下载、分享下载分别解决什么问题
-3. [接口信息](./api-reference.md)
-   - 然后看具体 API 形态和参数说明
-4. [使用方式](./usage-guide.md)
+3. [使用方式](./usage-guide.md)
    - 最后看如何在单体、独立服务、前端侧接入
-5. [建表语句](./ddl.md)
+4. [建表语句](./ddl.md)
    - 如果要真正落库，再查看表结构和字段约束
 
 ---
