@@ -6,6 +6,30 @@
 - 内链不因路径调整而频繁失效
 - 通过验证脚本确保 tags 符合规范
 
+## 分支与提交约定
+
+**默认直接在 `master` 分支上改动、提交并推送，不要新建分支。**
+
+- 本仓库是个人文档站，`master` 就是日常工作分支，不区分开发分支
+- **没有明确要求时，不要为了"规范"而创建 feature 分支**
+- 只有在用户明确要求（例如需要评审、要做试验性重构、要并行多套方案）时，才新建分支
+- 推送 `master` 会触发 `.github/workflows/deploy.yml` 自动部署 GitHub Pages，push 即上线
+
+提交前建议先本地验证：
+
+```bash
+npm run check-doc-tags   # tags 校验（必须通过）
+npm run build            # 构建校验，sidebar 写错会直接失败
+```
+
+提交信息沿用现有风格（中文 + conventional commits 前缀），例如：
+
+```
+docs(nebula): 新增扩展点与领域事件文档，为 dict/param 补充 Hook 与事件说明
+docs(projects): 新增 OmniGate 独立文档与侧边栏
+fix(ci): 让 GitHub Pages 发布 Docusaurus 而不是 Jekyll README
+```
+
 ## 文档与 Blog 的区别
 
 在新增内容前，需要先判断放在哪里：
