@@ -1,19 +1,19 @@
 ---
 title: 项目
 date: 2026-08-19 10:00
-tags: [cludix-totp, port-cleaner, guide]
+tags: [omnitotp, port-cleaner, guide]
 ---
 
 # 项目
 
-本目录收录自研小工具项目的说明与使用文档。这些项目均为**本地自用**的桌面工具，没有线上服务，从源码构建后在本机运行。
+本目录收录自研项目的说明与使用文档。下表中的桌面工具均为**本地自用**，没有线上服务，从源码构建后在本机运行；Nebula 是 Java 中台工程，文档见独立的 [Nebula 板块](../nebula/)。
 
 ## 文档清单
 
 | 项目 | 说明 | 仓库地址 |
 | --- | --- | --- |
-| [Cludix TOTP](./cludix-totp) | 轻量级 TOTP 两步验证码桌面工具（Tauri 2 + React + Rust） | [yunqilee69/cludix-totp](https://github.com/yunqilee69/cludix-totp) |
-| [Port Cleaner](./port-cleaner) | 本机端口占用查看与进程清理工具（Tauri 2 + Rust + React） | [yunqilee69/port-cleaner](https://github.com/yunqilee69/port-cleaner) |
+| [OmniTOTP](./omnitotp) | 轻量级 TOTP 两步验证码桌面工具（Tauri 2 + React + Rust），含使用方式、配置存储、本地构建 | [yunqilee69/OmniTOTP](https://github.com/yunqilee69/OmniTOTP) |
+| [Port Cleaner](./port-cleaner) | 本机端口占用查看与进程清理工具（Tauri 2 + Rust + React），含平台支持、使用注意、本地构建 | [yunqilee69/PortCleaner](https://github.com/yunqilee69/PortCleaner) |
 
 ## 其他项目
 

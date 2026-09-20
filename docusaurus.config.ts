@@ -118,8 +118,9 @@ const config: Config = {
           label: "项目",
           position: "right",
           items: [
+            { label: "项目总览", to: "/docs/projects/" },
             { label: "Nebula", to: "/docs/nebula/" },
-            { label: "Cludix TOTP", to: "/docs/projects/cludix-totp" },
+            { label: "OmniTOTP", to: "/docs/projects/omnitotp/" },
             { label: "Port Cleaner", to: "/docs/projects/port-cleaner" },
           ],
         },

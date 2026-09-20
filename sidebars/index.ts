@@ -1,6 +1,10 @@
 import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
 import nebulaSidebar from './nebula';
-import projectsSidebar from './projects';
+import {
+  projectsOverviewSidebar,
+  omnitotpSidebar,
+  portCleanerSidebar,
+} from './projects';
 import financeSidebar from './finance';
 import {
   dockerSidebar,
@@ -23,7 +27,9 @@ export type SidebarConfig = SidebarsConfig[string];
 
 const sidebars: SidebarsConfig = {
   nebulaSidebar,
-  projectsSidebar,
+  projectsOverviewSidebar,
+  omnitotpSidebar,
+  portCleanerSidebar,
   financeSidebar,
   tutorialsOverviewSidebar: [{ type: 'doc', id: 'tutorials/index' }],
   tutorialsDockerSidebar: dockerSidebar,
