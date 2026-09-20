@@ -1,7 +1,7 @@
 ---
 title: VMware使用U盘安装Debian系统
 description: 详细介绍在VMware Workstation中如何使用U盘安装Debian系统
-tags: [VMware, Debian]
+tags: [debian, linux, installation]
 date: 2025-12-10
 ---
 # 准备工作

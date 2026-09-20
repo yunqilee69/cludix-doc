@@ -5,7 +5,7 @@
  * 
  * 功能：
  * 1. 检查 docs/ 目录下的 Markdown 文件是否都有 front matter（缺少直接判失败）
- * 2. 检查非索引页是否有 tags 字段，并验证 tags 是否在白名单中
+ * 2. 检查文档是否都有 tags（目录索引页可省略），并验证 tags 是否在白名单中
  * 3. 排除 docs/nebula/ 目录（后续独立文档站）
  * 
  * 使用：npm run check-doc-tags
@@ -48,7 +48,8 @@ const EXCLUDE_DIRS = [
 ];
 
 /**
- * 允许没有 tags 的文件（目录索引页）
+ * 允许不写 tags 的文件（目录索引页）
+ * 注意：只是允许省略 tags，一旦写了 tags 仍会校验白名单
  */
 const TAGS_OPTIONAL_FILES = [
   'index.md'
@@ -172,13 +173,12 @@ function validateFile(filePath) {
     return { passed: false, errors, tags: [], file: relativePath };
   }
 
-  // 目录索引页允许没有 tags
-  if (TAGS_OPTIONAL_FILES.includes(fileName)) {
-    return { passed: true, errors: [], tags, file: relativePath };
-  }
-  
   // 有 front matter 但没有 tags
   if (tags.length === 0) {
+    // 目录索引页允许省略 tags，写了 tags 的索引页仍会走白名单校验
+    if (TAGS_OPTIONAL_FILES.includes(fileName)) {
+      return { passed: true, errors: [], tags, file: relativePath };
+    }
     errors.push({
       type: 'missing_tags',
       message: `缺少 tags 字段`,

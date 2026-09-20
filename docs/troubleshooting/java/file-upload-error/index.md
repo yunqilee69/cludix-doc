@@ -1,10 +1,9 @@
 ---
 title: 文件上传报错
 tags:
-  - Java
-  - Tomcat
-  - Spring Boot
-  - Bug
+  - java
+  - spring-boot
+  - troubleshooting
 ---
 # 文件上传报错
 

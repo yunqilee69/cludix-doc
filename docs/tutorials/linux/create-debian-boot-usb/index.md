@@ -1,7 +1,7 @@
 ---
 title: 制作启动U盘
 description: 使用 Ventoy 制作可在 UEFI 模式下启动的 Debian 安装 U 盘
-tags: [Debian, Ventoy, U盘]
+tags: [debian, linux, installation]
 date: 2026-03-13
 ---
 # 准备工作
