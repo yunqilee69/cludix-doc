@@ -30,7 +30,7 @@
 
 ## 2. Front Matter 规则
 
-每篇文档建议包含 front matter，**tags 和 date 为必填字段**：
+每篇文档**必须**包含 front matter：正文页必须写 `tags`，并尽量写全 `title` 与 `date`。`npm run check-doc-tags` 会强制校验——**缺 front matter、缺 tags、tag 不在白名单，一律判失败（退出码 1）**：
 
 ```md
 ---
@@ -44,9 +44,9 @@ tags: [tag1, tag2]
 
 | 字段 | 必填 | 说明 |
 |------|------|------|
-| `tags` | ✅ 必填 | 用于文档分类和检索，至少包含一个 tag |
+| `tags` | ✅ 必填 | 用于文档分类和检索，至少包含一个 tag；目录索引页 `index.md` 可省略（脚本对 `index.md` 放行 tags） |
 | `date` | ✅ 推荐 | 创建日期和时间（格式：yyyy-MM-dd hh:mm），方便后续回忆 |
-| `title` | 可选 | 页面标题，未填写时使用文档第一个标题 |
+| `title` | ✅ 推荐 | 页面标题，未填写时使用文档第一个标题 |
 | `slug` | Blog 必填 | 自定义 URL 路径，**仅在 Blog 中使用**，文档不需要填写 |
 
 ### 2.2 Tags 规范
@@ -66,22 +66,17 @@ tags: [tag1, tag2]
 
 ### 2.3 Tags 白名单
 
-参考项目根目录的 `allowed-tags.json` 文件，包含：
+**以项目根目录的 `allowed-tags.json` 为唯一口径**：`npm run check-doc-tags` 直接读取该文件校验，白名单即「实际在用词表」，没有文档使用的 tag 应当删除。当前共 72 个 tag，大致分为：
 
-**技术栈**：
-- docker, nginx, mysql, redis, postgresql, mongodb
-- nacos, rocketmq, kafka, milvus, elasticsearch
-- jenkins, portainer, k8s, rancher, filebrowser
-- jellyfin, jellyseerr, newapi, bifrost, deerflow
-- java, python, rust, nodejs, typescript
-- linux, debian, macos, windows, ubuntu, centos
+**技术栈**：docker, nginx, mysql, redis, postgresql, nacos, rocketmq, xxl-job, milvus, jenkins, portainer, k8s, rancher, filebrowser, jellyfin, jellyseerr, newapi, bifrost, deerflow, java, maven, rust, nodejs, npm, linux, debian, macos, windows, rocky
 
-**场景**：
-- installation, deployment, configuration, usage
-- concurrency, security, auth, cache, storage
-- network, database, middleware, proxy, media
-- devops, ci-cd, monitoring, backup, migration
-- troubleshooting, tutorial, guide, spec, api
+**场景**：installation, deployment, configuration, usage, concurrency, security, auth, cache, storage, network, proxy, media, ci-cd, troubleshooting, tutorial, guide
+
+**工具与其他**：spring-boot, ghcr, git, config, dufs, webdav, harmonyos, android, opencode, openclaw, ai, agent, llm
+
+**项目与领域**：omnitotp, port-cleaner, finance, investment, stock, fund, bond, etf, gold, macro, derivative, valuation, technical-analysis, fundamental-analysis
+
+新增 tag 前先在 `allowed-tags.json` 中添加，并确认不是一次性内容。
 
 ## 3. 侧边栏策略（全部手动维护）
 

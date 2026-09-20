@@ -1,3 +1,9 @@
+---
+title: Redis
+date: 2026-06-17 11:29
+tags: [redis, docker, deployment]
+---
+
 # Redis
 
 本文提供 Redis 的配置示例与配置原因说明。

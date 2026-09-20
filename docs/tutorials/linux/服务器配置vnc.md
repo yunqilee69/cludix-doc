@@ -1,3 +1,9 @@
+---
+title: 服务器配置 VNC
+date: 2026-06-17 11:29
+tags: [linux, configuration]
+---
+
 # 在Linux服务器上配置vnc
 
 在Linux配置VNC服务，在其他电脑上直接通过VNC进行连接和操作Linux系统，例如Linux上安装了软件，其带有页面，但是Linux是无界面的，这个时候可以通过VNC进行操作和配置

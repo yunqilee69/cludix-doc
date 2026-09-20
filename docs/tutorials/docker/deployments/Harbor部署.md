@@ -1,3 +1,9 @@
+---
+title: Harbor
+date: 2026-06-22 22:58
+tags: [docker, deployment]
+---
+
 # Harbor
 
 Harbor 是 CNCF 旗下的企业级镜像仓库，底层基于 Docker Distribution，并额外提供项目隔离、用户权限、镜像复制、漏洞扫描、镜像保留策略和 Web 管理界面等能力。本文将用户提到的 `haobar` 按常见镜像仓库产品 `Harbor` 理解，提供基于官方安装包和 Docker Compose 的单节点部署示例。

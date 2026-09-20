@@ -4,8 +4,8 @@
  * 文档 tags 验证脚本
  * 
  * 功能：
- * 1. 检查 docs/ 目录下的 Markdown 文件是否有 tags 字段
- * 2. 验证 tags 是否在白名单中
+ * 1. 检查 docs/ 目录下的 Markdown 文件是否都有 front matter（缺少直接判失败）
+ * 2. 检查非索引页是否有 tags 字段，并验证 tags 是否在白名单中
  * 3. 排除 docs/nebula/ 目录（后续独立文档站）
  * 
  * 使用：npm run check-doc-tags
@@ -48,9 +48,9 @@ const EXCLUDE_DIRS = [
 ];
 
 /**
- * 允许没有 tags 的文件（索引页等）
+ * 允许没有 tags 的文件（目录索引页）
  */
-const ALLOW_NO_TAGS_FILES = [
+const TAGS_OPTIONAL_FILES = [
   'index.md'
 ];
 
@@ -159,23 +159,22 @@ function validateFile(filePath) {
   const fileName = path.basename(filePath);
   const relativePath = path.relative(process.cwd(), filePath);
   
-  // 允许索引页没有 tags
-  if (ALLOW_NO_TAGS_FILES.includes(fileName)) {
-    return { passed: true, errors: [], tags: [], file: relativePath };
-  }
-  
   const content = fs.readFileSync(filePath, 'utf-8');
   const tags = parseFrontMatterTags(content);
-  
-  // 没有 front matter
+
+  // 没有 front matter：一律判失败
   if (tags === null) {
-    return {
-      passed: true, // 允许没有 front matter（很多文档只有标题行 #）
-      errors: [],
-      tags: [],
-      file: relativePath,
-      hasNoFrontMatter: true
-    };
+    errors.push({
+      type: 'missing_front_matter',
+      message: `缺少 front matter（请补 title / date，正文页还需 tags）`,
+      file: relativePath
+    });
+    return { passed: false, errors, tags: [], file: relativePath };
+  }
+
+  // 目录索引页允许没有 tags
+  if (TAGS_OPTIONAL_FILES.includes(fileName)) {
+    return { passed: true, errors: [], tags, file: relativePath };
   }
   
   // 有 front matter 但没有 tags
@@ -242,7 +241,6 @@ function main() {
     total: mdFiles.length,
     passed: 0,
     failed: 0,
-    noFrontMatter: 0,
     skipped: 0,
     errors: [],
     taggedFiles: []
@@ -252,10 +250,7 @@ function main() {
   for (const filePath of mdFiles) {
     const result = validateFile(filePath);
     
-    if (result.hasNoFrontMatter) {
-      report.noFrontMatter++;
-      console.log(`⚪ ${result.file} (无 front matter)`);
-    } else if (result.passed) {
+    if (result.passed) {
       report.passed++;
       report.taggedFiles.push({ file: result.file, tags: result.tags });
       console.log(`✅ ${result.file}`);
@@ -277,7 +272,6 @@ function main() {
   console.log(`总文件数:    ${report.total}`);
   console.log(`验证通过:    ${report.passed}`);
   console.log(`验证失败:    ${report.failed}`);
-  console.log(`无 front matter: ${report.noFrontMatter}`);
   console.log('');
   
   // 显示已验证的 tags 示例
@@ -306,11 +300,12 @@ function main() {
     console.log('请修复以上问题后重新运行验证。');
     console.log('');
     console.log('提示:');
-    console.log('1. 为缺少 tags 的文档添加 tags 字段');
-    console.log('2. 确保使用的 tag 在白名单中');
-    console.log('3. tags 格式示例:');
+    console.log('1. 文档必须写 front matter（title 必填；正文页还必须写 tags）');
+    console.log('2. 确保使用的 tag 在 allowed-tags.json 白名单中');
+    console.log('3. front matter 格式示例:');
     console.log('   ---');
     console.log('   title: 文档标题');
+    console.log('   date: 2026-06-22 15:30');
     console.log('   tags: [docker, deployment]');
     console.log('   ---');
     process.exit(1);

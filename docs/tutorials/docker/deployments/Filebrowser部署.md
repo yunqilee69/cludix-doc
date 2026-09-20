@@ -1,3 +1,9 @@
+---
+title: Filebrowser
+date: 2026-06-17 11:29
+tags: [filebrowser, docker, deployment]
+---
+
 # Filebrowser
 
 本文提供 Filebrowser 的配置示例与配置原因说明。

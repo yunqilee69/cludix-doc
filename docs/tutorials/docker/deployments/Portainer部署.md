@@ -1,3 +1,9 @@
+---
+title: Portainer
+date: 2026-06-17 11:29
+tags: [portainer, docker, deployment]
+---
+
 # Portainer
 
 Portainer 是一个常见的 Docker 管理面板，提供容器、镜像、卷、网络、Compose Stack 等可视化管理能力。本文提供基于 Docker Compose 的部署示例、初始化步骤与配置原因说明。

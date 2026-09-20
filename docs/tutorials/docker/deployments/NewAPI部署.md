@@ -1,3 +1,9 @@
+---
+title: NewAPI
+date: 2026-06-17 11:29
+tags: [newapi, docker, deployment]
+---
+
 # NewAPI
 
 NewAPI 是一个面向大模型与 AI 服务的统一网关，支持多供应商接入、令牌管理、计费与控制台管理。本文提供基于 Docker Compose 的部署示例与配置原因说明。

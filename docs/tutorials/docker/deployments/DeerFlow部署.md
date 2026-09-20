@@ -1,3 +1,9 @@
+---
+title: DeerFlow
+date: 2026-06-17 11:29
+tags: [deerflow, docker, deployment]
+---
+
 # DeerFlow
 
 DeerFlow 是字节跳动开源的 super agent harness，集成了前端、Gateway API、LangGraph、Sandbox、Skills 与 Sub-Agent 能力。它的 Docker 方案不是"单容器 + 单个 compose 文件"模式，而是官方维护的一套多服务编排，因此本文优先遵循官方仓库的 Docker 工作流。

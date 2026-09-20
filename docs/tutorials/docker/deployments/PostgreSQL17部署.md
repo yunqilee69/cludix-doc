@@ -1,3 +1,9 @@
+---
+title: PostgreSQL 17
+date: 2026-06-17 11:29
+tags: [postgresql, docker, deployment]
+---
+
 # PostgreSQL 17
 
 本文提供 PostgreSQL 17 的配置示例与配置原因说明。

@@ -1,3 +1,9 @@
+---
+title: Milvus
+date: 2026-06-17 11:29
+tags: [milvus, docker, deployment]
+---
+
 # Milvus
 
 本文提供 Milvus 向量数据库的配置示例与配置原因说明。

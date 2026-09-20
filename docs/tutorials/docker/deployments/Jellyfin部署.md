@@ -1,3 +1,9 @@
+---
+title: Jellyfin
+date: 2026-06-17 11:29
+tags: [jellyfin, docker, deployment, media]
+---
+
 # Jellyfin
 
 本文提供 Jellyfin 媒体服务器的部署示例、初始化步骤与配置原因说明。

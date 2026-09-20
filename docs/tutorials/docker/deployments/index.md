@@ -1,3 +1,8 @@
+---
+title: 容器部署
+date: 2026-06-17 11:29
+---
+
 # 容器部署
 
 本目录收录各类常用服务的 Docker Compose 部署文档，统一遵循 [Docker 规范](../index.md) 中的单应用 compose 模式。

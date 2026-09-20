@@ -1,3 +1,9 @@
+---
+title: Nginx
+date: 2026-06-17 11:29
+tags: [nginx, docker, deployment]
+---
+
 # Nginx
 
 本文仅提供配置示例与配置原因说明，不包含验证访问和运维命令。

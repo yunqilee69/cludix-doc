@@ -1,3 +1,9 @@
+---
+title: Jellyseerr
+date: 2026-06-17 11:29
+tags: [jellyseerr, docker, deployment, media]
+---
+
 # Jellyseerr
 
 本文提供 Jellyseerr 媒体请求服务的部署示例、初始化步骤与配置原因说明。

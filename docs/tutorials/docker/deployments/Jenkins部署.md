@@ -1,3 +1,9 @@
+---
+title: Jenkins
+date: 2026-06-17 11:29
+tags: [jenkins, docker, deployment, ci-cd]
+---
+
 # Jenkins
 
 本文提供 Jenkins CI/CD 服务器的配置示例与配置原因说明。

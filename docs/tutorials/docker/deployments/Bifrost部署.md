@@ -1,3 +1,9 @@
+---
+title: Bifrost AI Gateway
+date: 2026-06-17 11:29
+tags: [bifrost, docker, deployment]
+---
+
 # Bifrost AI Gateway
 
 Bifrost 是一个高性能 AI 网关，统一访问 15+ LLM 提供商（OpenAI、Anthropic、AWS Bedrock、Google Vertex、Azure、Cohere、Mistral、Ollama、Groq 等），通过单一 OpenAI 兼容 API 提供服务。本文提供 Bifrost 的配置示例与配置原因说明。
