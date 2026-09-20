@@ -50,6 +50,8 @@ pnpm build          # onBrokenLinks: "throw"，死链会直接导致构建失败
 
 ## 部署
 
-**手动部署**（没有 CI 流水线）：本地执行 `pnpm build`，把 `build/` 同步到服务器上 nginx 托管的静态目录，再 reload nginx。站点的服务器配置与目录以 `/etc/nginx/conf.d/` 下的实际配置为准。
+推送到 `master` 后，[GitHub Actions](https://github.com/yunqilee69/cludix-doc/actions) 会执行 `pnpm build`，把 `build/` 发布到 GitHub Pages。自定义域名是 `https://blog.cloudomni.cn`。
 
-历史上曾用 Jenkins + Publish Over SSH 自动部署本站（过程记录见 [blog](./blog/2026-06-22-jenkins全链路部署实战.md)），该链路已废弃，配套的 Jenkins / Webhook 教程已删除。
+仓库 **Settings → Pages → Source** 必须选 **GitHub Actions**。如果选成 Deploy from a branch（`master`），GitHub 会用 Jekyll 直接渲染仓库源码，首页就会变成这份 README，而不是 Docusaurus 站点。
+
+`static/CNAME` 会随构建产物一起发布，保证自定义域名绑定在 Docusaurus 输出上，而不是 Jekyll 源码树上。
