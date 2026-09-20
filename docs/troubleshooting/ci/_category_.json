@@ -1,9 +1,0 @@
-{
-  "label": "CI/CD",
-  "position": 6,
-  "link": {
-    "type": "doc",
-    "id": "troubleshooting/ci/index"
-  }
-}
-

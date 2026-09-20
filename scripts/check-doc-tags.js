@@ -51,10 +51,7 @@ const EXCLUDE_DIRS = [
  * 允许没有 tags 的文件（索引页等）
  */
 const ALLOW_NO_TAGS_FILES = [
-  'index.md',
-  '_category_.json',
-  'sidebar.js',
-  'sidebar.ts'
+  'index.md'
 ];
 
 // ========== 工具函数 ==========
