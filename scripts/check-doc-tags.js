@@ -44,7 +44,8 @@ const ALLOWED_TAGS = loadAllowedTags();
  * 排除的目录（不进行验证）
  */
 const EXCLUDE_DIRS = [
-  'nebula'  // 后续独立文档站
+  'nebula',       // 后续独立文档站
+  'superpowers',  // 本地 Agent 草稿，.gitignore 已忽略
 ];
 
 /**

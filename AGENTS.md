@@ -87,8 +87,8 @@ tags: [tag1, tag2]
 | Sidebar key | 配置文件 | 覆盖范围 |
 | --- | --- | --- |
 | `nebulaSidebar` | `sidebars/nebula.ts` | `docs/nebula/**`，顺序：设计说明 → Auth / Dict / Param / Storage / Frontend → 发布管理 → 规范说明 |
-| `projectsOverviewSidebar` | `sidebars/projects/overview.ts` | `docs/projects/index.md` |
 | `omnitotpSidebar` | `sidebars/projects/omnitotp.ts` | `docs/projects/omnitotp/**` |
+| `omnigateSidebar` | `sidebars/projects/omnigate.ts` | `docs/projects/omnigate/**` |
 | `portCleanerSidebar` | `sidebars/projects/port-cleaner.ts` | `docs/projects/port-cleaner/**` |
 | `financeSidebar` | `sidebars/finance.ts` | `docs/finance/**` |
 | `tutorials*Sidebar` | `sidebars/tutorials/*.ts` | `docs/tutorials/<场景>/**`，每个场景一个文件 |
@@ -125,7 +125,7 @@ const dockerSidebar: SidebarConfig = [
 - 目录索引页写成 `目录/index`，并让分类标题可点击（`link: { type: 'doc', id: ... }`）
 - 子目录使用嵌套的 `type: 'category'`
 - 一篇文档只能出现在一个 sidebar 里，重复登记以先匹配的 sidebar 为准
-- 新增独立项目 / 板块时，按 `docs/projects/omnitotp/` + `sidebars/projects/omnitotp.ts` 的模式落地：**独立目录 + 独立 sidebar 文件 + 在 `sidebars/index.ts` 注册**，不要塞进别人的 sidebar
+- 新增独立项目 / 板块时，按 `docs/projects/omnitotp/` + `sidebars/projects/omnitotp.ts`（或 `omnigate`）的模式落地：**独立目录 + 独立 sidebar 文件 + 在 `sidebars/index.ts` 注册**，不要塞进别人的 sidebar
 
 ### 3.4 验证
 

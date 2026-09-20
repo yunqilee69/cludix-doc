@@ -50,6 +50,7 @@ tags: [ai, agent, tutorial]
 | 文档 | 说明 | 状态 |
 | --- | --- | --- |
 | [OpenClaw 安装与基础配置](./applications/openclaw/) | npm 安装 OpenClaw 与 Gateway、Docker 运行 Agent 隔离、初始化注意事项 | ✅ 已落地 |
+| [OmniGate](../../projects/omnigate/) | OpenAI 兼容的本地 AI 网关：多提供方聚合、虚拟密钥、MCP 网关 | ✅ 已落地（项目文档） |
 
 ### tools（AI 开发工具）
 

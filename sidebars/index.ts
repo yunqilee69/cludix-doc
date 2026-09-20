@@ -2,6 +2,7 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
 import nebulaSidebar from './nebula';
 import {
   omnitotpSidebar,
+  omnigateSidebar,
   portCleanerSidebar,
 } from './projects';
 import financeSidebar from './finance';
@@ -27,6 +28,7 @@ export type SidebarConfig = SidebarsConfig[string];
 const sidebars: SidebarsConfig = {
   nebulaSidebar,
   omnitotpSidebar,
+  omnigateSidebar,
   portCleanerSidebar,
   financeSidebar,
   tutorialsOverviewSidebar: [{ type: 'doc', id: 'tutorials/index' }],

@@ -118,6 +118,7 @@ const config: Config = {
           position: "right",
           items: [
             { label: "Nebula", to: "/docs/nebula/" },
+            { label: "OmniGate", to: "/docs/projects/omnigate/" },
             { label: "OmniTOTP", to: "/docs/projects/omnitotp/" },
             { label: "Port Cleaner", to: "/docs/projects/port-cleaner" },
           ],
