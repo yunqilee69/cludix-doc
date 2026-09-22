@@ -114,6 +114,7 @@ tags: [tag1, tag2]
 | `omnitotpSidebar` | `sidebars/projects/omnitotp.ts` | `docs/projects/omnitotp/**` |
 | `omnigateSidebar` | `sidebars/projects/omnigate.ts` | `docs/projects/omnigate/**` |
 | `portCleanerSidebar` | `sidebars/projects/port-cleaner.ts` | `docs/projects/port-cleaner/**` |
+| `ompStudioSidebar` | `sidebars/projects/omp-studio.ts` | `docs/projects/omp-studio/**` |
 | `financeSidebar` | `sidebars/finance.ts` | `docs/finance/**` |
 | `tutorials*Sidebar` | `sidebars/tutorials/*.ts` | `docs/tutorials/<场景>/**`，每个场景一个文件 |
 | `troubleshooting*Sidebar` | `sidebars/troubleshooting/*.ts` | `docs/troubleshooting/<场景>/**`，每个场景一个文件 |

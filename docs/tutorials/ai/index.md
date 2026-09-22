@@ -57,6 +57,7 @@ tags: [ai, agent, tutorial]
 | 文档 | 说明 | 状态 |
 | --- | --- | --- |
 | [OpenCode](./tools/opencode/) | 终端 AI 编码 agent：安装使用、模型配置、LSP/MCP/Skills 扩展、多 Agent 编排 | ✅ 已落地 |
+| [OMP Studio](../../projects/omp-studio/) | omp 编码 agent 的 VS Code 侧栏控制面：会话列表即并发实例、模型与 MCP 面板、只读子智能体视图 | ✅ 已落地（项目文档） |
 
 ## 使用建议
 

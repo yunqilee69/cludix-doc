@@ -24,7 +24,7 @@ pnpm check-doc-tags     # 校验文档 front matter 与 tags（CI 必须通过�
 | --- | --- |
 | `docs/tutorials/` | 教程：一个动作、一个配置、一个命令 |
 | `docs/troubleshooting/` | 踩坑：报错处理与问题排查 |
-| `docs/projects/` | 自研项目文档（Nebula、OmniGate、OmniTOTP、Port Cleaner） |
+| `docs/projects/` | 自研项目文档（Nebula、OmniGate、OmniTOTP、Port Cleaner、OMP Studio） |
 | `docs/finance/` | 投资理财专题 |
 | `blog/` | 跨工具的完整链路与方案思考 |
 | `sidebars/` | 侧边栏配置，**全部手写**，一个项目一个 sidebar |

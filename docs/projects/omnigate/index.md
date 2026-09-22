@@ -46,4 +46,4 @@ OpenAI 兼容的本地 AI 网关。把多个模型提供方聚合成一个端点
 5. 熔断、重试、日志捕获、会话亲和见 [运行设置](./运行设置)；监听地址和登录账号见 [配置](./配置)
 6. 从源码开发见 [本地开发](./本地开发)
 
-相关文档：[Nebula](../nebula/) · [OmniTOTP](../omnitotp/) · [Port Cleaner](../port-cleaner/)
+相关文档：[Nebula](../nebula/) · [OmniTOTP](../omnitotp/) · [Port Cleaner](../port-cleaner/) · [OMP Studio](../omp-studio/)
