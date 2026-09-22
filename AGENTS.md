@@ -335,6 +335,20 @@ tags: [docker, mysql, deployment]
 
 **Blog 文档**：背景/上下文、完整过程、中间的尝试和取舍、最终结论
 
+**只写可复用步骤，不写本机特例。** 教程正文给读者的是命令、配置项、失败现象、通用环境变量。调试过程中发现的本机细节不要进文档，沉淀到本文件。
+
+不要写入文档的例子：
+- 本机 alias（如 `proxy-on`）、某次调试用的 `source ~/.bashrc`
+- 非交互 shell 是否加载配置等 Agent 执行细节
+- 某台机器实测的文件数量、路径特例、代理端口
+
+代理类步骤只写通用写法，并链到已有代理文档：
+
+```bash
+export http_proxy="http://<proxy-host>:<port>"
+export https_proxy="$http_proxy"
+```
+
 ### 8.6 验证
 
 ```bash
@@ -379,6 +393,7 @@ tags: [jenkins, docker, ci-cd]
 - 新增 tag 需在 `allowed-tags.json` 中添加
 - 日期字段记录创建时间，方便后续回忆和追溯
 - 目录结构调整时，同步更新 sidebar 配置和相对链接
+- 文档只写可复用步骤；本机 alias、某次实测数据、Agent 调试细节写进 `AGENTS.md`，不进教程正文
 
 ## 11. 验证工具
 

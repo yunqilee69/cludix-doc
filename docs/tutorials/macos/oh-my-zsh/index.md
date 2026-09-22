@@ -263,30 +263,25 @@ brew install --cask font-meslo-lg-nerd-font
 
 #### Linux（Debian）
 
-Linuxbrew 同样能装这个 cask，TTF 会落到用户字体目录 `~/.local/share/fonts/`。cask 从 GitHub Releases 下载 `Meslo.tar.xz`，国内直连会失败：
-
-```text
-Error: Download failed on Cask 'font-meslo-lg-nerd-font'
-curl: (7) Failed to connect to github.com port 443
-```
-
-先开代理再装。本机 `proxy-on` 是 `~/.bashrc` 里的 alias，非交互 shell 不会自动加载，需要先 `source`：
+Linuxbrew 同样能装这个 cask，TTF 会落到用户字体目录 `~/.local/share/fonts/`。cask 从 GitHub Releases 下载 `Meslo.tar.xz`，国内通常无法直连，需要先配置 HTTP 代理：
 
 ```bash
-source ~/.bashrc
-proxy-on
-# 或直接：
-# export http_proxy="http://192.168.100.1:7890"
-# export https_proxy="$http_proxy"
+export http_proxy="http://<proxy-host>:<port>"
+export https_proxy="$http_proxy"
 
 HOMEBREW_NO_AUTO_UPDATE=1 brew install --cask font-meslo-lg-nerd-font
 fc-cache -fv ~/.local/share/fonts
 fc-list : family | grep -i 'MesloLGM Nerd Font'
 ```
 
-代理地址按本机实际配置，参见 [Debian 代理配置](../../network/Debian代理配置)。
+代理地址按本机环境填写，可参考 [Debian 代理配置](../../network/Debian代理配置)。未开代理时常见失败：
 
-验证通过时应能看到 `MesloLGM Nerd Font`、`MesloLGS Nerd Font` 等 family。本机实测：72 个 TTF 写入 `~/.local/share/fonts/`。
+```text
+Error: Download failed on Cask 'font-meslo-lg-nerd-font'
+curl: (7) Failed to connect to github.com port 443
+```
+
+验证通过时应能看到 `MesloLGM Nerd Font`、`MesloLGS Nerd Font` 等 family。
 
 不用 Homebrew 时，手动下载解压即可：
 
