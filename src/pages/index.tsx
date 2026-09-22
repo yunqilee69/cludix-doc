@@ -3,10 +3,7 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
 import Layout from '@theme/Layout'
 
 import Hero from '@site/src/components/Hero'
-import Particles from '@site/src/components/Particles'
 import DocsSection from '@site/src/components/DocsSection'
-import PromoSection from '@site/src/components/PromoSection'
-import FeaturesSection from '@site/src/components/FeaturesSection'
 
 import styles from './index.module.css'
 
@@ -20,13 +17,7 @@ export default function Home(): ReactNode {
     <Layout title={tagline} description={description}>
       <main className={styles.main}>
         <Hero />
-        <Particles className={styles.particles} quantity={100} ease={80} color="#667eea" refresh />
-
-        <div className={styles.content}>
-          <DocsSection />
-          <PromoSection />
-          <FeaturesSection />
-        </div>
+        <DocsSection />
       </main>
     </Layout>
   )

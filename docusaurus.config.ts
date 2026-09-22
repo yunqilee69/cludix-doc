@@ -2,6 +2,7 @@ import { themes as prismThemes } from "prism-react-renderer";
 import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
 import type * as SearchLocal from "@easyops-cn/docusaurus-search-local";
+import recentUpdatesPlugin from "./plugins/recent-updates";
 
 // 闲鱼店铺推广链接（TODO: 替换为真实闲鱼店铺链接）
 const XIANYU_URL = "https://github.com/yunqilee69";
@@ -156,6 +157,8 @@ const config: Config = {
       darkTheme: prismThemes.dracula,
     },
   } satisfies Preset.ThemeConfig,
+
+  plugins: [recentUpdatesPlugin],
 
   themes: [
     [
