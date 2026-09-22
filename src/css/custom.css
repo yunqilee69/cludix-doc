@@ -38,3 +38,25 @@ html {
     scroll-behavior: auto;
   }
 }
+
+/*
+ * Docusaurus future.v4 把 Infima 放进 @layer，未分层规则会压过层内样式。
+ * 首页 antd 组件会注入全局 `a { color }`；SPA 跳进文档后这些样式还在，
+ * 侧边栏 .menu__link--active 的高亮就被盖掉。这里用未分层 + 更高优先级抢回来。
+ */
+.theme-doc-sidebar-container .menu__link {
+  color: var(--ifm-menu-color);
+}
+
+.theme-doc-sidebar-container .menu__link:hover {
+  color: var(--ifm-menu-color);
+}
+
+.theme-doc-sidebar-container .menu__link--active,
+.theme-doc-sidebar-container .menu__link--active:hover {
+  color: var(--ifm-menu-color-active);
+}
+
+.theme-doc-sidebar-container .menu__link--active:not(.menu__link--sublist) {
+  background-color: var(--ifm-menu-color-background-active);
+}
