@@ -1,6 +1,6 @@
 import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
-import nebulaSidebar from './nebula';
 import {
+  nebulaSidebar,
   omnitotpSidebar,
   omnigateSidebar,
   portCleanerSidebar,

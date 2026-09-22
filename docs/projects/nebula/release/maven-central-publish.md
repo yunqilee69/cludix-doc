@@ -8,7 +8,7 @@ date: 2026-08-19 13:30
 
 Nebula 以 `cn.cloudomni:nebula-app-starter` 等坐标发布到 Maven Central。
 
-账号注册、命名空间验证、GPG 签名、Portal 令牌、pom 要求与发布插件配置等**通用流程见 [发布管理](../../tutorials/other/发布管理)**，本文只记录 nebula 特有信息与当前进度。
+账号注册、命名空间验证、GPG 签名、Portal 令牌、pom 要求与发布插件配置等**通用流程见 [发布管理](../../../tutorials/other/发布管理)**，本文只记录 nebula 特有信息与当前进度。
 
 ## 当前状态
 
@@ -55,7 +55,7 @@ backend/ 模板工程的 `pom.xml` 引用 `${nebula.version}`，发布成功后�
 
 ## nebula 特有排查
 
-通用问题（签名认证、javadoc、同步延迟等）见 [发布管理 §2.10](../../tutorials/other/发布管理)，此处只列 nebula 特有项：
+通用问题（签名认证、javadoc、同步延迟等）见 [发布管理 §2.10](../../../tutorials/other/发布管理)，此处只列 nebula 特有项：
 
 | 症状 | 原因与处理 |
 |---|---|

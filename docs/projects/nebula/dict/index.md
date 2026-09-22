@@ -1,6 +1,3 @@
----
-slug: /nebula/dict
----
 
 # Nebula Dict 模块
 

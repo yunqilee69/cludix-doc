@@ -1,5 +1,4 @@
 ---
-slug: /nebula/release
 title: 发布管理
 tags: [java, spring-boot, ci-cd, deployment]
 date: 2026-08-19 13:30

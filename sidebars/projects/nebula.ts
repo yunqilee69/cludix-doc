@@ -1,4 +1,4 @@
-import type {SidebarConfig} from './index';
+import type {SidebarConfig} from '../index';
 
 // 按阅读旅程组织：入门 -> 模块指南 -> 配置说明 -> 进阶
 // - 入门：项目简介、快速开始（nebula-template fork 使用）、设计说明
@@ -13,20 +13,20 @@ const nebulaSidebar: SidebarConfig = [
     items: [
       {
         type: 'doc',
-        id: 'nebula/index',
+        id: 'projects/nebula/index',
         label: '项目简介',
       },
-      'nebula/quick-start',
+      'projects/nebula/quick-start',
       {
         type: 'category',
         label: '设计说明',
         link: {
           type: 'doc',
-          id: 'nebula/design/index',
+          id: 'projects/nebula/design/index',
         },
         items: [
-          'nebula/design/layered-design',
-          'nebula/design/package-design',
+          'projects/nebula/design/layered-design',
+          'projects/nebula/design/package-design',
         ],
       },
     ],
@@ -40,12 +40,12 @@ const nebulaSidebar: SidebarConfig = [
         label: 'Auth 模块',
         link: {
           type: 'doc',
-          id: 'nebula/auth/index',
+          id: 'projects/nebula/auth/index',
         },
         items: [
-          'nebula/auth/overview',
-          'nebula/auth/business-capabilities',
-          'nebula/auth/usage-guide',
+          'projects/nebula/auth/overview',
+          'projects/nebula/auth/business-capabilities',
+          'projects/nebula/auth/usage-guide',
         ],
       },
       {
@@ -53,12 +53,12 @@ const nebulaSidebar: SidebarConfig = [
         label: 'Dict 模块',
         link: {
           type: 'doc',
-          id: 'nebula/dict/index',
+          id: 'projects/nebula/dict/index',
         },
         items: [
-          'nebula/dict/overview',
-          'nebula/dict/business-capabilities',
-          'nebula/dict/usage-guide',
+          'projects/nebula/dict/overview',
+          'projects/nebula/dict/business-capabilities',
+          'projects/nebula/dict/usage-guide',
         ],
       },
       {
@@ -66,12 +66,12 @@ const nebulaSidebar: SidebarConfig = [
         label: 'Param 模块',
         link: {
           type: 'doc',
-          id: 'nebula/param/index',
+          id: 'projects/nebula/param/index',
         },
         items: [
-          'nebula/param/overview',
-          'nebula/param/business-capabilities',
-          'nebula/param/usage-guide',
+          'projects/nebula/param/overview',
+          'projects/nebula/param/business-capabilities',
+          'projects/nebula/param/usage-guide',
         ],
       },
       {
@@ -79,12 +79,12 @@ const nebulaSidebar: SidebarConfig = [
         label: 'Storage 模块',
         link: {
           type: 'doc',
-          id: 'nebula/storage/index',
+          id: 'projects/nebula/storage/index',
         },
         items: [
-          'nebula/storage/overview',
-          'nebula/storage/business-capabilities',
-          'nebula/storage/usage-guide',
+          'projects/nebula/storage/overview',
+          'projects/nebula/storage/business-capabilities',
+          'projects/nebula/storage/usage-guide',
         ],
       },
       {
@@ -92,12 +92,12 @@ const nebulaSidebar: SidebarConfig = [
         label: 'Frontend 模块',
         link: {
           type: 'doc',
-          id: 'nebula/frontend/index',
+          id: 'projects/nebula/frontend/index',
         },
         items: [
-          'nebula/frontend/overview',
-          'nebula/frontend/business-capabilities',
-          'nebula/frontend/usage-guide',
+          'projects/nebula/frontend/overview',
+          'projects/nebula/frontend/business-capabilities',
+          'projects/nebula/frontend/usage-guide',
         ],
       },
     ],
@@ -108,27 +108,27 @@ const nebulaSidebar: SidebarConfig = [
     items: [
       {
         type: 'doc',
-        id: 'nebula/auth/configuration',
+        id: 'projects/nebula/auth/configuration',
         label: 'Auth 配置',
       },
       {
         type: 'doc',
-        id: 'nebula/dict/configuration',
+        id: 'projects/nebula/dict/configuration',
         label: 'Dict 配置',
       },
       {
         type: 'doc',
-        id: 'nebula/param/configuration',
+        id: 'projects/nebula/param/configuration',
         label: 'Param 配置',
       },
       {
         type: 'doc',
-        id: 'nebula/storage/configuration',
+        id: 'projects/nebula/storage/configuration',
         label: 'Storage 配置',
       },
       {
         type: 'doc',
-        id: 'nebula/frontend/configuration',
+        id: 'projects/nebula/frontend/configuration',
         label: 'Frontend 配置',
       },
     ],
@@ -139,57 +139,57 @@ const nebulaSidebar: SidebarConfig = [
     items: [
       {
         type: 'doc',
-        id: 'nebula/auth/design-and-implementation',
+        id: 'projects/nebula/auth/design-and-implementation',
         label: 'Auth 设计与实现',
       },
       {
         type: 'doc',
-        id: 'nebula/auth/ddl',
+        id: 'projects/nebula/auth/ddl',
         label: 'Auth 数据表',
       },
       {
         type: 'doc',
-        id: 'nebula/dict/design-and-implementation',
+        id: 'projects/nebula/dict/design-and-implementation',
         label: 'Dict 设计与实现',
       },
       {
         type: 'doc',
-        id: 'nebula/dict/ddl',
+        id: 'projects/nebula/dict/ddl',
         label: 'Dict 数据表',
       },
       {
         type: 'doc',
-        id: 'nebula/param/design-and-implementation',
+        id: 'projects/nebula/param/design-and-implementation',
         label: 'Param 设计与实现',
       },
       {
         type: 'doc',
-        id: 'nebula/param/ddl',
+        id: 'projects/nebula/param/ddl',
         label: 'Param 数据表',
       },
       {
         type: 'doc',
-        id: 'nebula/storage/design-and-implementation',
+        id: 'projects/nebula/storage/design-and-implementation',
         label: 'Storage 设计与实现',
       },
       {
         type: 'doc',
-        id: 'nebula/storage/ddl',
+        id: 'projects/nebula/storage/ddl',
         label: 'Storage 数据表',
       },
       {
         type: 'doc',
-        id: 'nebula/frontend/design-and-implementation',
+        id: 'projects/nebula/frontend/design-and-implementation',
         label: 'Frontend 设计与实现',
       },
       {
         type: 'doc',
-        id: 'nebula/frontend/ddl',
+        id: 'projects/nebula/frontend/ddl',
         label: 'Frontend 数据表',
       },
       {
         type: 'doc',
-        id: 'nebula/spec/index',
+        id: 'projects/nebula/spec/index',
         label: '规范说明',
       },
       {
@@ -197,9 +197,9 @@ const nebulaSidebar: SidebarConfig = [
         label: '发布管理',
         link: {
           type: 'doc',
-          id: 'nebula/release/index',
+          id: 'projects/nebula/release/index',
         },
-        items: ['nebula/release/maven-central-publish'],
+        items: ['projects/nebula/release/maven-central-publish'],
       },
     ],
   },
@@ -208,11 +208,11 @@ const nebulaSidebar: SidebarConfig = [
     label: '扩展点与领域事件',
     link: {
       type: 'doc',
-      id: 'nebula/extensibility/index',
+      id: 'projects/nebula/extensibility/index',
     },
     items: [
-      'nebula/extensibility/index',
-      'nebula/extensibility/hooks-events',
+      'projects/nebula/extensibility/index',
+      'projects/nebula/extensibility/hooks-events',
     ],
   },
 ];

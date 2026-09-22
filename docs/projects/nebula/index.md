@@ -1,5 +1,4 @@
 ---
-slug: /nebula
 title: Nebula 项目
 ---
 
@@ -76,3 +75,5 @@ Nebula 是一个基于 Spring 生态的 **Java 模块化中台工程**。它不�
 4. 需要具体接口契约时，查看 nebula 后端运行时 OpenAPI 文档（`doc.html` / `swagger-ui.html`），与代码实时一致
 5. 最后看 [规范说明](./spec/index.md)
    - 对照对象命名规约和分层约定，帮助把文档理解映射回代码结构
+
+相关文档：[OmniGate](../omnigate/) · [OmniTOTP](../omnitotp/) · [Port Cleaner](../port-cleaner/)

@@ -1,6 +1,3 @@
----
-slug: /nebula/storage
----
 
 # Nebula Storage 模块
 

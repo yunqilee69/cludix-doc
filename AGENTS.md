@@ -110,7 +110,7 @@ tags: [tag1, tag2]
 
 | Sidebar key | 配置文件 | 覆盖范围 |
 | --- | --- | --- |
-| `nebulaSidebar` | `sidebars/nebula.ts` | `docs/nebula/**`，顺序：设计说明 → Auth / Dict / Param / Storage / Frontend → 发布管理 → 规范说明 |
+| `nebulaSidebar` | `sidebars/projects/nebula.ts` | `docs/projects/nebula/**`，顺序：入门 → 模块指南 → 配置说明 → 进阶 → 扩展点 |
 | `omnitotpSidebar` | `sidebars/projects/omnitotp.ts` | `docs/projects/omnitotp/**` |
 | `omnigateSidebar` | `sidebars/projects/omnigate.ts` | `docs/projects/omnigate/**` |
 | `portCleanerSidebar` | `sidebars/projects/port-cleaner.ts` | `docs/projects/port-cleaner/**` |
@@ -211,7 +211,7 @@ tags: [tutorial, docker]
 ## 6. 排除目录
 
 以下目录不参与 tags 验证：
-- `docs/nebula/` - 后续将独立为单独的文档站
+- `docs/projects/nebula/` - 按目录名 `nebula` 排除 tags 校验
 
 ## 7. 新增文档判断流程
 

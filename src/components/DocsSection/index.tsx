@@ -41,9 +41,9 @@ const sections: SectionCard[] = [
   {
     title: '项目',
     description: '自研工具与中台规范。',
-    to: '/docs/nebula/',
+    to: '/docs/projects/nebula/',
     chips: [
-      { label: 'Nebula', to: '/docs/nebula/' },
+      { label: 'Nebula', to: '/docs/projects/nebula/' },
       { label: 'OmniGate', to: '/docs/projects/omnigate/' },
       { label: 'OmniTOTP', to: '/docs/projects/omnitotp/' },
       { label: 'Port Cleaner', to: '/docs/projects/port-cleaner' },
@@ -64,7 +64,7 @@ const projects = [
   {
     title: 'Nebula',
     description: 'Java 模块化中台，单体接入或独立部署。',
-    to: '/docs/nebula/',
+    to: '/docs/projects/nebula/',
   },
   {
     title: 'OmniGate',

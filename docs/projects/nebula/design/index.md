@@ -1,6 +1,3 @@
----
-slug: /nebula/design
----
 
 # 设计说明
 

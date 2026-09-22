@@ -1,6 +1,3 @@
----
-slug: /nebula/frontend
----
 
 # Nebula Frontend 模块
 

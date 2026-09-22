@@ -1,6 +1,3 @@
----
-slug: /nebula/param
----
 
 # Nebula Param 模块
 

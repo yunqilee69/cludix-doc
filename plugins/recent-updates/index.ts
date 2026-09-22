@@ -44,7 +44,7 @@ function kindFromPermalink(permalink: string): string {
   if (permalink.startsWith('/blog')) {
     return '专题';
   }
-  if (permalink.startsWith('/docs/nebula')) {
+  if (permalink.startsWith('/docs/nebula') || permalink.startsWith('/docs/projects/nebula')) {
     return 'Nebula';
   }
   if (permalink.startsWith('/docs/projects')) {

@@ -1,6 +1,3 @@
----
-slug: /nebula/auth
----
 
 # Nebula Auth 模块
 

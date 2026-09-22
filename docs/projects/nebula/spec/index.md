@@ -1,5 +1,4 @@
 ---
-slug: /nebula/spec
 title: 项目分层对象命名规约说明书
 ---
 

@@ -6,7 +6,7 @@
  * 功能：
  * 1. 检查 docs/ 目录下的 Markdown 文件是否都有 front matter（缺少直接判失败）
  * 2. 检查文档是否都有 tags（目录索引页可省略），并验证 tags 是否在白名单中
- * 3. 排除 docs/nebula/ 目录（后续独立文档站）
+ * 3. 排除 docs/projects/nebula/ 目录（按目录名 nebula 匹配）
  * 
  * 使用：npm run check-doc-tags
  */
