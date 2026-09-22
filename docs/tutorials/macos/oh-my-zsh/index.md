@@ -1,5 +1,7 @@
 ---
 title: Oh My Zsh配置
+date: 2026-09-22 09:30
+tags: [macos, linux, tutorial]
 ---
 # Oh My Zsh配置
 
@@ -247,14 +249,58 @@ echo $'\uf179 \uf07c \uf418 \ue0b0'
 
 ### 安装 Nerd Font 字体
 
-推荐使用 Meslo 字体（与 iTerm2 和 Oh My Zsh 官方示例同族，视觉协调）：
+推荐使用 Meslo 字体（与 iTerm2 和 Oh My Zsh 官方示例同族，视觉协调）。
+
+`homebrew/cask-fonts` 已废弃并清空，字体 cask 已并入 `homebrew/cask`。不要再执行 `brew tap homebrew/cask-fonts`。
+
+#### macOS
 
 ```bash
-brew tap homebrew/cask-fonts
 brew install --cask font-meslo-lg-nerd-font
 ```
 
 安装完成后，字体册中会出现 `MesloLGS NF` / `MesloLGM Nerd Font` 等条目。
+
+#### Linux（Debian）
+
+Linuxbrew 同样能装这个 cask，TTF 会落到用户字体目录 `~/.local/share/fonts/`。cask 从 GitHub Releases 下载 `Meslo.tar.xz`，国内直连会失败：
+
+```text
+Error: Download failed on Cask 'font-meslo-lg-nerd-font'
+curl: (7) Failed to connect to github.com port 443
+```
+
+先开代理再装。本机 `proxy-on` 是 `~/.bashrc` 里的 alias，非交互 shell 不会自动加载，需要先 `source`：
+
+```bash
+source ~/.bashrc
+proxy-on
+# 或直接：
+# export http_proxy="http://192.168.100.1:7890"
+# export https_proxy="$http_proxy"
+
+HOMEBREW_NO_AUTO_UPDATE=1 brew install --cask font-meslo-lg-nerd-font
+fc-cache -fv ~/.local/share/fonts
+fc-list : family | grep -i 'MesloLGM Nerd Font'
+```
+
+代理地址按本机实际配置，参见 [Debian 代理配置](../../network/Debian代理配置)。
+
+验证通过时应能看到 `MesloLGM Nerd Font`、`MesloLGS Nerd Font` 等 family。本机实测：72 个 TTF 写入 `~/.local/share/fonts/`。
+
+不用 Homebrew 时，手动下载解压即可：
+
+```bash
+mkdir -p ~/.local/share/fonts
+cd /tmp
+curl -fL -o Meslo.tar.xz \
+  https://github.com/ryanoasis/nerd-fonts/releases/latest/download/Meslo.tar.xz
+tar -xJf Meslo.tar.xz -C ~/.local/share/fonts --wildcards '*.ttf'
+fc-cache -fv ~/.local/share/fonts
+fc-list : family | grep -i 'MesloLGM Nerd Font'
+```
+
+Linux 系统终端（GNOME Terminal）还要把配置文件字体改成 `MesloLGM Nerd Font`：汉堡菜单 → 偏好设置 → 配置文件 → 自定义字体。
 
 ### VSCode 配置
 
