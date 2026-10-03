@@ -3,7 +3,6 @@ import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
 import type * as SearchLocal from "@easyops-cn/docusaurus-search-local";
 import recentUpdatesPlugin from "./plugins/recent-updates";
-
 // 闲鱼店铺推广链接（TODO: 替换为真实闲鱼店铺链接）
 const XIANYU_URL = "https://github.com/yunqilee69";
 
@@ -19,6 +18,11 @@ const config: Config = {
     xianyuUrl: XIANYU_URL,
   },
   favicon: "img/favicon.ico",
+
+  // Mermaid 图表渲染（docs 中的 ```mermaid 代码块）
+  markdown: {
+    mermaid: true,
+  },
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -162,6 +166,7 @@ const config: Config = {
   plugins: [recentUpdatesPlugin],
 
   themes: [
+    "@docusaurus/theme-mermaid",
     [
       require.resolve("@easyops-cn/docusaurus-search-local"),
       {
