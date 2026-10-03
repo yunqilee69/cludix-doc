@@ -196,3 +196,51 @@ frontend_user_preference
 - 语言集合
 
 这类配置当前设计上就应该继续放在参数中心，而不是落回 `frontend_user_preference`。
+
+---
+
+## 8. `frontend_app_release`（应用版本发布记录）
+
+该表由「应用版本与升级检查」能力引入，用于保存应用版本的发布记录。字段与索引以增量脚本 `docs/sql/unreleased/{mysql,postgresql}/02-app-release.sql` 为准。
+
+```sql
+CREATE TABLE frontend_app_release (
+    id                         varchar(32)   NOT NULL,
+    platform                   varchar(16)   NOT NULL,     -- IOS / ANDROID / OHOS / H5
+    channel                    varchar(32)   NOT NULL,     -- 分发渠道，客户端未传时取平台默认渠道
+    version_code               int           NOT NULL,     -- 整数构建号，比较用
+    version_name               varchar(64)   NOT NULL,     -- 展示用版本名，如 1.4.0
+    min_supported_version_code int,                        -- 低于此值必须强制升级
+    download_url               varchar(1000),              -- 声明了最低支持版本时必填
+    release_notes              varchar(2000),
+    release_status             varchar(16)   NOT NULL DEFAULT 'DRAFT',  -- DRAFT / PUBLISHED / WITHDRAWN
+    published_at               timestamp,
+    create_time                timestamp     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    update_time                timestamp     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_app_release UNIQUE (platform, channel, version_code)
+);
+CREATE INDEX idx_app_release_latest
+    ON frontend_app_release (platform, channel, release_status, version_code);
+```
+
+### 8.1 关键字段说明
+
+| 字段 | 含义 |
+| --- | --- |
+| `platform` | 平台，取值 `IOS` / `ANDROID` / `OHOS` / `H5` |
+| `channel` | 分发渠道；客户端不传时按平台默认渠道匹配 |
+| `version_code` | **整数**构建号，升级判定用它比较（不要用字符串版本号） |
+| `version_name` | 展示用版本名，仅作记录 |
+| `min_supported_version_code` | 低于此值必须强制升级 |
+| `download_url` | 声明了最低支持版本时必须提供 |
+| `release_status` | `DRAFT` / `PUBLISHED` / `WITHDRAWN`，**仅 `PUBLISHED` 参与「最新版本」计算** |
+| `published_at` | 发布时间 |
+
+### 8.2 设计意图
+
+- 唯一约束 `uk_app_release` 保证同平台同渠道下 `version_code` 不重复。
+- 索引 `idx_app_release_latest` 服务于「取最新已发布记录」的查询（`platform + channel + release_status` 过滤、`version_code` 倒序）。
+- 列名刻意用 `release_status` 而非 `status`——后者在本仓库是启用/禁用的标准列，语义不同，不可混用。
+- **撤回 = 置 `WITHDRAWN`**（保留记录）；物理删除只用于误录入。
+

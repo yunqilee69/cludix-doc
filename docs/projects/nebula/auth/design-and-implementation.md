@@ -283,52 +283,73 @@
 
 ## 8. OAuth2 设计
 
-## 8.1 多提供商配置树
+## 8.1 Provider 插件架构
 
-从 `AuthProperties` 可以确认，模块已经预留以下提供商配置：
+OAuth2 Provider 采用 SPI 插件结构，契约在 `nebula-auth-oauth2-provider`：
 
-- QQ
-- 微信小程序
-- 微信网站
-- 支付宝
+- `getProviderId()`：提供商标识
+- `resolveIdentity(context)`：把授权码解析为外部身份（`ExternalIdentityDto`）
+- `supportsBinding()`：是否支持「已登录用户绑定」
+- `buildAuthorizeUrl(state)`：生成重定向式授权页地址（默认 `null`）
 
-其中：
+编排层（`OAuth2LoginServiceImpl` / `OAuth2BindingServiceImpl`）只依赖 SPI，不感知具体 provider 的接口细节；每个 provider 是独立 Maven 模块 + Spring Boot 自动配置，加入 classpath 即注册。
 
-- QQ / 支付宝走通用 OAuth2 client provider 结构
-- 微信小程序走 `appId/appSecret/sessionUrl/grantType`
-- 微信网站支持 `redirect` 与 `qr` 两种登录类型
+当前已实现：
 
-## 8.2 微信网站登录
+- `nebula-auth-oauth2-provider-github`：浏览器重定向式
+- `nebula-auth-oauth2-provider-wechat`：一个 provider 覆盖两个渠道，凭据按渠道分两级配置
 
-微信网站登录设计得比较完整，当前支持两种模式：
+## 8.2 微信登录（小程序 + 扫码双渠道）
 
-### redirect 模式
+### 渠道模型
 
-典型流程：
+| 渠道 | 交互形态 | 登录接口 | 能否绑定 |
+|---|---|---|---|
+| `mini`（小程序） | `wx.login()` 直连，无浏览器重定向 | `POST /api/auth/wechat/mini-login`，一次请求同步返回 token | 否 |
+| `web`（开放平台网站应用，网页应用） | 浏览器跳 `connect/qrconnect`，微信 302 回调 | `prepare` / `callback` / `status` 三段式，与 GitHub 同一套 state 机制 | 是 |
 
-1. 前端调用 `/wechat/web/redirect/prepare`
-2. 服务端生成 `state` 和微信授权地址
-3. 浏览器跳转到微信授权页
-4. 回调后调用 `/wechat/web/redirect/callback`
-5. 服务端完成登录并返回 token
+渠道分流由 `OAuth2LoginContext.params` 中的 `channel` 参数决定，缺省 `mini`。
 
-### qr 模式
+两条渠道的端到端时序（含令牌交付与 state 防重放细节）见[《微信扫码绑定与小程序账号互通》](./wechat-web-binding.md)，此处给出扫码登录的简化流程：
 
-典型流程：
+```mermaid
+flowchart LR
+    A[登录页] -->|prepare| B[后端生成<br/>loginId + state]
+    B --> C[iframe 内嵌<br/>qrconnect 授权页]
+    C -->|用户扫码确认| D[微信 302 回调<br/>GET /web/callback?code&state]
+    D --> E[state 一次性领取防重放<br/>code 换 unionid]
+    E --> F[绑定命中 / 手机号合并<br/>/ 自动建号]
+    F --> G[令牌暂存缓存<br/>markSuccess]
+    A -->|轮询 /web/status| G
+    G -->|SUCCESS + token| H[进入系统<br/>跳 redirectAfterLogin]
+```
 
-1. 前端调用 `/wechat/web/qrcode` 生成二维码登录信息
-2. 服务端返回 `loginId`、二维码 URL 和过期时间
-3. 前端轮询 `/wechat/web/status`
-4. 微信扫码回调进入 `/wechat/web/callback`
-5. 服务端标记状态为 `SCANNED / SUCCESS`
-6. 前端轮询拿到最终登录结果
+### 身份标识与账号互通
+
+- `providerUserId` 优先取 `unionid`，缺失退回 `openid`
+- **同一开放平台账号下，同一微信用户在小程序与网站应用解析出的 `unionid` 相同**——这是「Web 扫码绑定、小程序直接登录同一账号」的关键：绑定表按 `(provider_id, provider_user_id)` 唯一，扫码落一条 `(wechat, unionid)` 绑定后，小程序登录命中同一条记录
+- 小程序未绑定开放平台时退回 `openid`，两渠道账号不互通
+- 具体渠道记录在 `provider_attributes.channel`；`session_key` 是加密密钥，不落库、不进日志
+
+### 扫码绑定流程（Web 个人信息页）
+
+1. 绑定页调 `prepareOAuth2Bind(userId, "wechat")`，服务端生成 state 与 `qrconnect` 授权地址
+2. 浏览器跳转微信扫码，微信 302 回调 `GET /api/auth/wechat/web/callback?code&state`
+3. 回调识别到 state 属于绑定会话（`OAuth2BindStateCacheService`），把 code/state 转发到前端绑定承接页
+4. 前端提交绑定完成请求，服务端解析 unionid 并落绑定记录
+
+小程序侧无需任何绑定代码：登录时按 unionid 命中绑定即视为已绑定。
+
+### 手机号合并（防重复账号）
+
+`(provider_id, provider_user_id)` 未命中且身份带手机号时（来自小程序 `getPhoneNumber`，微信验证过），先按手机号查既有账号：命中则把微信身份绑过去（合并），不新建用户；未命中且允许注册才自动建号。手机号在自动建号时仅在未被占用时写入，避免重复手机号拖垮手机号登录。
 
 ## 8.3 OAuth2 用户开通
 
-从核心服务依赖关系可以确认，OAuth2 登录并不是只做 token 交换，还包括：
+OAuth2 登录并不是只做 token 交换，还包括：
 
-- 第三方账号与本地用户绑定
-- 用户自动开通
+- 第三方账号与本地用户绑定（并发冲突依赖 `(provider_id, provider_user_id)` 唯一约束兜底）
+- 用户自动开通：昵称、头像、邮箱、手机号按 `provider_attributes` 约定键落库，仅首次建号写一次
 - 默认角色 / 默认组织的赋值入口
 
 这使模块具备从“外部身份”落到“内部权限体系”的完整接入能力。
@@ -340,14 +361,15 @@
 `AuthCacheDefinitionConfiguration` 中明确了两类缓存定义：
 
 - 用户上下文缓存：TTL 跟随 access token 过期时间
-- 微信网站登录状态缓存：固定 600 秒
+- OAuth2 登录状态缓存（state / loginId / 登录结果）：固定 600 秒
 
 此外，从缓存服务类还可以确认 auth 模块实际使用的缓存域包括：
 
 - 用户上下文缓存
 - 登录失败计数缓存
 - 登录锁定缓存
-- 微信网站登录状态缓存
+- OAuth2 登录状态缓存
+- OAuth2 绑定状态缓存
 
 这样设计的意义是：
 

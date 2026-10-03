@@ -10,6 +10,7 @@
 - [业务功能](./business-capabilities.md) - 面向业务方的能力边界、典型流程与适用场景
 - [使用方式](./usage-guide.md) - 单体接入、独立服务部署、远程消费与调用建议
 - [配置说明](./configuration.md) - `nebula.auth.*`、动态登录参数、独立服务示例配置
+- [微信扫码绑定与账号互通](./wechat-web-binding.md) - 扫码绑定流程、unionid 互通原理与前置条件
 - [建表与迁移说明](./ddl.md) - auth 相关表结构与组织类型迁移 SQL
 
 ## 推荐阅读顺序

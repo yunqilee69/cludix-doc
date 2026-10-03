@@ -309,3 +309,48 @@ storage_file
 建议在业务侧再建一张关系表，而不是强行把所有业务语义都塞进 `storage_file`。
 
 这样 storage 模块负责“统一文件中心”，业务模块负责“本业务如何组织这些文件”。
+
+---
+
+## 7. `storage_file_variant`（文件派生版本）
+
+该表由「存储增强（对象存储与图片处理）」能力引入，保存图片的派生版本（当前只有 `thumb`）。字段与索引以增量脚本 `docs/sql/unreleased/{mysql,postgresql}/04-storage-file-variant.sql` 为准。
+
+```sql
+CREATE TABLE storage_file_variant (
+    id          char(32)     NOT NULL,
+    file_id     char(32)     NOT NULL,     -- 源文件 ID（storage_file.id）
+    variant     varchar(50)  NOT NULL,     -- 派生标识，如 thumb
+    content_key varchar(500) NOT NULL,     -- 派生内容存储 Key
+    width       int          DEFAULT NULL, -- 宽（图片类）
+    height      int          DEFAULT NULL, -- 高（图片类）
+    file_size   bigint       DEFAULT NULL, -- 字节数
+    file_hash   varchar(64)  DEFAULT NULL, -- 内容哈希
+    create_time timestamp    NOT NULL,
+    update_time timestamp    NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_file_variant UNIQUE (file_id, variant)
+);
+CREATE INDEX idx_file_variant_hash ON storage_file_variant (file_hash);
+```
+
+### 7.1 关键字段说明
+
+| 字段 | 含义 |
+| --- | --- |
+| `file_id` | 源文件 ID |
+| `variant` | 派生标识，如 `thumb` |
+| `content_key` | 派生内容存储 Key（形如 `variant/thumb/<fileHash>.jpg`） |
+| `width` / `height` | 尺寸（图片类派生） |
+| `file_size` | 派生内容字节数 |
+| `file_hash` | 派生内容哈希（用于跨文件去重） |
+
+### 7.2 设计意图
+
+- 唯一约束 `uk_file_variant` 保证「一个源文件的一个派生版本只有一条」。
+- 索引 `idx_file_variant_hash` 服务于按 `(fileHash, variant)` 的内容寻址去重：多个业务引用同一张图只存一份缩略图。
+- 派生是**可选存在**：`nebula.storage.image.enabled=false`（默认）或处理失败时没有派生行，读取端回退原图。
+- 删除文件时删除派生行，若某 `content_key` 不再被任何行引用才删除正式内容。
+
+> H2 测试 schema 为规避非幂等 `CREATE INDEX`，未建 `file_hash` 索引；生产 MySQL / PostgreSQL 增量脚本包含它。
+

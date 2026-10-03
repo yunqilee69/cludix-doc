@@ -140,22 +140,31 @@ nebula:
         redirect-uri:
         grant-type:
         scope:
-      wechat-mini-program:
-        enabled: false
-        app-id:
-        app-secret:
-        session-url:
-        grant-type:
-      wechat-web:
-        enabled: false
-        type: redirect
-        app-id:
-        app-secret:
-        authorize-url:
-        token-url:
-        redirect-uri:
-        grant-type:
-        scope:
+      providers:
+        github:
+          enabled: false
+          client-id:
+          client-secret:
+          authorize-url:
+          token-url:
+          redirect-uri:
+          scope:
+        wechat:
+          enabled: false
+          mini:
+            app-id:
+            app-secret:
+            js-code2-session-url:
+            access-token-url:
+            phone-number-url:
+          web:
+            app-id:
+            app-secret:
+            authorize-url:
+            access-token-url:
+            redirect-uri:
+            scope:
+            frontend-callback-uri:
       alipay:
         enabled: false
         client-id:
@@ -198,39 +207,80 @@ nebula:
 | `grant-type` | 授权类型 |
 | `scope` | 授权范围 |
 
-### 3.3 微信小程序配置
+### 3.3 微信登录配置（`nebula.auth.oauth2.providers.wechat.*`）
 
-| 配置项 | 说明 |
-|---|---|
-| `nebula.auth.oauth2.wechat-mini-program.enabled` | 是否启用微信小程序登录 |
-| `app-id` | 小程序 AppId |
-| `app-secret` | 小程序 AppSecret |
-| `session-url` | code 换 session 接口地址 |
-| `grant-type` | 授权类型 |
+微信统一为一个 provider（providerId `wechat`），凭据按接入渠道分两级：
 
-### 3.4 微信网站配置
+- `mini` —— 小程序渠道：`wx.login()` 直连式登录，无浏览器重定向
+- `web` —— 开放平台「网站应用」渠道（网页应用）：`connect/qrconnect` 扫码授权，可用于 Web 登录与「已登录用户绑定」
+
+顶层：
 
 | 配置项 | 说明 | 默认值 |
 |---|---|---|
-| `nebula.auth.oauth2.wechat-web.enabled` | 是否启用微信网站登录 | `false` |
-| `nebula.auth.oauth2.wechat-web.type` | 登录类型：`redirect` / `qr` | `redirect` |
-| `app-id` | 微信网站应用 AppId | 无 |
-| `app-secret` | 微信网站应用 AppSecret | 无 |
-| `authorize-url` | 授权地址 | 无 |
-| `token-url` | token 地址 | 无 |
-| `redirect-uri` | 回调地址 | 无 |
-| `grant-type` | 授权类型 | 无 |
-| `scope` | scope | 无 |
+| `nebula.auth.oauth2.providers.wechat.enabled` | 微信登录总开关（静态装配开关） | `false` |
+| `nebula.auth.oauth2.providers.wechat.access-token-safety-margin-seconds` | access_token 缓存提前失效余量（秒） | `300` |
 
-说明：
+小程序渠道（`mini`）：
 
-- `type=redirect` 时主要用于浏览器跳转授权
-- `type=qr` 时主要用于二维码扫码登录
-- 若关键地址或 appId 缺失，登录流程会直接报参数缺失错误
+| 配置项 | 说明 | 默认值 |
+|---|---|---|
+| `mini.app-id` | 小程序 AppID | 无 |
+| `mini.app-secret` | 小程序 AppSecret，必须环境变量注入 | 无 |
+| `mini.js-code2-session-url` | 授权码换会话接口 | `https://api.weixin.qq.com/sns/jscode2session` |
+| `mini.access-token-url` | 接口调用凭证接口（手机号能力依赖） | `https://api.weixin.qq.com/cgi-bin/token` |
+| `mini.phone-number-url` | 手机号获取接口 | `https://api.weixin.qq.com/wxa/business/getuserphonenumber` |
+
+网页应用渠道（`web`）：
+
+| 配置项 | 说明 | 默认值 |
+|---|---|---|
+| `web.app-id` | 网站应用 AppID | 无 |
+| `web.app-secret` | 网站应用 AppSecret，必须环境变量注入 | 无 |
+| `web.authorize-url` | 扫码授权页地址 | `https://open.weixin.qq.com/connect/qrconnect` |
+| `web.access-token-url` | 授权码换 token 接口 | `https://api.weixin.qq.com/sns/oauth2/access_token` |
+| `web.redirect-uri` | 微信侧回调地址，须与开放平台后台授权回调域一致 | 无（启用网页应用渠道时必填） |
+| `web.scope` | 授权作用域 | `snsapi_login` |
+| `web.frontend-callback-uri` | 扫码登录完成后前端承接页地址 | `/login/wechat-callback` |
+
+校验规则：
+
+- `enabled=true` 时 `mini` 与 `web` 至少一个渠道配置完整，否则启动失败
+- 渠道配置完整即参与装配：仅配 `mini` 时绑定能力不可用，配齐 `web` 后个人信息页出现微信绑定入口
+
+环境变量参考（推荐注入方式）：
+
+```yaml
+nebula:
+  auth:
+    oauth2:
+      providers:
+        wechat:
+          enabled: ${NEBULA_AUTH_WECHAT_ENABLED:false}
+          mini:
+            app-id: ${NEBULA_AUTH_WECHAT_MINI_APP_ID:}
+            app-secret: ${NEBULA_AUTH_WECHAT_MINI_APP_SECRET:}
+          web:
+            app-id: ${NEBULA_AUTH_WECHAT_WEB_APP_ID:}
+            app-secret: ${NEBULA_AUTH_WECHAT_WEB_APP_SECRET:}
+            redirect-uri: ${NEBULA_AUTH_WECHAT_WEB_REDIRECT_URI:}
+            frontend-callback-uri: ${NEBULA_AUTH_WECHAT_WEB_FRONTEND_CALLBACK_URI:/login/wechat-callback}
+```
+
+### 3.4 微信登录运行时开关（系统参数）
+
+静态 `enabled` 只管「装配不装配」，用户能否用微信登录以参数中心的系统参数为准：
+
+| 参数键 | 说明 |
+|---|---|
+| `login.oauth2.enabled` | OAuth2 总开关，微信登录要求同时为 true |
+| `login.oauth2.provider.wechat.enabled` | 微信登录开关（小程序 + 扫码共用），默认 `false` |
+
+该开关可在管理端「高级配置 → 通用配置 → 第三方登录（OAuth2）」运行时切换。
 
 ---
 
-## 4. 动态登录参数 `auth.login.*`
+## 4. 动态登录参数（参数中心 `login.*` / `auth.login.*`）
 
 除了 `nebula.auth.*` 之外，登录初始化配置还依赖参数中心中的动态参数。
 
@@ -273,13 +323,10 @@ nebula:
 
 | 参数键 | 说明 |
 |---|---|
-| `auth.login.oauth2.enabled` | 是否启用 OAuth2 登录 |
-| `auth.login.oauth2.allow-register` | 是否允许 OAuth2 自动注册 |
-| `auth.login.oauth2.provider.qq.enabled` | 是否启用 QQ 登录 |
-| `auth.login.oauth2.provider.wechat-mini-program.enabled` | 是否启用微信小程序登录 |
-| `auth.login.oauth2.provider.wechat-web.enabled` | 是否启用微信网站登录 |
-| `auth.login.oauth2.provider.wechat-web.type` | 微信网站登录类型：`redirect` / `qr` |
-| `auth.login.oauth2.provider.alipay.enabled` | 是否启用支付宝登录 |
+| `login.oauth2.enabled` | 是否启用 OAuth2 登录 |
+| `login.oauth2.allow-register` | 是否允许 OAuth2 自动注册 |
+| `login.oauth2.provider.github.enabled` | 是否启用 GitHub 登录 |
+| `login.oauth2.provider.wechat.enabled` | 是否启用微信登录（小程序 + 扫码共用） |
 
 说明：
 
@@ -298,8 +345,9 @@ nebula:
 
 - `/api/auth/get-auth-config`
 - `/api/auth/login`
-- `/api/auth/wechat/mini-program/login`
-- `/api/auth/wechat/web/qrcode`
+- `/api/auth/wechat/mini-login`
+- `/api/auth/wechat/web/redirect/prepare`
+- `/api/auth/wechat/web/redirect/callback`
 - `/api/auth/wechat/web/status`
 - `/api/auth/wechat/web/callback`
 - `/api/auth/refresh`

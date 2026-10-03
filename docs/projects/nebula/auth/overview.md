@@ -132,7 +132,7 @@ nebula-auth/
 - OAuth2 客户端管理
 - OAuth2 账户绑定管理
 - 微信小程序登录
-- 微信网站登录（redirect 与 qr 两种形态）
+- 微信网站登录（redirect 与 web 两种形态）
 
 配置类中还预留了：
 

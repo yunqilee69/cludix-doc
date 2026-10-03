@@ -47,9 +47,11 @@ Nebula 是一个基于 Spring 生态的 **Java 模块化中台工程**。它不�
 | `nebula-dict` | 统一数据字典：字典类型 + 树形字典项，支持缓存与分页维护 | [Dict 模块](./dict/index.md) |
 | `nebula-param` | 统一系统参数中心：运行期按 key 读取、后台可维护的业务开关与配置 | [Param 模块](./param/index.md) |
 | `nebula-storage` | 统一文件存储：普通/分片上传、鉴权下载、短时签名分享下载 | [Storage 模块](./storage/index.md) |
-| `nebula-frontend` | 前端支撑：启动配置、主题/语言/导航布局偏好、动态缓存治理 | [Frontend 模块](./frontend/index.md) |
+| `nebula-frontend` | 前端支撑：启动配置、主题/语言/导航布局偏好、动态缓存治理、应用版本与升级检查 | [Frontend 模块](./frontend/index.md) |
+| `nebula-notify` | 统一消息中心：通知模板与渠道变体、通知类别、站内信、公告、订阅偏好、移动推送与设备注册 | [Notify 模块](./notify/index.md) |
+| `mobile/` | 移动端基座（React Native 新架构，一套代码输出 iOS / Android / 鸿蒙） | [移动端基座](./mobile/index.md) |
 
-各模块文档采用统一结构：`overview → design-and-implementation → business-capabilities → usage-guide → configuration → ddl`。
+各模块文档采用统一结构：`overview → design-and-implementation → business-capabilities → usage-guide → configuration → ddl`（`mobile/` 为客户端工程，结构略有不同）。
 
 ## 📚 文档分类
 
@@ -58,6 +60,8 @@ Nebula 是一个基于 Spring 生态的 **Java 模块化中台工程**。它不�
 - [Param 模块](./param/index.md) - nebula-param 模块的总览、业务功能、设计实现、接入方式、配置与建表说明
 - [Storage 模块](./storage/index.md) - nebula-storage 模块的总览、业务功能、设计实现、接入方式、配置与建表说明
 - [Frontend 模块](./frontend/index.md) - nebula-frontend 模块的总览、业务功能、设计实现、接入方式、配置与建表说明
+- [Notify 模块](./notify/index.md) - nebula-notify 模块的总览、业务功能、设计实现、接入方式、配置与建表说明
+- [移动端基座](./mobile/index.md) - React Native 移动端基座工程与端无关共享契约 `packages/client-sdk`
 - **接口文档**：模块对外接口不再在本站维护，接入 nebula 后端运行时 OpenAPI 文档（启动后访问 `doc.html` / `swagger-ui.html`），与代码实时一致
 - [设计说明](./design/index.md) - 项目分层设计与包设计说明
 - [规范说明](./spec/index.md) - 项目分层对象命名规约说明书

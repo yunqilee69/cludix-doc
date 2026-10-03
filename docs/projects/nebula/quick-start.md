@@ -15,6 +15,8 @@ date: 2026-09-20
 | --- | --- |
 | `backend/` | 基于 `cn.cloudomni:nebula-app-starter` 的最小可运行 Spring Boot 工程，一个依赖即获得认证（用户/角色/组织/菜单/权限/OAuth2）、数据字典、系统参数、通知、文件存储、审计、任务调度、前端配置能力 |
 | `web/` | React 18 + Ant Design 6 + React Router 7 + Vite + Tailwind CSS 4 的管理端 |
+| `mobile/` | React Native 新架构 + TypeScript 移动端基座（一套代码输出 iOS / Android / 鸿蒙，框架层，不含业务页面） |
+| `packages/client-sdk` | 端无关的纯 TS 契约（类型、端点常量、token 规则、端类型），`web/` 与移动端共用 |
 | `docs/spec/` | 开发规范：架构、分层、命名、数据库、接口、异常、日志、安全、配置 |
 | `docs/sql/` | 数据库全量初始化与版本增量升级脚本（MySQL / PostgreSQL） |
 | `.agents/skills/` | AI 辅助开发技能：模块指引、特性分析、特性规格、规范约束 |
@@ -122,7 +124,9 @@ git merge upstream/main
 常用能力开关：
 
 - 任务调度 `nebula.scheduler.engine`（默认 quartz，可选 xxl；引擎脚本选型见 `docs/sql/README.md`）
-- 文件存储 `nebula.storage.*.type`（filesystem / db / minio）
+- 文件存储 `nebula.storage.*.type`（filesystem / db / minio / s3；图片处理 `nebula.storage.image.enabled` 默认关闭）
+- 移动推送 `nebula.notify.push.enabled`（默认关闭；启用需配齐 APNs 凭据，仅 iOS）；通知订阅偏好**无开关、永远生效**，类别在「系统管理 → 通知管理 → 通知类别」维护
+- 客户端接口面准入 `nebula.auth.client-scope.*`（默认不改变现有行为，可 dry-run 灰度）
 - GitHub 登录 `NEBULA_AUTH_GITHUB_ENABLED=true` + client-id / secret
 - 验证码与限流 `nebula.auth.security.captcha` / `rate-limit`
 - 跨域 `nebula.web.cors.allowed-origins`（默认关闭）
@@ -130,6 +134,7 @@ git merge upstream/main
 ## 下一步
 
 - 了解整体架构与分层动机：[设计说明](./design/index.md)
-- 按模块查看能力边界与接入方式：[Auth 模块](./auth/index.md)、[Dict 模块](./dict/index.md)、[Param 模块](./param/index.md)、[Storage 模块](./storage/index.md)、[Frontend 模块](./frontend/index.md)
+- 按模块查看能力边界与接入方式：[Auth 模块](./auth/index.md)、[Dict 模块](./dict/index.md)、[Param 模块](./param/index.md)、[Storage 模块](./storage/index.md)、[Frontend 模块](./frontend/index.md)、[Notify 模块](./notify/index.md)
+- 移动端开发：[移动端基座](./mobile/index.md)
 - 开发规范与详细配置：模板仓 `docs/spec/`、`backend/README.md`、`web/README.md`
 - 数据库脚本组织与升级方式：模板仓 `docs/sql/README.md`

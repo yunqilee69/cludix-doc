@@ -46,6 +46,7 @@ const nebulaSidebar: SidebarConfig = [
           'projects/nebula/auth/overview',
           'projects/nebula/auth/business-capabilities',
           'projects/nebula/auth/usage-guide',
+          'projects/nebula/auth/client-scope',
         ],
       },
       {
@@ -85,6 +86,7 @@ const nebulaSidebar: SidebarConfig = [
           'projects/nebula/storage/overview',
           'projects/nebula/storage/business-capabilities',
           'projects/nebula/storage/usage-guide',
+          'projects/nebula/storage/content-enhancements',
         ],
       },
       {
@@ -98,8 +100,35 @@ const nebulaSidebar: SidebarConfig = [
           'projects/nebula/frontend/overview',
           'projects/nebula/frontend/business-capabilities',
           'projects/nebula/frontend/usage-guide',
+          'projects/nebula/frontend/app-release',
         ],
       },
+      {
+        type: 'category',
+        label: 'Notify 模块',
+        link: {
+          type: 'doc',
+          id: 'projects/nebula/notify/index',
+        },
+        items: [
+          'projects/nebula/notify/overview',
+          'projects/nebula/notify/business-capabilities',
+          'projects/nebula/notify/usage-guide',
+        ],
+      },
+    ],
+  },
+  {
+    type: 'category',
+    label: '移动端基座',
+    link: {
+      type: 'doc',
+      id: 'projects/nebula/mobile/index',
+    },
+    items: [
+      'projects/nebula/mobile/overview',
+      'projects/nebula/mobile/client-sdk',
+      'projects/nebula/mobile/usage-guide',
     ],
   },
   {
@@ -130,6 +159,11 @@ const nebulaSidebar: SidebarConfig = [
         type: 'doc',
         id: 'projects/nebula/frontend/configuration',
         label: 'Frontend 配置',
+      },
+      {
+        type: 'doc',
+        id: 'projects/nebula/notify/configuration',
+        label: 'Notify 配置',
       },
     ],
   },
@@ -186,6 +220,16 @@ const nebulaSidebar: SidebarConfig = [
         type: 'doc',
         id: 'projects/nebula/frontend/ddl',
         label: 'Frontend 数据表',
+      },
+      {
+        type: 'doc',
+        id: 'projects/nebula/notify/design-and-implementation',
+        label: 'Notify 设计与实现',
+      },
+      {
+        type: 'doc',
+        id: 'projects/nebula/notify/ddl',
+        label: 'Notify 数据表',
       },
       {
         type: 'doc',

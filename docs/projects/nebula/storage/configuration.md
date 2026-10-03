@@ -77,6 +77,7 @@ nebula:
 - `filesystem`
 - `db`
 - `minio`
+- `s3`（S3 兼容对象存储，覆盖 OSS / COS / 七牛 / MinIO 等）
 
 作用：
 
@@ -254,3 +255,65 @@ nebula:
 - 多实例环境建议使用统一缓存后端
 
 这样才能避免不同实例之间的计数不一致。
+
+---
+
+## 7. S3 兼容对象存储（`content.type=s3`）
+
+当 `nebula.storage.content.type=s3` 时，正式内容区改用 S3 兼容后端：
+
+```yaml
+nebula:
+  storage:
+    content:
+      type: s3
+      s3:
+        endpoint: ${NEBULA_STORAGE_S3_ENDPOINT:}
+        region: ${NEBULA_STORAGE_S3_REGION:}
+        access-key: ${NEBULA_STORAGE_S3_ACCESS_KEY:}
+        secret-key: ${NEBULA_STORAGE_S3_SECRET_KEY:}
+        bucket: ${NEBULA_STORAGE_S3_BUCKET:}
+        path-style-access: ${NEBULA_STORAGE_S3_PATH_STYLE:true}
+        create-bucket-if-missing: ${NEBULA_STORAGE_S3_CREATE_BUCKET:false}
+```
+
+| 配置项 | 默认值 | 说明 |
+| --- | --- | --- |
+| `endpoint` | 无 | 服务地址（OSS / COS / 七牛 / MinIO） |
+| `region` | 无 | 区域；多数云厂商必填，MinIO 可留空（回退 `us-east-1`） |
+| `access-key` / `secret-key` | 无 | AK/SK，**只走环境变量** |
+| `bucket` | 无 | Bucket 名称 |
+| `path-style-access` | `true` | MinIO/自建网关用 `true`，多数云厂商用 `false` |
+| `create-bucket-if-missing` | `false` | 自动建桶；多数云厂商 AK 无建桶权限，生产建议 `false` |
+
+- **凭据只走环境变量**，不入库、不入仓、不打日志。
+- 配置不完整或 bucket 不存在且未开启自动建桶时报 `S3_CONFIG_INCOMPLETE`（24020）。
+- `path-style-access` 配错会得到 404 或签名错误（不是明显的配置报错），选型时注意。
+- 启用 S3 后端需把 `content.type` 改为 `s3` 并配齐 endpoint/region/bucket/AK/SK。
+
+---
+
+## 8. 图片处理（`nebula.storage.image.*`）
+
+```yaml
+nebula:
+  storage:
+    image:
+      enabled: false        # 默认关闭，关闭时行为与改造前完全一致
+      thumb-width: 320
+      thumb-height: 320
+      thumb-quality: 0.8
+      max-width: 0          # 原图宽度上限，0 表示不限制
+      max-height: 0         # 原图高度上限，0 表示不限制
+```
+
+| 配置项 | 默认值 | 说明 |
+| --- | --- | --- |
+| `enabled` | `false` | 开启缩略图派生与尺寸上限校验 |
+| `thumb-width` / `thumb-height` | `320` / `320` | 缩略图目标尺寸（不放大） |
+| `thumb-quality` | `0.8` | 缩略图压缩质量（0~1），输出固定 jpeg |
+| `max-width` / `max-height` | `0` | 原图尺寸上限，`0` 不限制 |
+
+- 解码前先读图片头部尺寸，超过像素（5000 万）或字节（64 MiB）上限直接拒绝（`IMAGE_DIMENSION_EXCEEDED`, 24021）——防解压炸弹。
+- 派生内容按 `(fileHash, variant)` 去重；读取端缺失派生时**回退原图**。
+- 详见[存储增强（对象存储与图片处理）](./content-enhancements)。

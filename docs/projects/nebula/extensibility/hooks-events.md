@@ -49,7 +49,37 @@ Hook 是标准的 Spring Bean。业务侧声明自己的实现后，框架自动
 | 字典项 | `beforeUpdateDictItem` / `afterUpdateDictItem` |
 | 字典项 | `beforeDeleteDictItem` / `afterDeleteDictItem` |
 
-> Auth、Storage、Frontend 模块目前**不提供**写操作 Hook。这些模块的可扩展入口只有领域事件。
+> Auth、Storage、Frontend、Notify 模块目前**不提供**写操作 Hook。这些模块的可扩展入口只有领域事件，以及下方「其它 SPI 扩展点」。
+
+### 其它 SPI 扩展点（非 Hook）
+
+除写操作 Hook 外，模块还暴露两个**策略型 SPI**。它们的共同特点是：**没有 `Noop*` 空实现兜底**——未提供实现时要么走框架默认策略，要么明确失败。
+
+#### Notify：推送发送器 `PushChannelSender`
+
+接口：`cn.cloudomni.nebula.notify.service.PushChannelSender`
+
+```java
+public interface PushChannelSender {
+    String vendor();                                              // 路由键，见 NotifyPushVendors
+    PushSendResult send(PushMessage message, NotifyPushDeviceDto device);
+}
+```
+
+- 实现要求：单台失败**不抛异常**而返回 `PushSendResult`；token 失效置 `invalidToken=true`；**未配置凭据的实现不注册为 Bean**；凭据只走环境变量；收集注入需容忍空列表。
+- 框架内置实现：`ApnsPushChannelSender`（iOS APNs），**仅在推送总开关打开且四项 APNs 凭据齐备时注册**，缺任一即不注册。
+- **没有兜底实现**：某 vendor 没有对应发送器时，投递记 `PROVIDER_NOT_CONFIGURED`（不会静默成功）。当前没有 Android / 鸿蒙发送器。
+- 扩展点用途：接入 Android 厂商通道（HMS / 小米 / OPPO / vivo / 荣耀）或聚合通道。
+
+#### Auth：客户端作用域判定 `IClientScopeResolver`
+
+接口：`cn.cloudomni.nebula.auth.service.IClientScopeResolver`（详见 [Auth · 客户端接口面准入](../auth/client-scope)）
+
+- 责任链模式，按 `@Order` 升序取首个非 null 结果。
+- 框架默认实现 `DefaultClientScopeResolver` 恒返回 `INTERNAL`（不限制），业务侧提供 Resolver 才能把某类账号判为受限作用域。
+- 实现类**必须**显式声明 `< Ordered.LOWEST_PRECEDENCE` 的 `@Order`，否则启动期失败。
+
+> **通知订阅偏好不是扩展点**：类别是**可管理数据**（表 `sys_notify_category`，管理员可在「通知类别」页增删改），但没有提供 SPI——类别判定逻辑固定在 `NotifyPreferenceServiceImpl`，接入方通过维护类别数据（而非实现接口）来调整行为。内置 5 个类别（`NotifyCategoryTypes` 常量）之所以收敛且不可删，是因为移动端（Android 8.0+ / HarmonyOS）的通知渠道一旦创建，用户即拥有完全控制权，渠道 ID 必须稳定且与内置类别一一对应；自定义类别不新建系统渠道，推送时回退 `DEFAULT`。
 
 ## 2. 领域事件
 
