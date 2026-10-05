@@ -77,7 +77,7 @@ mobile/
 - **端类型**：所有请求显式注入 `X-Client-Type: APP`。服务端判定优先 UA 强特征容器 > 该头 > UA 推断；RN 的 UA 未必稳定带特征，**必须显式注入**。
 - **启动引导是两步**：`GET /api/frontend/init`（匿名，含登录开关、上传策略、默认主题、推送配置、版本策略）**不含菜单与权限**；菜单与权限码来自 `GET /api/auth/current-user`。
 - **上传两阶段**：先上传得到临时 task，`bind` 之后才产生正式 `fileId`；未 bind 的临时文件会被清理。
-- **鉴权下载**：`GET /api/storage/download` 需登录，返回二进制流；图片走带 token 的 blob 获取（`AuthenticatedImage`），不用裸图片 URL。
+- **鉴权下载**：`GET /api/storage/download` 需登录，返回二进制流。图片预览先用 `GET /api/storage/download-location` 解析位置：`mode=PROXY` 时走带 token 的 blob 获取（`AuthenticatedImage`），`mode=DIRECT`（对象存储开启直连）时直接用返回的预签名直链；`release()` 只回收自己创建的 blob URL，不会去 revoke 直链。
 
 ## 4. 与后端新增能力的对接
 

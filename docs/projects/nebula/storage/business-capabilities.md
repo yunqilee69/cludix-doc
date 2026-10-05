@@ -220,10 +220,22 @@ bind 把“文件内容”变成“业务附件”。
 - 会触发 `StoragePermissionChecker` 权限校验
 - 可以自定义下载时展示的文件名
 - 返回真实文件流
+- 可先调用 `GET /api/storage/download-location` 解析下载位置：对象存储开启直连时返回临时直链，否则返回服务端代理地址
 
 ### 7.3 适用建议
 
 只要是**平台用户自己下载**，优先使用登录态下载，不建议为了内部下载而滥用签名下载。
+
+### 7.4 直连与代理
+
+`GET /api/storage/download-location` 让客户端不必判断后端类型：
+
+- `mode=DIRECT`：`url` 是对象存储预签名直链，客户端直接把它当裸 URL 使用（不附加 `Authorization`），有效期内可用；
+- `mode=PROXY`：`url` 指回 `/api/storage/download`，客户端照常带 `Authorization` 拉取。
+
+定位方式二选一：给 `fileId` 解析单个文件；给 `sourceEntity` + `sourceId`（可选 `sourceType`）一次解析该业务实体下全部附件。响应恒为**数组**，客户端可以直接遍历渲染多项（例如一次拿到某单据的全部签名照片）。
+
+`filesystem` / `db` 后端恒为 `PROXY`；对象存储的直连开关默认关闭，因此**默认行为与改造前一致**。无论走哪种模式，权限校验都发生在解析位置/服务端下载时，`StoragePermissionChecker` 依旧是唯一的业务权限扩展点。签名分享下载不受影响，始终经服务端代理。
 
 ---
 
@@ -366,8 +378,9 @@ bind 把“文件内容”变成“业务附件”。
 推荐流程：
 
 1. 查文件 ID
-2. 调用 `/api/storage/download`
-3. 按业务权限校验后下载
+2. 调用 `/api/storage/download-location?fileId=...` 取下载位置
+3. `DIRECT` 用返回的裸 URL，`PROXY` 调用 `/api/storage/download`
+4. 按业务权限校验后下载
 
 ### 11.4 对外分享下载
 
@@ -392,5 +405,6 @@ bind 把“文件内容”变成“业务附件”。
 - 一个支持普通文件和大文件的统一上传体系
 - 一个支持内部下载与外部分享下载的双通道模型
 - 一个支持多存储 provider 的底层能力抽象
+- 一个由服务端决议、可选的客户端直连下载通道（`download-location`）
 
 如果你的业务里涉及“附件先上传，再保存单据，再长期管理，再下载或分享”，那么 storage 模块已经基本覆盖了这条完整链路。

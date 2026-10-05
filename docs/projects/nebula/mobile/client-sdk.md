@@ -51,7 +51,7 @@ export const CLIENT_TYPES: readonly ClientType[] = [/* 全部合法取值 */];
 | --- | --- |
 | `AUTH_ENDPOINTS` | 登录/刷新/登出、`current-user`、验证码登录、忘记密码三步、`profile`、OAuth2 绑定、登录记录 |
 | `FRONTEND_ENDPOINTS` | `init`、`appReleaseCheck` |
-| `STORAGE_ENDPOINTS` | 上传策略、简单上传、分片（`uploadTaskPart(taskId, partNo)` 等函数）、`bind`、文件详情/分页、下载、签名下载 |
+| `STORAGE_ENDPOINTS` | 上传策略、简单上传、分片（`uploadTaskPart(taskId, partNo)` 等函数）、`bind`、文件详情/分页、下载、`downloadLocation`（下载位置解析，按 `fileId` 或业务归属批量，恒返回数组）、签名下载 |
 | `DICT_ENDPOINTS` | `itemsByCode(dictCode)` |
 | `PARAM_ENDPOINTS` | `value` / `boolean` / `integer` / `detail` |
 | `NOTIFY_ENDPOINTS` | 站内信、公告、通知偏好、推送设备（含 `pushDevice(deviceId)` 等函数） |

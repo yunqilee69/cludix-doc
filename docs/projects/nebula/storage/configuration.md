@@ -98,10 +98,13 @@ nebula:
 - `secret-key`
 - `bucket`
 - `create-bucket-if-missing`
+- `direct-download-enabled`（默认 `false`）
+- `direct-download-expire-seconds`（默认 `300`，上限 `3600`）
 
 作用：
 
 - 当 `content.type=minio` 时，指定 MinIO 连接与桶配置
+- `direct-download-*` 决定客户端是否直连 MinIO 取文件（预签名直链）；关闭时所有下载经服务端流式转发
 
 ### 2.6 `nebula.storage.signed-download.*`
 
@@ -256,6 +259,16 @@ nebula:
 
 这样才能避免不同实例之间的计数不一致。
 
+### 6.5 直连下载按需开启
+
+对象存储的 `direct-download-*` 默认关闭，即下载一律经服务端转发。开启后客户端拿临时直链自行取文件，可减轻应用出口带宽压力，但代价是：
+
+- 直链在有效期内等效于凭据，泄露即可被任意使用——有效期不宜设置过长。
+- 直链请求不经过应用，权限校验只在**签发直链时**发生一次。
+- 需要对象存储本身允许客户端网络访问（内网部署的 MinIO 未必可达）。
+
+内网部署或合规要求下载可审计时，保持关闭、走服务端代理更稳妥。
+
 ---
 
 ## 7. S3 兼容对象存储（`content.type=s3`）
@@ -275,6 +288,8 @@ nebula:
         bucket: ${NEBULA_STORAGE_S3_BUCKET:}
         path-style-access: ${NEBULA_STORAGE_S3_PATH_STYLE:true}
         create-bucket-if-missing: ${NEBULA_STORAGE_S3_CREATE_BUCKET:false}
+        direct-download-enabled: ${NEBULA_STORAGE_S3_DIRECT_DOWNLOAD_ENABLED:false}
+        direct-download-expire-seconds: ${NEBULA_STORAGE_S3_DIRECT_DOWNLOAD_EXPIRE_SECONDS:300}
 ```
 
 | 配置项 | 默认值 | 说明 |
@@ -285,11 +300,14 @@ nebula:
 | `bucket` | 无 | Bucket 名称 |
 | `path-style-access` | `true` | MinIO/自建网关用 `true`，多数云厂商用 `false` |
 | `create-bucket-if-missing` | `false` | 自动建桶；多数云厂商 AK 无建桶权限，生产建议 `false` |
+| `direct-download-enabled` | `false` | 开启后 `/api/storage/download-location` 返回对象存储预签名直链 |
+| `direct-download-expire-seconds` | `300` | 直链有效期（秒），上限 `3600`，超出按上限截断 |
 
 - **凭据只走环境变量**，不入库、不入仓、不打日志。
 - 配置不完整或 bucket 不存在且未开启自动建桶时报 `S3_CONFIG_INCOMPLETE`（24020）。
 - `path-style-access` 配错会得到 404 或签名错误（不是明显的配置报错），选型时注意。
 - 启用 S3 后端需把 `content.type` 改为 `s3` 并配齐 endpoint/region/bucket/AK/SK。
+- 预签名直链本身是**凭据**，不写日志、不入审计快照、不回显到错误信息中。`filesystem`/`db` 后端不支持直连，恒走服务端代理。
 
 ---
 

@@ -8,6 +8,7 @@
 - 上传完成后如何与业务实体建立归属关系
 - 正式文件如何避免重复存储
 - 下载如何区分登录态下载和可分享下载
+- 下载位置如何由服务端决议直连还是代理
 - 二进制内容如何在 filesystem / db / minio 之间切换
 - 单体与微服务模式下如何复用同一套契约
 
@@ -45,7 +46,7 @@ storage 模块遵循 Nebula 的标准分层。
 - `StorageUploadTaskEntity` / `StorageUploadPartEntity` / `StorageFileEntity`
 - `StorageContentRepository`
 - `RoutingStorageContentRepository`
-- `FileSystemStorageBinaryStore` / `DatabaseStorageBinaryStore` / `MinioStorageBinaryStore`
+- `FileSystemStorageBinaryStore` / `DatabaseStorageBinaryStore` / `MinioStorageBinaryStore` / `S3StorageBinaryStore`
 - `NebulaStorageAutoConfiguration`
 - `NebulaStorageProperties`
 
@@ -207,12 +208,14 @@ storage 模块把二进制内容存储抽象为两层。
 - delete
 - type
 - bucket
+- `supportsDirectAccess()` / `presignGet(...)`（默认返回 `false` / `Optional.empty()`，对象存储实现可覆盖以签发直链）
 
 当前已确认实现包括：
 
 - `FileSystemStorageBinaryStore`
 - `DatabaseStorageBinaryStore`
 - `MinioStorageBinaryStore`
+- `S3StorageBinaryStore`
 
 ### 5.2 `StorageContentRepository`
 
@@ -226,6 +229,7 @@ storage 模块把二进制内容存储抽象为两层。
 - `openFormal`
 - `deleteTemp`
 - `deleteFormal`
+- `supportsDirectAccess()` / `presignFormal(...)`（向 service 层暴露直连能力，默认关闭）
 
 它不是简单“存一份 bytes”，而是把“临时区 / 正式区”的生命周期差异封装起来。
 
@@ -269,14 +273,16 @@ storage 模块把二进制内容存储抽象为两层。
 - `type=filesystem`
 - `type=db`
 - `type=minio`
+- `type=s3`（S3 兼容，覆盖 OSS / COS / 七牛等）
 
-其中 MinIO 还需要：
+其中对象存储（`minio` / `s3`）还需要：
 
 - `endpoint`
 - `accessKey`
 - `secretKey`
 - `bucket`
 - `createBucketIfMissing`
+- `directDownloadEnabled` / `directDownloadExpireSeconds`（直连开关，默认关闭）
 
 ### 6.4 `signedDownload`
 
@@ -301,6 +307,8 @@ storage 模块把二进制内容存储抽象为两层。
 2. 读取当前登录用户
 3. 调用 `StoragePermissionChecker`
 4. 权限通过后打开正式内容流
+
+接口层可选带 `filename`（有值 ⇒ `attachment` 下载，为空 ⇒ `inline` 预览）与 `variant`（派生版本，缺失回退原图）。同样的鉴权与回退逻辑被 `resolveDownloadLocation` 复用（见 7.4）。
 
 ### 7.2 签名下载
 
@@ -328,6 +336,30 @@ storage 模块把二进制内容存储抽象为两层。
 - 角色范围
 
 进行更细粒度控制。
+
+### 7.4 下载位置解析
+
+下载位置解析与 `openFileContent` 共用鉴权与派生回退逻辑，但不返回内容流，只回答「这次下载应该问谁要文件」。服务层提供两个方法，控制层按入参分派：
+
+- `resolveDownloadLocation(fileId, filename, variant)`：解析单个文件；
+- `resolveDownloadLocationsBySource(query, variant)`：按 `sourceEntity` / `sourceId`（可选 `sourceType`）复用 `StorageFileDao.listBySource` 拿到全部附件，逐条解析。
+
+单个文件的解析步骤：
+
+1. 查询正式文件并调用 `StoragePermissionChecker`；
+2. 解析内容键（`variant` 缺省或派生缺失时回退原图）；
+3. `StorageContentRepository.supportsDirectAccess()` 为真时调用 `presignFormal(...)` 签发直链，返回 `mode=DIRECT`；
+4. 否则返回 `mode=PROXY`，由控制层按当前请求上下文补全 `/api/storage/download` 地址（带好 `fileId`/`variant`）。
+
+接口**恒返回数组**：按 `fileId` 解析是单元素数组，按业务归属解析是全部附件；每项带上 `fileId` / `fileName` / `fileMimeType` / `fileSize`，客户端列表页可直接渲染。按业务归属解析时按预览语义处理，不把 `filename` 套到批量结果上。两个定位方式都不给时抛 `DOWNLOAD_LOCATION_PARAM_INVALID`（24027）。
+
+能力由存储实现自行声明，不需要在 service 层写 if-else 判断类型：
+
+- `StorageBinaryStore` 默认 `supportsDirectAccess()` 返回 `false`、`presignGet(...)` 返回 `Optional.empty()`；
+- `S3StorageBinaryStore` / `MinioStorageBinaryStore` 仅在「开关开启 + 客户端支持预签名」时返回 `true`；
+- `S3ObjectClient` 以 `supportsPresign()` / `presignGetObject(...)` 暴露预签名；MinIO 走 `getPresignedObjectUrl`。
+
+`filename` 有值 ⇒ `attachment`（下载）；为空 ⇒ `inline`（预览）。有效期由 `direct-download-expire-seconds` 决定并被截断到上限。预签名 URL 属于凭据，只回传给调用方，不写日志与审计。
 
 ---
 

@@ -9,7 +9,7 @@
 - [设计与实现](./design-and-implementation.md) - 分层结构、两阶段上传模型、provider 设计与关键实现机制
 - [业务功能](./business-capabilities.md) - 面向业务方的能力边界、典型流程与场景说明
 - [使用方式](./usage-guide.md) - 单体接入、独立服务部署、前端调用建议和业务使用方式
-- [存储增强（对象存储与图片处理）](./content-enhancements.md) - S3 兼容后端、图片派生版本、存储后端迁移
+- [存储增强（对象存储与图片处理）](./content-enhancements.md) - S3 兼容后端、图片派生版本、存储后端迁移、对象存储直连下载
 - [配置说明](./configuration.md) - `nebula.storage.*`、provider 选型与签名下载配置说明
 - [建表语句](./ddl.md) - 存储模块涉及的数据表结构与字段说明
 

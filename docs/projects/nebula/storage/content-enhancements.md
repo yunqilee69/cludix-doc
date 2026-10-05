@@ -6,7 +6,7 @@ tags: [nebula, storage, configuration]
 
 # 存储增强（对象存储与图片处理）
 
-`nebula-storage` 本批新增三块能力：**S3 兼容对象存储后端**、**图片派生版本（缩略图）**、**存储后端迁移工具**。三者的默认配置都**不改变现有行为**（S3 需显式切换、图片处理默认关闭、迁移工具需主动调用）。
+`nebula-storage` 本批新增四块能力：**S3 兼容对象存储后端**、**图片派生版本（缩略图）**、**存储后端迁移工具**、**对象存储直连下载**。四者的默认配置都**不改变现有行为**（S3 需显式切换、图片处理默认关闭、迁移工具需主动调用、直连下载默认关闭）。
 
 ## 1. S3 兼容对象存储后端
 
@@ -109,6 +109,7 @@ nebula:
 ### 2.5 读取与回退
 
 - `GET /api/storage/download` 新增可选 `variant` 参数：缺省/null/空白 → 原图；`variant=thumb` → 缩略图。
+- `GET /api/storage/download-location` 同样接受 `variant`，直连模式下发的是该派生的预签名直链。
 - **请求的派生版本不存在时回退原图并记 WARN，不抛 `VARIANT_NOT_FOUND`**——避免移动端列表页因缺少缩略图而整块空白。
 - 文件详情响应新增 `variants`（可用派生版本与尺寸）。
 - 签名下载 `download-signed` **不带** `variant`，恒返回原图。
@@ -156,10 +157,76 @@ nebula:
 
 ---
 
-## 4. 接口与权限码
+## 4. 对象存储直连下载
+
+### 4.1 定位
+
+新增 `GET /api/storage/download-location`：**由服务端决议本次下载走直链还是走代理**，客户端不需要知道后端类型，也不自己选路。`filesystem` / `db` 恒为代理；对象存储（`minio` / `s3`）在开启直连开关后返回预签名直链。
+
+定位方式二选一：
+
+- 给 `fileId`：解析单个文件的下载位置；
+- 给 `sourceEntity` + `sourceId`（可选 `sourceType`）：一次解析该业务实体下**全部附件**，省掉「先 list-by-source 再逐个解析」的两跳。
+
+响应恒为**数组**（单文件解析只有一个元素），客户端可直接遍历渲染多项。`variant` 两种方式都支持。
+
+### 4.2 响应
+
+`data` 为数组，每项：
+
+| 字段 | 说明 |
+| --- | --- |
+| `fileId` | 正式文件ID |
+| `fileName` | 文件名，供列表页直接展示 |
+| `fileMimeType` | 文件 MIME；请求派生版本时为该派生内容的类型 |
+| `fileSize` | 文件字节数 |
+| `mode` | `DIRECT`（`url` 是对象存储预签名直链）或 `PROXY`（`url` 指回 `/api/storage/download`） |
+| `url` | `DIRECT` 为临时直链；`PROXY` 为带好 `fileId`/`variant` 的服务端下载地址 |
+| `expiresAtEpochSecond` | 仅 `DIRECT` 有值，直链过期时间 |
+
+`filename` 有值 ⇒ 附件下载（`attachment`）；为空 ⇒ 内联预览（`inline`）。预览场景不传 `filename`。
+
+> 按业务归属批量解析时按**预览语义**处理：不会把调用方传的 `filename` 套到批量结果上（否则一键改掉全部附件的文件名没有意义）。需要带文件名的单个下载，请按 `fileId` 单独解析。
+
+### 4.3 配置
+
+直连开关位于对象存储各自的配置节点下，默认关闭：
+
+```yaml
+nebula:
+  storage:
+    content:
+      type: s3
+      s3:
+        direct-download-enabled: ${NEBULA_STORAGE_S3_DIRECT_DOWNLOAD_ENABLED:false}
+        direct-download-expire-seconds: ${NEBULA_STORAGE_S3_DIRECT_DOWNLOAD_EXPIRE_SECONDS:300}
+      # minio 同名配置项：direct-download-enabled / direct-download-expire-seconds
+```
+
+| 配置项 | 默认值 | 说明 |
+| --- | --- | --- |
+| `direct-download-enabled` | `false` | 是否允许签发直链 |
+| `direct-download-expire-seconds` | `300` | 直链有效期，上限 `3600`，超出按上限截断 |
+
+### 4.4 能力声明与降级
+
+- `StorageBinaryStore.supportsDirectAccess()` 默认 `false`；`filesystem` / `db` 用默认实现即自动降级为服务端流式转发。
+- `S3StorageBinaryStore` 在「开关开启 **且** 客户端支持预签名」时才返回 `true`（`S3ObjectClient.supportsPresign()`）；`MinioStorageBinaryStore` 只需开关开启（MinIO 客户端恒支持预签名）。
+- `S3ObjectClient` 以 `supportsPresign()` + `presignGetObject(...)` 暴露预签名能力；MinIO 客户端走 `getPresignedObjectUrl`。
+
+### 4.5 安全边界
+
+- 预签名直链是**凭据**：不写日志、不入审计快照、不回显到错误信息；代码只记录 `describeObjectLocation(key)` 这类寻址信息。
+- 直链有效期受上限截断，权限校验只在签发时发生一次。
+- 签名分享下载 `download-signed` **恒经服务端代理**，不因直连开关而改变——它需要强制次数与时效，不能绕过。
+
+---
+
+## 5. 接口与权限码
 
 | 方法 + 路径 | 权限码 | 说明 |
 | --- | --- | --- |
+| `GET /api/storage/download-location` | `STORAGE_FILE_QUERY` | 解析下载位置，返回数组；`fileId` 或 `sourceEntity`+`sourceId` 二选一定位，`DIRECT` 返直链、`PROXY` 返代理地址 |
 | `GET /api/storage/download` | `STORAGE_FILE_QUERY` | 新增可选 `variant` 参数 |
 | `POST /api/storage/files/list-by-source` | `STORAGE_FILE_QUERY` | 由内部能力开放为正式接口（按业务实体查附件，供移动端列表页取图） |
 | `DELETE /api/storage/files/{fileId}` | `STORAGE_FILE_DELETE` | 补齐权限码 |
@@ -167,7 +234,7 @@ nebula:
 
 `POST /api/storage/files/list-by-source` 请求：`sourceEntity`（必填）、`sourceId`（必填）、`sourceType`（可选）；响应为文件列表（**不含 `variants`**，`variants` 只在文件详情接口返回）。
 
-## 5. 错误码
+## 6. 错误码
 
 | 错误码 | 名称 | 说明 |
 | --- | --- | --- |
@@ -179,6 +246,6 @@ nebula:
 | `24025` | `MIGRATION_CHECKSUM_MISMATCH` | 迁移校验失败，内容哈希不一致 |
 | `24026` | `STORAGE_BACKEND_MISMATCH` | 文件不属于当前存储后端，拒绝删除 |
 
-## 6. 数据表
+## 7. 数据表
 
 `storage_file_variant` 的字段与索引见 [Storage 数据表](./ddl)。

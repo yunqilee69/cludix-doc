@@ -115,6 +115,8 @@ nebula:
         secret-key: minioadmin
         bucket: nebula-storage
         create-bucket-if-missing: true
+        direct-download-enabled: false
+        direct-download-expire-seconds: 300
 ```
 
 ### 4.2 `temp-dir`
@@ -138,6 +140,7 @@ nebula:
 - `filesystem`
 - `db`
 - `minio`
+- `s3`（S3 兼容，覆盖阿里云 OSS / 腾讯云 COS / 七牛等）
 
 它决定的是**正式文件内容区**如何保存，而不是业务元数据表落在哪里。
 
@@ -207,15 +210,30 @@ nebula:
 
 ### 5.4 平台内部下载
 
-推荐直接使用：
+推荐先解析下载位置，再按返回的 `mode` 取文件：
 
-- `GET /api/storage/download?fileId=...`
+1. `GET /api/storage/download-location?fileId=...`（可带 `filename`、`variant`）
+2. `mode=DIRECT`：把 `url` 当作裸 URL 直接取文件，不附加 `Authorization`
+3. `mode=PROXY`：`GET /api/storage/download?fileId=...`，带 `Authorization`
+
+也可以跳过第 1 步直接调用 `/api/storage/download`——服务端代理路径始终可用；`download-location` 只是让客户端在对象存储开启直连时少走一趟应用带宽。
+
+接口**恒返回数组**。要一次拿到某个业务单据下的全部附件，改用业务归属定位，省掉「先 list-by-source 再逐个解析」：
+
+```text
+GET /api/storage/download-location?sourceEntity=deliveryOrder&sourceId=1870000000000000001&sourceType=signPhoto&variant=thumb
+```
+
+响应每项带 `fileId` / `fileName` / `fileMimeType` / `fileSize` / `mode` / `url`，列表页可直接遍历渲染。`fileId` 与 `sourceEntity`+`sourceId` 二选一，都不给报 `DOWNLOAD_LOCATION_PARAM_INVALID`（24027）。
 
 适用场景：
 
 - 已登录后台用户下载
 - 平台前端自己下载
-- 网关或浏览器自动携带认证信息
+- 移动端图片预览（`variant=thumb`，直连时用直链、否则走 blob）
+- 业务单据的全部附件/签名照片一次性取下载位置
+
+> **注意**：`filesystem` / `db` 后端恒返回 `PROXY`；对象存储的直连开关默认关闭。预览场景**不要传 `filename`**，否则语义会从 `inline` 变成 `attachment`；按业务归属批量解析本身即按预览语义处理，传了也会被忽略。
 
 ### 5.5 对外分享下载
 
@@ -354,7 +372,7 @@ public class ContractStoragePermissionChecker implements StoragePermissionChecke
 建议区分两类按钮：
 
 1. **下载附件**
-   - 走 `/api/storage/download`
+   - 先调 `/api/storage/download-location` 解析位置：`DIRECT` 用返回的裸 URL，`PROXY` 走 `/api/storage/download`
 
 2. **复制分享链接**
    - 先调用 `/api/storage/generate-signed-url`

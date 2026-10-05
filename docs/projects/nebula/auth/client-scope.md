@@ -56,6 +56,7 @@ nebula:
             - /api/notify/site-messages/**
             - /api/notify/preferences/current
             - /api/storage/download
+            - /api/storage/download-location
             - /api/storage/files/*
 ```
 

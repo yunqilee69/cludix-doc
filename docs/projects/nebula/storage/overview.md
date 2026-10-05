@@ -57,14 +57,16 @@ nebula-storage/
    - 小文件可以直接走 `/api/storage/upload`；
    - 分片场景先创建任务，再分片上传，再 complete，再 bind。
 
-3. **下载分成两类**
-   - 登录态鉴权下载：`/api/storage/download`
-   - 分享链接下载：`/api/storage/download-signed`
+3. **下载位置由服务端决议**
+   - 下载位置解析：`/api/storage/download-location`（`fileId` 或 `sourceEntity`+`sourceId` 二选一，恒返回数组），对象存储开启直连时返回临时直链，否则返回服务端代理地址
+   - 登录态鉴权下载：`/api/storage/download`（服务端流式代理）
+   - 分享链接下载：`/api/storage/download-signed`（恒经服务端代理，以强制次数与时效）
 
 4. **正式文件内容存储支持多 provider**
    - `filesystem`
    - `db`
    - `minio`
+   - `s3`（S3 兼容，覆盖阿里云 OSS / 腾讯云 COS / 七牛等）
 
 5. **临时区与正式区解耦**
    - 临时区用于上传中间态；
@@ -126,6 +128,7 @@ nebula-storage/
 - 查询正式文件详情
 - 分页查询正式文件
 - 登录态下载正式文件
+- 解析下载位置（按 fileId 或按业务归属批量，直连或代理）
 - 生成签名下载地址
 - 按签名下载正式文件
 - 删除正式文件
