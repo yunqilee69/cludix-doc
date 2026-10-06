@@ -44,8 +44,6 @@ nebula:
     oauth2:
       enabled: false
       register-allowed: true
-      default-role-id: admin-role-id
-      default-org-id: root-org-id
 ```
 
 ### 2.1 `nebula.auth.mode`
@@ -128,8 +126,6 @@ nebula:
     oauth2:
       enabled: false
       register-allowed: true
-      default-role-id:
-      default-org-id:
       qq:
         enabled: false
         client-id:
@@ -183,8 +179,8 @@ nebula:
 |---|---|
 | `nebula.auth.oauth2.enabled` | 是否启用 OAuth2 登录能力 |
 | `nebula.auth.oauth2.register-allowed` | OAuth2 登录后是否允许自动注册 / 自动开通 |
-| `nebula.auth.oauth2.default-role-id` | OAuth2 新用户默认角色 |
-| `nebula.auth.oauth2.default-org-id` | OAuth2 新用户默认组织 |
+
+自动建号用户的**默认角色 / 默认组织不是静态配置项**，而是参数中心的系统参数 `login.oauth2.default-role-id` / `login.oauth2.default-org-id`（见 §4.4）；未设置（空值）时不绑定。绑定逻辑在 `UserDefaultRoleOrgBinder`，由**所有自助注册建号路径**在建号事务内调用（OAuth2 首登、用户名注册、手机号 / 邮箱验证码首次登录）。
 
 ### 3.2 QQ / 支付宝通用 OAuth2 客户端配置
 
@@ -325,8 +321,16 @@ nebula:
 |---|---|
 | `login.oauth2.enabled` | 是否启用 OAuth2 登录 |
 | `login.oauth2.allow-register` | 是否允许 OAuth2 自动注册 |
+| `login.oauth2.default-role-id` | **自助注册建号**绑定的默认角色 ID（角色须已存在，否则建号失败）；留空则不绑定角色。键名保留历史前缀 `login.oauth2.`，但作用域是全部自助注册建号，不是只给 OAuth2 用 |
+| `login.oauth2.default-org-id` | 自助注册建号绑定的默认组织 ID（组织须已存在，否则建号失败，并以「主组织」写入）；留空则不绑定组织。键名说明同上 |
 | `login.oauth2.provider.github.enabled` | 是否启用 GitHub 登录 |
 | `login.oauth2.provider.wechat.enabled` | 是否启用微信登录（小程序 + 扫码共用） |
+
+说明：
+
+- 默认角色 / 组织在**同一个创建事务内**同步绑定（不是靠监听建号事件），因为登录在创建用户后会紧接着签发会话，事件却在提交后才派发，届时不绑定就没机会了。绑定收敛在 `UserDefaultRoleOrgBinder`，四个自助注册建号点（OAuth2 自动开通、用户名注册、手机号首次登录建号、邮箱首次登录建号）都会调用；后台「用户管理」建号不受影响（由管理员显式选择角色）。
+- 参数是**单一开关**：接上一条，它同时作用于全部自助注册入口。只想给其中一类入口绑角色时用入口开关收窄（`login.username.allow-register` / `login.phone.allow-register` / `login.email.allow-register` / `login.oauth2.allow-register`），本版没有按来源分开的默认角色参数。
+- 配了但角色 / 组织不存在时**快速失败**（`ROLE_NOT_FOUND` / `ORG_NOT_FOUND`）并回滚建号，不静默建出无角色账号。
 
 说明：
 

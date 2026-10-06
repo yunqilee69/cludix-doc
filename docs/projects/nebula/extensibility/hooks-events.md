@@ -97,6 +97,7 @@ public interface PushChannelSender {
 | Dict | `dict-itemUpdated` | `DictItemUpdatedEvent` | 字典项已更新 |
 | Dict | `dict-itemDeleted` | `DictItemDeletedEvent` | 字典项已删除 |
 | Auth | `auth-userLogin` | `UserLoginEvent` | 用户登录事件 |
+| Auth | `auth-userCreated` | `UserCreatedEvent` | 用户创建事件（用户名注册、手机号 / 邮箱首次登录建号、OAuth2 自动开通、后台建号，payload 带 `source` 区分来源） |
 | Auth | `auth-passwordReset` | `UserPasswordResetEvent` | 用户密码重置事件 |
 | Auth | `auth-permissionChanged` | `UserPermissionChangedEvent` | 用户权限变更事件 |
 | Storage | `storage-upload-task-bound` | `StorageUploadTaskBoundEvent` | 上传任务绑定完成 |
