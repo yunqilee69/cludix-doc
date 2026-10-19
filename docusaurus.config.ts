@@ -6,7 +6,7 @@ import recentUpdatesPlugin from "./plugins/recent-updates";
 // 闲鱼店铺推广链接（TODO: 替换为真实闲鱼店铺链接）
 const XIANYU_URL = "https://github.com/yunqilee69";
 
-const ICP_NUMBER = "皖ICP备2023028796号-1";
+const ICP_NUMBER = "皖ICP备2023028796号-2";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
