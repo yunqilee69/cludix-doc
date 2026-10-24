@@ -4,7 +4,6 @@ import {
   omnitotpSidebar,
   omnigateSidebar,
   portCleanerSidebar,
-  ompStudioSidebar,
 } from './projects';
 import financeSidebar from './finance';
 import {
@@ -31,7 +30,6 @@ const sidebars: SidebarsConfig = {
   omnitotpSidebar,
   omnigateSidebar,
   portCleanerSidebar,
-  ompStudioSidebar,
   financeSidebar,
   tutorialsOverviewSidebar: [{ type: 'doc', id: 'tutorials/index' }],
   tutorialsDockerSidebar: dockerSidebar,

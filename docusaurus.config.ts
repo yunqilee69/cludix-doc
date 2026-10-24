@@ -129,7 +129,6 @@ const config: Config = {
             { label: "OmniGate", to: "/docs/projects/omnigate/" },
             { label: "OmniTOTP", to: "/docs/projects/omnitotp/" },
             { label: "Port Cleaner", to: "/docs/projects/port-cleaner" },
-            { label: "OMP Studio", to: "/docs/projects/omp-studio/" },
           ],
         },
         {

@@ -110,11 +110,10 @@ tags: [tag1, tag2]
 
 | Sidebar key | 配置文件 | 覆盖范围 |
 | --- | --- | --- |
-| `nebulaSidebar` | `sidebars/projects/nebula.ts` | `docs/projects/nebula/**`，顺序：入门 → 模块指南 → 配置说明 → 进阶 → 扩展点 |
+| `nebulaSidebar` | `sidebars/projects/nebula.ts` | `docs/projects/nebula/**`，顺序：入门 → 模块指南 → 移动端基座 → 多租户 → 配置说明 → 进阶 → 扩展点 |
 | `omnitotpSidebar` | `sidebars/projects/omnitotp.ts` | `docs/projects/omnitotp/**` |
 | `omnigateSidebar` | `sidebars/projects/omnigate.ts` | `docs/projects/omnigate/**` |
 | `portCleanerSidebar` | `sidebars/projects/port-cleaner.ts` | `docs/projects/port-cleaner/**` |
-| `ompStudioSidebar` | `sidebars/projects/omp-studio.ts` | `docs/projects/omp-studio/**` |
 | `financeSidebar` | `sidebars/finance.ts` | `docs/finance/**` |
 | `tutorials*Sidebar` | `sidebars/tutorials/*.ts` | `docs/tutorials/<场景>/**`，每个场景一个文件 |
 | `troubleshooting*Sidebar` | `sidebars/troubleshooting/*.ts` | `docs/troubleshooting/<场景>/**`，每个场景一个文件 |
