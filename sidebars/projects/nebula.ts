@@ -133,6 +133,22 @@ const nebulaSidebar: SidebarConfig = [
   },
   {
     type: 'category',
+    label: '多租户',
+    link: {
+      type: 'doc',
+      id: 'projects/nebula/tenant/index',
+    },
+    items: [
+      'projects/nebula/tenant/overview',
+      'projects/nebula/tenant/design-and-implementation',
+      'projects/nebula/tenant/business-capabilities',
+      'projects/nebula/tenant/usage-guide',
+      'projects/nebula/tenant/configuration',
+      'projects/nebula/tenant/ddl',
+    ],
+  },
+  {
+    type: 'category',
     label: '配置说明',
     items: [
       {
