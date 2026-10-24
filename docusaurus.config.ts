@@ -7,6 +7,9 @@ import recentUpdatesPlugin from "./plugins/recent-updates";
 const XIANYU_URL = "https://github.com/yunqilee69";
 
 const ICP_NUMBER = "皖ICP备2023028796号-2";
+const MPS_NUMBER = "沪公网安备31011202023776号";
+const MPS_QUERY_URL =
+  "https://beian.mps.gov.cn/#/query/webSearch?code=31011202023776";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -94,7 +97,7 @@ const config: Config = {
     },
     footer: {
       style: "dark",
-      copyright: `Copyright © ${new Date().getFullYear()} 云寰 · <a target="_blank" rel="noopener noreferrer" href="https://beian.miit.gov.cn/">${ICP_NUMBER}</a>`,
+      copyright: `Copyright © ${new Date().getFullYear()} 云寰 · <a target="_blank" rel="noopener noreferrer" href="https://beian.miit.gov.cn/">${ICP_NUMBER}</a> · <a target="_blank" rel="noreferrer" href="${MPS_QUERY_URL}">${MPS_NUMBER}</a>`,
     },
     navbar: {
       title: "云寰",
