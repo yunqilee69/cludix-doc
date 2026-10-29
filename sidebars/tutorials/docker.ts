@@ -12,6 +12,11 @@ const dockerSidebar: SidebarConfig = [
     label: 'Docker 配置',
   },
   {
+    type: 'doc',
+    id: 'tutorials/docker/容器挂载权限',
+    label: '容器挂载目录权限',
+  },
+  {
     type: 'category',
     label: '安装 Docker',
     link: {
