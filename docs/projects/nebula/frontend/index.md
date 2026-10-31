@@ -10,6 +10,7 @@
 - [业务功能](./business-capabilities.md) - 面向业务方的能力边界、典型流程与适用场景
 - [使用方式](./usage-guide.md) - 单体接入、独立服务部署、前端对接与调用建议
 - [应用版本与升级检查](./app-release.md) - 版本发布表、客户端检查接口、init 版本策略、versionCode 整数比较与 fail-open 取舍
+- [动态缓存页面接入](./cache-page-integration.md) - 动态缓存查询的前端落地方式、权限码与页面接入示例
 - [配置说明](./configuration.md) - `nebula.frontend.*`、依赖模块和参数键说明
 - [建表语句](./ddl.md) - frontend 模块涉及的数据表结构与字段说明
 

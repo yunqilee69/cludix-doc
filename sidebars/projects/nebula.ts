@@ -27,6 +27,8 @@ const nebulaSidebar: SidebarConfig = [
         items: [
           'projects/nebula/design/layered-design',
           'projects/nebula/design/package-design',
+          'projects/nebula/design/crypto',
+          'projects/nebula/design/multitenancy-plan',
         ],
       },
     ],
@@ -87,6 +89,7 @@ const nebulaSidebar: SidebarConfig = [
           'projects/nebula/storage/business-capabilities',
           'projects/nebula/storage/usage-guide',
           'projects/nebula/storage/content-enhancements',
+          'projects/nebula/storage/upload-policy-design',
         ],
       },
       {
@@ -101,6 +104,7 @@ const nebulaSidebar: SidebarConfig = [
           'projects/nebula/frontend/business-capabilities',
           'projects/nebula/frontend/usage-guide',
           'projects/nebula/frontend/app-release',
+          'projects/nebula/frontend/cache-page-integration',
         ],
       },
       {
@@ -114,6 +118,7 @@ const nebulaSidebar: SidebarConfig = [
           'projects/nebula/notify/overview',
           'projects/nebula/notify/business-capabilities',
           'projects/nebula/notify/usage-guide',
+          'projects/nebula/notify/template-reference',
         ],
       },
     ],
@@ -259,7 +264,10 @@ const nebulaSidebar: SidebarConfig = [
           type: 'doc',
           id: 'projects/nebula/release/index',
         },
-        items: ['projects/nebula/release/maven-central-publish'],
+        items: [
+          'projects/nebula/release/maven-central-publish',
+          'projects/nebula/release/changelog',
+        ],
       },
     ],
   },

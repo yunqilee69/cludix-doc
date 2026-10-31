@@ -10,6 +10,7 @@ date: 2026-08-19 13:30
 
 ## 文档列表
 
+- [变更记录（Changelog）](./changelog.md) - 按 Keep a Changelog 维护的版本变更、破坏性变更与升级注意。
 - [发布到 Maven Central 完整流程](./maven-central-publish.md) - 从 `cn.cloudomni` 命名空间申请、GPG 密钥生成与上传，到 `mvn -P release deploy` 发布与消费端验证的完整操作手册。
 
 ## 使用建议

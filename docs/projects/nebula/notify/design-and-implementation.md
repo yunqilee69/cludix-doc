@@ -25,6 +25,18 @@ sys_notify_template (1)
 - 记录是**投递维度**：同一次 `sendNotify` 走 2 个通道、3 个用户，落多条记录。
 - 明细只在推送通道出现（一台设备一条），站内信没有明细表。
 
+### 1.1 模板渲染管线
+
+模板与事务邮件共用 `TextTemplateRenderer` / `ThymeleafTextTemplateRenderer`（`nebula-base-common`），只依赖 Thymeleaf core：
+
+1. **写入时校验**：创建/更新模板逐条调用 `validateInline`，纯文本按 `TemplateMode.TEXT`、HTML 按 `TemplateMode.HTML` 解析语法，坏模板不入库（`01040002`）。
+2. **发送时渲染**：按渠道取变体 → 组装上下文（`templateParams` + 自动注入的 `notify.*`）→ 渲染 `subjectTemplate` / `contentTemplate`；EMAIL 且配置了 `html_content_template` 时再渲染 HTML。
+3. **投递**：`NotifyEmailSender` 在纯文本 + HTML 同时存在时组装 `multipart/alternative`，否则按纯文本或 HTML 单发；SITE / PUSH / 群机器人只使用渲染后的纯文本（PUSH 还需通过 JSON 解析）。
+
+渲染器按 `nebula.template.locations` 顺序查找 resources 模板（业务方目录可覆盖内置模板），数据库模板则直接渲染字符串。内置变量与语法见[模板语法与变量](./template-reference)。
+
+事务邮件（验证码、密码重置、成员邀请、加入企业欢迎）走同一套机制，但模板来自 resources；控制平面邮件强制发送 HTML 正文并以纯文本兜底，HTML 模板缺失视为配置错误。
+
 ## 2. 渠道分发结构
 
 发送时按 `channelTypes` 逐通道处理：

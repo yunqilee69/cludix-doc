@@ -6,11 +6,12 @@ tags: [nebula, notify, configuration]
 
 # Nebula Notify 配置说明
 
-`nebula-notify` 的配置分三类：
+`nebula-notify` 的配置分四类：
 
 1. **静态配置** `nebula.notify.*`（`NotifyProperties`）：运行模式、缓存、推送。
 2. **系统参数** `notify.email.*`：邮件发送配置，运行期从参数中心读取。
-3. **远程配置** `nebula.notify.remote.*`：微服务消费者使用。
+3. **模板渲染配置** `nebula.template.*`：模板目录、后缀、编码、缓存与启动校验，与事务邮件共用。
+4. **远程配置** `nebula.notify.remote.*`：微服务消费者使用。
 
 > **凭据只走环境变量**：APNs 私钥、邮件密码等一律从环境变量注入，**禁止写入配置库、仓库或日志**。
 
@@ -114,7 +115,38 @@ nebula:
 
 ---
 
-## 3. 远程配置（`nebula.notify.remote.*`）
+## 3. 模板渲染配置（`nebula.template.*`）
+
+通知模板本身存数据库，但渲染器与事务邮件共用 `nebula.template.*`。以下配置影响所有模板渲染：
+
+```yaml
+nebula:
+  template:
+    locations:
+      - classpath:/templates/      # 按顺序查找，业务方目录放前面即可覆盖内置模板
+    text-suffix: .txt
+    html-suffix: .html
+    encoding: UTF-8
+    cacheable: true                # 按文件 lastModified 自动失效
+    validate-on-startup: true      # 启动时校验事务邮件模板
+    app-name: ${NEBULA_APP_NAME:Nebula}
+```
+
+| 配置项 | 默认值 | 说明 |
+| --- | --- | --- |
+| `nebula.template.locations` | `classpath:/templates/` | 模板根目录，按顺序命中第一个存在的 `.txt` / `.html` |
+| `nebula.template.text-suffix` | `.txt` | 纯文本模板后缀 |
+| `nebula.template.html-suffix` | `.html` | HTML 模板后缀 |
+| `nebula.template.encoding` | `UTF-8` | 模板文件编码 |
+| `nebula.template.cacheable` | `true` | 是否缓存已加载模板；覆盖文件调试时建议关闭 |
+| `nebula.template.validate-on-startup` | `true` | 启动阶段校验事务邮件模板存在且语法正确 |
+| `nebula.template.app-name` | `Nebula` | 模板中 `appName` 变量的默认值 |
+
+> `html_content_template` 是**模板数据**，不是配置项，通过模板管理页/接口维护；不配置即只发纯文本邮件。
+
+---
+
+## 4. 远程配置（`nebula.notify.remote.*`）
 
 | 配置项 | 默认值 | 说明 |
 | --- | --- | --- |
@@ -132,7 +164,7 @@ nebula:
 
 ---
 
-## 4. 独立服务示例
+## 5. 独立服务示例
 
 `nebula-notify-service/src/main/resources/application.yml` 的关键项：
 
@@ -143,7 +175,7 @@ nebula:
 
 ---
 
-## 5. 生产环境注意事项
+## 6. 生产环境注意事项
 
 - 推送默认关闭：启用需同时打开总开关并配齐四项 APNs 凭据（只走环境变量）。
 - 邮件密码、APNs 私钥禁止入库入仓入日志。

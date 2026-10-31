@@ -14,7 +14,7 @@ tags: [nebula, notify, configuration]
 | --- | --- | --- | --- |
 | 1 | `sys_notify_template` | 通知模板 | 新增列 `category_code` |
 | 2 | `sys_notify_template_field` | 模板自定义字段 | — |
-| 3 | `sys_notify_template_variant` | 模板渠道变体 | — |
+| 3 | `sys_notify_template_variant` | 模板渠道变体 | 新增列 `html_content_template` |
 | 4 | `sys_notify_channel_target` | 渠道目标（webhook） | — |
 | 5 | `sys_notify_record` | 发送记录 | 新增列 `category_code` |
 | 6 | `sys_site_message` | 站内信 | — |
@@ -26,7 +26,7 @@ tags: [nebula, notify, configuration]
 | 12 | `sys_notify_push_device` | 移动推送设备 | ✅ 新增 |
 | 13 | `sys_notify_push_record_detail` | 逐设备推送明细 | ✅ 新增 |
 
-增量脚本位于 `docs/sql/unreleased/{mysql,postgresql}/` 下的 `01-notify-category-preference.sql` 与 `03-notify-push-device.sql`，全量脚本已同步进 `docs/sql/init/`。`01` 脚本同时带 `DROP TABLE IF EXISTS sys_notify_user_setting`（免打扰功能已整体下线）。
+增量脚本位于 `docs/sql/unreleased/{mysql,postgresql}/` 下的 `01-notify-category-preference.sql`、`03-notify-push-device.sql` 与 `05-notify-template-thymeleaf-html.sql`，全量脚本已同步进 `docs/sql/init/`。`01` 脚本同时带 `DROP TABLE IF EXISTS sys_notify_user_setting`（免打扰功能已整体下线）；`05` 脚本负责加 HTML 列、校验字段编码并把 `${key}` 迁移为 `[(${key})]`。
 
 ---
 
@@ -53,7 +53,10 @@ tags: [nebula, notify, configuration]
 
 ### 2.3 `sys_notify_template_variant`
 
-`id`、`template_id`（NOT NULL）、`channel_type`（NOT NULL）、`subject_template`、`content_template`（NOT NULL）、`is_enabled`（NOT NULL DEFAULT FALSE）、`remark`、时间列。
+`id`、`template_id`（NOT NULL）、`channel_type`（NOT NULL）、`subject_template`、`content_template`（NOT NULL）、`html_content_template`（TEXT，可空，仅 EMAIL）、`is_enabled`（NOT NULL DEFAULT FALSE）、`remark`、时间列。
+
+- `html_content_template` 为本批新增：配置后 EMAIL 变体以 `multipart/alternative` 同时发送纯文本与 HTML；其它渠道写入该列会被业务层拒绝。
+- `content_template` 与 `html_content_template` 使用 Thymeleaf 语法，旧的 `${key}` 不再兼容。升级脚本见 `docs/sql/unreleased/{mysql,postgresql}/05-notify-template-thymeleaf-html.sql`。
 
 索引：`uk_notify_template_variant_channel` UNIQUE(`template_id`,`channel_type`)、`idx_notify_template_variant_template`(`template_id`)、`idx_notify_template_variant_channel`(`channel_type`)。
 

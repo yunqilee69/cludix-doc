@@ -17,8 +17,9 @@ tags: [nebula, notify, guide]
 | [模块总览](./overview) | 模块定位与边界、包结构、三种载体、通道模型、模板 + 变体机制、当前不提供的能力 |
 | [设计与实现](./design-and-implementation) | 模板/变体/记录三层数据关系、渠道分发、偏好判定优先级、类别数据模型、推送扇出与 APNs 发送器 |
 | [业务功能](./business-capabilities) | 按能力逐条列出能做什么、不能做什么、接口组与权限码 |
-| [使用方式](./usage-guide) | 建模板与变体 → 管类别 → 发通知 → 查记录 → 站内信/公告 → 偏好设置 → 设备注册 |
-| [配置说明](./configuration) | `nebula.notify.*` 全量配置、邮件系统参数、APNs 凭据环境变量 |
+| [使用方式](./usage-guide) | 建模板与变体 → 配 HTML → 管类别 → 发通知 → 查记录 → 站内信/公告 → 偏好设置 → 设备注册 |
+| [模板语法与变量](./template-reference) | Thymeleaf 语法、15 个内置变量、字段编码约束、各渠道差异、`${key}` 迁移 |
+| [配置说明](./configuration) | `nebula.notify.*`、`nebula.template.*`、邮件系统参数、APNs 凭据环境变量 |
 | [建表语句](./ddl) | 13 张表的结构、字段与索引 |
 
 ## 推荐阅读顺序
@@ -26,6 +27,7 @@ tags: [nebula, notify, guide]
 1. [模块总览](./overview)
 2. [业务功能](./business-capabilities)
 3. [使用方式](./usage-guide)
-4. [配置说明](./configuration)
-5. [设计与实现](./design-and-implementation)
-6. [建表语句](./ddl)
+4. [模板语法与变量](./template-reference)
+5. [配置说明](./configuration)
+6. [设计与实现](./design-and-implementation)
+7. [建表语句](./ddl)

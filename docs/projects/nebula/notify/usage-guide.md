@@ -32,30 +32,48 @@ curl -X POST "http://{host}/api/notify/templates" \
   }'
 ```
 
-- `categoryCode` 可空，空值归入 `DEFAULT`；取值须是**已启用**的类别 code（内置 5 类为 `SECURITY/TODO/BUSINESS/ANNOUNCEMENT/DEFAULT`，管理员可另建自定义类别，见 §1.4）。
+- `categoryCode` 可空，空值归入 `DEFAULT`；取值须是**已启用**的类别 code（内置 5 类为 `SECURITY/TODO/BUSINESS/ANNOUNCEMENT/DEFAULT`，管理员可另建自定义类别，见 §1.5）。
 - 创建后模块会为 `ALL` 通道自动生成空变体。
 
 ### 1.2 填写渠道变体
 
-变体逐通道填写，`channelType` 取 `SITE` / `EMAIL` / `PUSH` / 各群机器人通道。模板中用 `${orderNo}` 引用自定义字段，`${notify.currentDate}` 等为系统内置变量。
+变体逐通道填写，`channelType` 取 `SITE` / `EMAIL` / `PUSH` / 各群机器人通道。模板使用 Thymeleaf 语法：纯文本用 `[(${orderNo})]` 引用自定义字段，`[(${notify.currentDate})]` 等为系统内置变量。旧写法 `${orderNo}` 已不再兼容，会原样发出。
 
 `PUSH` 变体的 `contentTemplate` 是**推送 JSON**：
 
 ```json
 {
   "title": "订单已支付",
-  "body": "订单 ${orderNo} 已支付成功",
-  "deeplink": "app://orders/${orderNo}",
+  "body": "订单 [(${orderNo})] 已支付成功",
+  "deeplink": "app://orders/[(${orderNo})]",
   "collapseKey": "ORDER_PAID",
-  "extra": { "orderNo": "${orderNo}" }
+  "extra": { "orderNo": "[(${orderNo})]" }
 }
 ```
 
 > `body` 必填。不是合法 JSON 或缺 `body` 时发送会失败并记 `PUSH_TEMPLATE_INVALID`（22038）。
 
-SITE / EMAIL 变体的 `subjectTemplate` + `contentTemplate` 是普通文本模板。
+SITE / EMAIL 变体的 `subjectTemplate` + `contentTemplate` 是纯文本模板（`TemplateMode.TEXT`）；HTML 写法、条件语句、内置变量与迁移方式见[模板语法与变量](./template-reference)。
 
-### 1.3 设置 / 修改模板的通知类别
+### 1.3 填写 HTML 正文（仅 EMAIL）
+
+EMAIL 变体可以额外配置 `htmlContentTemplate`，配置后同时发送纯文本与 HTML：
+
+```json
+{
+  "channelType": "EMAIL",
+  "subjectTemplate": "订单 [(${orderNo})] 已支付",
+  "contentTemplate": "您好，订单 [(${orderNo})] 已支付。",
+  "htmlContentTemplate": "<p>您好，订单 <strong th:text=\"${orderNo}\">A-1001</strong> 已支付。</p>",
+  "enabled": true
+}
+```
+
+- 纯文本正文仍然必填，它是 HTML 的兜底；只配 HTML 不配纯文本会被拒绝。
+- HTML 变量默认自动转义，用户输入不要用 `th:utext`。
+- SITE / PUSH / 群机器人渠道提交 `htmlContentTemplate` 会报 `22046`。
+
+### 1.4 设置 / 修改模板的通知类别
 
 类别决定这条通知落到用户「消息设置」里的哪一组开关（类别清单与含义见[设计与实现](./design-and-implementation) §5）。类别本身是**可管理数据**，管理员可以新建/停用/删除（见 §1.4）。
 
@@ -77,7 +95,7 @@ curl -X PUT "http://{host}/api/notify/templates/{id}" \
     "categoryCode": "SECURITY",
     "fields": [],
     "variants": [
-      { "channelType": "SITE", "contentTemplate": "订单 ${orderNo} 已支付", "enabled": true }
+      { "channelType": "SITE", "contentTemplate": "订单 [(${orderNo})] 已支付", "enabled": true }
     ]
   }'
 ```
@@ -87,7 +105,7 @@ curl -X PUT "http://{host}/api/notify/templates/{id}" \
 - 改类别**只影响之后的发送**，历史记录上的 `category_code` 保持当时的值，可用于回溯。
 - 某一次发送要临时按别的类别判定，**改模板是唯一途径**：`SendNotifyCommand.categoryCode` 已废弃并被忽略（见 §2.1）。
 
-### 1.4 管理通知类别（新增 / 修改 / 停用 / 删除）
+### 1.5 管理通知类别（新增 / 修改 / 停用 / 删除）
 
 类别清单在「系统管理 → 通知管理 → 通知类别」维护（权限码 `NOTIFY_CATEGORY_*`）。内置 5 类不可删除、编码不可改，其余属性（名称、说明、强制、默认开启、允许渠道、排序、启用）都可改。
 
@@ -142,8 +160,8 @@ curl -X POST "http://{host}/api/notify/send" \
 ```
 
 - `receiverUserIds` 对 `SITE` / `EMAIL` / `PUSH` 必填；EMAIl 要求接收用户有邮箱，否则 `USER_EMAIL_REQUIRED`（22022）。
-- `templateParams` 的 key 只写变量名本身，**不要带 `${}`**。
-- `categoryCode` **已废弃并被忽略**（传了只打 WARN）：生效类别只取模板上的 `category_code`，模板为空则按 `DEFAULT`。要改判定请改模板（见 §1.3）。
+- `templateParams` 的 key 只写变量名本身，**不要带 `${}` 或 `[()]`**；字段编码必须匹配 `^[A-Za-z_][A-Za-z0-9_]*$`，且不能使用保留变量 `notify`。
+- `categoryCode` **已废弃并被忽略**（传了只打 WARN）：生效类别只取模板上的 `category_code`，模板为空则按 `DEFAULT`。要改判定请改模板（见 §1.4）。
 
 ### 2.2 发到群机器人
 

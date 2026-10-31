@@ -99,11 +99,15 @@ nebula-notify/
 
 - `sys_notify_template`：模板主体（编码、名称、`category_code`）。
 - `sys_notify_template_field`：自定义参数校验（`field_code` / 是否必填 / 默认值 / 示例）。
-- `sys_notify_template_variant`：**每个通道一条变体**（`channel_type` + `subject_template` + `content_template` + `is_enabled`）。
+- `sys_notify_template_variant`：**每个通道一条变体**（`channel_type` + `subject_template` + `content_template` + 可选的 `html_content_template` + `is_enabled`）。
 
 创建模板时，模块会为 `NotifyChannelTypes.ALL` 中每个通道自动生成一条空变体（内容为空、`is_enabled=false`），再由接入方逐通道填写。发送时按目标通道取对应变体渲染。
 
-**渲染上下文**自动注入一组内置变量（`notify.currentDateTime`、`notify.currentDate`、`notify.currentTime`、`notify.timestamp`、`notify.year/month/day/hour/minute/second`、`notify.dayOfWeek`、`notify.templateCode`、`notify.channelType`、`notify.receiverUserId`、`notify.receiverEmail`），业务自定义字段通过模板字段声明。
+**模板语法是 Thymeleaf**：纯文本用 `[(${orderNo})]`，HTML 用 `th:text="${orderNo}"`；旧的 `${orderNo}` 字符串替换已移除，不迁移会原样发出。完整语法、内置变量与迁移方式见[模板语法与变量](./template-reference)。
+
+**渲染上下文**自动注入一组内置变量（`notify.currentDateTime`、`notify.currentDate`、`notify.currentTime`、`notify.timestamp`、`notify.year/month/day/hour/minute/second`、`notify.dayOfWeek`、`notify.templateCode`、`notify.channelType`、`notify.receiverUserId`、`notify.receiverEmail`），业务自定义字段通过模板字段声明。字段编码必须匹配 `^[A-Za-z_][A-Za-z0-9_]*$`，且不能使用保留变量 `notify`。
+
+**EMAIL 变体可以选择配置 HTML 正文**（`html_content_template`）：配置后发送 `multipart/alternative`，同时携带纯文本与 HTML，纯文本作为不支持 HTML 客户端的兜底；只配纯文本则发普通文本邮件。其它渠道配置 HTML 会被拒绝（`22046`）。
 
 **`PUSH` 变体的内容不是纯文本，而是推送 JSON**：`{title, body, deeplink, collapseKey, extra}`。发送时解析为推送消息；变体不是合法 JSON 或缺 `body` 会失败并记 `PUSH_TEMPLATE_INVALID`（22038），不会把整段 JSON 推给用户。发送记录里存的是渲染后的可读标题与正文，不是 JSON。
 
@@ -175,6 +179,7 @@ nebula:
 
 - [业务功能](./business-capabilities)：能力边界与权限码
 - [使用方式](./usage-guide)：建模板、发通知、查记录的可复用步骤
-- [配置说明](./configuration)：`nebula.notify.*` 与凭据注入
+- [模板语法与变量](./template-reference)：Thymeleaf 语法、内置变量、HTML 与迁移
+- [配置说明](./configuration)：`nebula.notify.*`、`nebula.template.*` 与凭据注入
 - [设计与实现](./design-and-implementation)：偏好判定优先级、推送扇出
 - [建表语句](./ddl)：13 张表结构

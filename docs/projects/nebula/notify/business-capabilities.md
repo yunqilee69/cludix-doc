@@ -33,6 +33,8 @@ tags: [nebula, notify, usage]
 - 创建、更新、删除、查询通知模板（`template_code` 全局唯一）。
 - 为模板声明自定义字段（`field_code` / 是否必填 / 默认值 / 示例值），发送时校验参数是否齐备。
 - 为 `ALL` 通道自动生成渠道变体，逐通道填写标题/内容模板并启用。
+- 模板正文使用 Thymeleaf 语法（纯文本 `[(${orderNo})]`、HTML `th:text="${orderNo}"`），支持条件块；完整写法见[模板语法与变量](./template-reference)。
+- `EMAIL` 变体可选配置 HTML 正文（`htmlContentTemplate`），配置后同时发送纯文本与 HTML（`multipart/alternative`）。
 - 为模板设置**通知类别**（`categoryCode`，即消息设置页里的开关分组），新增与编辑都可改；留空即归入「其他通知」（`DEFAULT`）。
 
 **不能做什么**
@@ -41,6 +43,9 @@ tags: [nebula, notify, usage]
 - 模板本身不绑定发送对象——发送时由调用方传 `receiverUserIds` / 渠道目标。
 - **类别不能在这里新增/删除**：类别是数据（见 §3 通知类别管理），模板表单只能从**启用中的类别**里选；未知或已停用的类别提交会被拒（`CATEGORY_CODE_UNKNOWN`，22037）。
 - 更新接口对 `categoryCode` 是**全量覆盖**：不传即清空并归入 `DEFAULT`，不是「保持原值」。
+- **字段编码有硬约束**：只允许 `^[A-Za-z_][A-Za-z0-9_]*$`，且不能使用保留变量 `notify`；不合规直接拒绝（`01040003`）。旧模板里的 `${key}` 不再兼容，必须迁移为 `[(${key})]`。
+- **HTML 正文只对 EMAIL 有效**：SITE、PUSH、群机器人渠道提交 `htmlContentTemplate` 会被拒绝（`22046`）。
+- 模板语法在创建/更新时校验，语法错误返回 `01040002`，不会保存坏模板。
 
 **接口**：`POST /api/notify/templates`、`PUT /api/notify/templates/{id}`、`DELETE /api/notify/templates/{id}`、`GET /api/notify/templates/{id}`、`POST /api/notify/templates/page`
 

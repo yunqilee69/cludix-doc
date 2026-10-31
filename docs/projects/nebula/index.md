@@ -65,8 +65,9 @@ Nebula 是一个基于 Spring 生态的 **Java 模块化中台工程**。它不�
 - [多租户](./tenant/index.md) - 租户解析、平台账号强制绑定、企业切换、数据隔离、配置与建表说明
 - [移动端基座](./mobile/index.md) - React Native 移动端基座工程与端无关共享契约 `packages/client-sdk`
 - **接口文档**：模块对外接口不再在本站维护，接入 nebula 后端运行时 OpenAPI 文档（启动后访问 `doc.html` / `swagger-ui.html`），与代码实时一致
-- [设计说明](./design/index.md) - 项目分层设计与包设计说明
-- [规范说明](./spec/index.md) - 项目分层对象命名规约说明书
+- [设计说明](./design/index.md) - 项目分层设计、包设计、敏感字段加密与多租户实施计划
+- [规范说明](./spec/index.md) - 开发规范清单（架构、分层、命名、数据库、接口、异常、日志、安全、配置、多租户）
+- [发版记录](./release/changelog.md) - 各版本变更、破坏性变更与升级注意
 
 ## 推荐阅读顺序
 
@@ -80,6 +81,6 @@ Nebula 是一个基于 Spring 生态的 **Java 模块化中台工程**。它不�
    - `design-and-implementation` → `business-capabilities` → `usage-guide` → `configuration` → `ddl`
 4. 需要具体接口契约时，查看 nebula 后端运行时 OpenAPI 文档（`doc.html` / `swagger-ui.html`），与代码实时一致
 5. 最后看 [规范说明](./spec/index.md)
-   - 对照对象命名规约和分层约定，帮助把文档理解映射回代码结构
+   - 对照命名、分层、数据库与安全规范，帮助把文档理解映射回代码结构
 
 相关文档：[OmniGate](../omnigate/) · [OmniTOTP](../omnitotp/) · [Port Cleaner](../port-cleaner/)
