@@ -205,7 +205,7 @@ CREATE TABLE auth_oauth2_provider (
 ```sql
 CREATE TABLE auth_tenant_oauth2_provider (
     id CHAR(32) NOT NULL,
-    tenant_id CHAR(32) NOT NULL DEFAULT '0194f3c8b6b77c0d91a7d9af9c7d0100',
+    tenant_id CHAR(32) DEFAULT '0194f3c8b6b77c0d91a7d9af9c7d0100',
     provider_id CHAR(32) NOT NULL,
     channel VARCHAR(20) NOT NULL COMMENT 'WEB/MINI/APP',
     enabled TINYINT(1) NOT NULL DEFAULT 1,
@@ -232,7 +232,7 @@ CREATE TABLE auth_tenant_oauth2_provider (
 ```sql
 CREATE TABLE auth_tenant_invitation (
     id CHAR(32) NOT NULL,
-    tenant_id CHAR(32) NOT NULL DEFAULT '0194f3c8b6b77c0d91a7d9af9c7d0100',
+    tenant_id CHAR(32) DEFAULT '0194f3c8b6b77c0d91a7d9af9c7d0100',
     email VARCHAR(100),
     phone VARCHAR(32),
     role_id CHAR(32),
@@ -252,7 +252,7 @@ CREATE TABLE auth_tenant_invitation (
 
 ## 3. 改造表
 
-所有改造表都增加 `tenant_id CHAR(32) NOT NULL DEFAULT '0194f3c8b6b77c0d91a7d9af9c7d0100'`，并把原唯一键前置 `tenant_id`。
+所有改造表都增加 `tenant_id CHAR(32) DEFAULT '0194f3c8b6b77c0d91a7d9af9c7d0100'`，并把原唯一键前置 `tenant_id`。
 
 | 表 | 额外字段 | 新唯一键 / 索引 |
 | --- | --- | --- |
