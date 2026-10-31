@@ -111,7 +111,10 @@ git merge upstream/main
 ```
 
 - **前端升级** = 合并上游；按约定冲突应只落在你改过的应用层文件，框架层冲突时优先采用上游版本；
-- **后端升级** = 改 `backend/pom.xml` 中的 `<nebula.version>`；前后端模板同 tag 发布，版本一一配对。
+- **后端升级** = 改 `backend/pom.xml` 中的 `<nebula.version>`；前后端模板同 tag 发布，版本一一配对；
+- **数据库升级** = 按 `docs/sql/<目标版本>/{mysql,postgresql}/` 执行增量脚本：从当前版本的下一个版本目录开始，按版本号升序执行到目标版本（含目标版本），目录内按文件名顺序执行。
+  - `docs/sql/init/` 只用于全新数据库，不能用来升级存量库（`CREATE TABLE IF NOT EXISTS` 不会补列）；
+  - `docs/sql/unreleased/` 只在主仓存在，是未发布脚本，模板仓不包含，升级时不要执行。
 
 ## 上线前必改配置
 
