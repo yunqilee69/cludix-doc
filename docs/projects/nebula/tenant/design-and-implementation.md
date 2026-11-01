@@ -164,8 +164,9 @@ Web 端每个子域独立使用 `localStorage` 存令牌；Mobile 同一时刻�
 
 - `TenantLineInnerInterceptor` 在 `PaginationInnerInterceptor` **之前**注册；
 - 只有 `nebula.tenant.enabled=true` 才注册租户插件；
-- 租户表查询自动追加 `tenant_id = ?`，插入自动补齐列（实体已带列时 `ignoreInsert` 不再重复注入）；
-- 无租户上下文访问租户表抛 `01030001 TENANT_CONTEXT_MISSING`。
+- 租户表查询自动追加 `tenant_id = ?`；插入不依赖数据库默认值，由 `TenantIdResolver` 显式填充；
+- `TenantIdResolver` 顺序：实体已设置 → 当前 `TenantContext` → 多租户缺失即失败 → 单租户 `default-tenant-id`；
+- 无租户上下文且单租户默认值缺失时，查询/写入立即失败，不写空串、不回退系统租户。
 
 ### 6.2 表分类
 
@@ -178,8 +179,10 @@ Web 端每个子域独立使用 `localStorage` 存令牌；Mobile 同一时刻�
 
 ### 6.3 实体与手写 SQL
 
-- 租户表实体继承 `TenantBaseEntity`，`tenant_id` 由 `FieldFill.INSERT` 自动填充；
+- 租户表实体继承 `TenantBaseEntity`（基类实现 `TenantScoped`），`tenant_id` 由 `BaseFieldHandler` 通过 `TenantIdResolver` 显式写入；
+- 无实体基类的租户表实体实现 `TenantScoped` 并提供 `tenantId` 字段；只对 `TenantScoped` 自动填充；
 - 全局表实体继承 `BaseEntity`；
+- 数据库 `tenant_id` 为 `NOT NULL` 且无 DEFAULT；
 - 手写 SQL、注解 SQL、原生 JDBC 不会被拦截器改写，必须显式带 `tenant_id`；
 - `auth_person_user` 是全局表但含 `tenant_id`，禁止让拦截器自动填充/过滤，租户侧查询必须显式带条件。
 

@@ -50,18 +50,19 @@ nebula:
 | `strict` | `true` | 启动时校验所有 MyBatis 实体表已分类；未分类直接启动失败 |
 | `header` | `X-Tenant-Id` | 内部请求传播的租户 ID 头，仅用于可信内网 |
 | `code-header` | `X-Tenant-Code` | 匿名请求选择租户的编码头 |
-| `default-tenant-id` | 无 | 默认租户 ID，也是平台管理员操作的租户；涉及默认租户保护 |
+| `default-tenant-id` | `0194f3c8b6b77c0d91a7d9af9c7d0100` | 默认租户 ID；单租户下所有请求与写入都归属该租户，多租户下用于启动期和平台级操作 |
 | `system-tenant-id` | `__system__` | 系统租户 ID，仅作为新建租户的模板源 |
 | `auth-domain` | 无 | 平台账号中心域名，如 `auth.app.example.com` |
 | `base-domains` | 空 | 允许的租户基础域列表，用于 Host 子域名解析 |
 | `reserved-subdomains` | 内置 9 个 | 保留子域，不能分配给租户 |
 | `ignore-tables` | 空 | 额外按全局表处理的表名 |
+| `tenant-tables` | 空 | 没有实体类的租户表扩展清单；有实体的表通过实现 `TenantScoped` 自动识别 |
 | `ignore-caches` | 内置列表 | 额外按全局缓存处理的缓存名，不参与租户前缀 |
 
 ### 2.1 `enabled`
 
-- `false`：不注册 `TenantContextFilter`、`TenantLineInnerInterceptor`、租户缓存前缀；登录不要求平台账号绑定；行为和原单租户一致。
-- `true`：启用完整链路；平台账号层自动启用，租户登录必须完成绑定。
+- `false`：不注册租户拦截器和租户缓存前缀；`TenantContextFilter` 仍会为每个请求设置 `default-tenant-id` 上下文，所有租户表写入都归属默认租户；登录不要求平台账号绑定。
+- `true`：启用完整链路；平台账号层自动启用，租户登录必须完成绑定；缺少租户上下文的后台写入直接失败，不回退默认租户。
 
 这是部署级开关，不是运行时热切换开关。数据库结构必须先按多租户版本初始化。
 
@@ -89,6 +90,10 @@ nebula:
 
 ### 2.5 `default-tenant-id`
 
+- 必填；单租户模式下所有请求、后台任务和写入都由 `TenantIdResolver` 解析到该值；
+- 数据库的 `tenant_id` 列没有 DEFAULT，值只来自租户上下文或该配置；
+- 启动时校验该 ID 对应的 `auth_tenant` 行存在且状态为 `ACTIVE`；
+- 多租户模式下用于启动期、平台级操作和显式 `TenantContext.runAs(defaultTenantId)`，普通请求仍以会话/域名租户为准；
 - 新建租户的模板来自系统租户，平台级配置和平台管理员归属默认租户；
 - `PlatformAdminGuard` 要求当前租户等于该值，否则平台管理接口返回 `19014`；
 - 默认租户不能暂停、不能删除（`19021`）。
@@ -177,12 +182,12 @@ personBindCodeSendTimestampCache
 | `docs/sql/init/postgresql/01-init-structure.sql` | PostgreSQL 表结构 |
 | `docs/sql/init/postgresql/02-init-data.sql` | PostgreSQL 初始化数据 |
 
-多租户改造只修改全量初始化 SQL，不提供 `unreleased` 增量迁移脚本，也不做存量数据回填。已有单租户数据库需要自行导出、清洗、重建。
+多租户改造只修改全量初始化 SQL，不提供 `unreleased` 增量迁移脚本，也不做存量数据回填。当前数据库均为开发库，直接删库后执行初始化脚本重建即可。
 
 ## 6. 配置与部署建议
 
 - **域名与证书**：准备 `*.app.example.com` 通配证书，`auth` 保留子域同时覆盖；
-- **默认租户**：`default-tenant-id` 必须与初始化 SQL 一致，否则平台管理员无法通过校验；
+- **默认租户**：`default-tenant-id` 必须与初始化 SQL 一致；启动时会校验该租户存在且为 `ACTIVE`，不一致直接启动失败；
 - **网关**：外部请求不要透传 `X-Tenant-Id`；匿名请求只允许 `X-Tenant-Code`；
 - **反向代理**：确保 Host 正确传递，且只信任可信代理的 `Host` / `X-Forwarded-Host`；
 - **监控**：关注 `TENANT_CONTEXT_MISSING`、租户解析失败、未分类表 WARN、绑定失败率；

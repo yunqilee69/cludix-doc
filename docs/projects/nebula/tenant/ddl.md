@@ -205,7 +205,7 @@ CREATE TABLE auth_oauth2_provider (
 ```sql
 CREATE TABLE auth_tenant_oauth2_provider (
     id CHAR(32) NOT NULL,
-    tenant_id CHAR(32) DEFAULT '0194f3c8b6b77c0d91a7d9af9c7d0100',
+    tenant_id CHAR(32) NOT NULL CHECK (tenant_id <> ''),
     provider_id CHAR(32) NOT NULL,
     channel VARCHAR(20) NOT NULL COMMENT 'WEB/MINI/APP',
     enabled TINYINT(1) NOT NULL DEFAULT 1,
@@ -232,7 +232,7 @@ CREATE TABLE auth_tenant_oauth2_provider (
 ```sql
 CREATE TABLE auth_tenant_invitation (
     id CHAR(32) NOT NULL,
-    tenant_id CHAR(32) DEFAULT '0194f3c8b6b77c0d91a7d9af9c7d0100',
+    tenant_id CHAR(32) NOT NULL CHECK (tenant_id <> ''),
     email VARCHAR(100),
     phone VARCHAR(32),
     role_id CHAR(32),
@@ -252,7 +252,7 @@ CREATE TABLE auth_tenant_invitation (
 
 ## 3. 改造表
 
-所有改造表都增加 `tenant_id CHAR(32) DEFAULT '0194f3c8b6b77c0d91a7d9af9c7d0100'`，并把原唯一键前置 `tenant_id`。
+所有改造表都增加 `tenant_id CHAR(32) NOT NULL CHECK (tenant_id <> '')`，**数据库不提供 DEFAULT**；写入值由服务端 `TenantIdResolver` 解析后显式写入。原唯一键前置 `tenant_id`。
 
 | 表 | 额外字段 | 新唯一键 / 索引 |
 | --- | --- | --- |
@@ -307,11 +307,11 @@ CREATE TABLE auth_tenant_invitation (
 
 新建租户时从系统租户复制模板；字典、通知、参数由各模块 `TenantDataProvisioner` 补齐。复制后各租户数据自包含，运行时不再回退系统租户。
 
-## 6. 迁移说明
+## 6. 数据库重建说明
 
-- 多租户改造只维护全量初始化 SQL，不提供增量脚本；
-- 不做存量数据回填；
-- 已有单租户数据库需要先导出业务数据，按新结构重建后再导入，并补齐默认租户与平台账号关联；
+- 多租户改造只维护全量初始化 SQL，不提供增量脚本，也不做存量数据回填；
+- 当前仓库的数据库都是开发库，直接删除后执行 `docs/sql/init/{mysql,postgresql}/01-init-structure.sql` 与 `02-init-data.sql` 重建；
+- 单租户模式也必须使用同一套表结构：所有租户表写入默认租户，开启 `enabled=true` 后无需再改表；
 - 不要直接在生产库执行 `ALTER TABLE` 后开启 `enabled=true`，缺少 `auth_person_user` 关联会导致所有租户用户无法登录。
 
 ## 7. 相关文档

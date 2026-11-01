@@ -51,8 +51,8 @@ erDiagram
 
 | 层面 | 隔离方式 |
 | --- | --- |
-| 数据库 | MyBatis-Plus `TenantLineInnerInterceptor` 自动给租户表追加 `tenant_id = ?`；全局表放行 |
-| 实体 | 租户表实体继承 `TenantBaseEntity`，插入时自动填充 `tenant_id` |
+| 数据库 | `tenant_id CHAR(32) NOT NULL CHECK (tenant_id <> '')`，无 DEFAULT；查询由 `TenantLineInnerInterceptor` 追加条件，写入由服务端显式赋值 |
+| 实体 | 租户表实体继承 `TenantBaseEntity` 或实现 `TenantScoped`；插入时由 `TenantIdResolver` 显式填充 `tenant_id`，数据库无 DEFAULT |
 | 缓存 | 未登记为全局的缓存自动加 `{tenantId}:` 前缀 |
 | 线程上下文 | `TenantContext`（ThreadLocal）；异步执行器显式传播 |
 | 领域事件 | 事件 envelope 携带 `tenantId`，消费前 `TenantContext.runAs` |

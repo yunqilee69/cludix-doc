@@ -155,15 +155,15 @@
 
 开启多租户后，业务模块不需要自己写租户条件：
 
-- 租户表自动按 `tenant_id` 过滤与填充；
+- 租户表自动按 `tenant_id` 过滤；写入时由 `TenantIdResolver` 显式填充默认租户/当前租户，数据库无 DEFAULT；
 - 缓存自动按租户隔离；
 - 异步任务、领域事件、调度任务、文件 key、审计记录都带租户；
 - 租户 A 的用户无法通过 ID 直接访问租户 B 的资源；查不到就是查不到，不会回退到系统租户。
 
 业务方仍需要遵守两条规则：
 
-1. 租户表实体继承 `TenantBaseEntity`；手写 SQL 显式带 `tenant_id`；
-2. 在没有租户上下文的入口（定时任务、消息消费、命令行）显式使用 `TenantContext.runAs`。
+1. 租户表实体继承 `TenantBaseEntity`，或实现 `TenantScoped` 并提供 `tenantId` 字段；手写 SQL 显式带 `tenant_id`；
+2. 在没有租户上下文的入口（定时任务、消息消费、命令行）显式使用 `TenantContext.runAs(defaultTenantId, ...)`；多租户下禁止静默回退默认租户。
 
 ## 11. 刻意不做
 

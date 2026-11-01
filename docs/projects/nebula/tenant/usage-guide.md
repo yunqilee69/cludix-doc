@@ -48,7 +48,9 @@ public class OrderEntity extends TenantBaseEntity {
 ```
 
 - 查询、更新、删除由 MyBatis 拦截器自动追加 `tenant_id = ?`；
-- 插入时 `tenant_id` 自动填充；
+- 插入时 `tenant_id` 由 `TenantIdResolver` 显式填充：优先当前请求租户，单租户回退 `nebula.tenant.default-tenant-id`；
+- 数据库列没有 DEFAULT，也不允许 `NULL`/空串；
+- 没有继承 `TenantBaseEntity` 的租户表实体，实现 `TenantScoped` 并提供 `tenantId` 字段即可；
 - 全局表继续继承 `BaseEntity`。
 
 ### 2.2 手写 SQL
@@ -66,8 +68,11 @@ OrderEntity selectById(@Param("tenantId") String tenantId, @Param("id") String i
 // 以指定租户身份执行，结束后恢复原上下文
 TenantContext.runAs(tenantId, () -> orderDao.list());
 
-// 以系统租户身份执行，仅用于读取模板或平台级数据
+// 以系统租户身份执行，仅用于读取模板数据；业务数据不要用它兜底
 TenantContext.runAsSystem(() -> menuDao.list());
+
+// 启动期、定时任务等没有请求上下文的场景，使用配置的默认租户
+TenantContext.runAs(defaultTenantId, () -> jobDao.list());
 
 // 忽略租户过滤，仅用于全局扫描/运维任务，使用后务必恢复
 TenantContext.ignore(() -> outboxDao.listPending());

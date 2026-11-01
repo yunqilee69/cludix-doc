@@ -11,6 +11,17 @@ format: md
 
 ## [Unreleased]
 
+### Changed
+
+- **租户字段收敛为单一契约：`tenant_id NOT NULL`、无数据库默认值、服务端统一解析**。此前 41 张租户表的 `tenant_id` 依赖数据库 `DEFAULT`，单租户下由数据库兜底，导致 DDL、实体填充、手写 SQL、存储 key、事件/Outbox 各自出现空串、`__system__` 或不同默认值。本次统一为：
+  - DDL：租户表 `tenant_id CHAR(32) NOT NULL CHECK (tenant_id <> '')`，删除所有 `DEFAULT`；唯一键/索引以 `tenant_id` 开头；
+  - 解析：新增 `TenantScoped` 标记与 `TenantIdResolver`，顺序为实体显式值 → `TenantContext` → 单租户 `nebula.tenant.default-tenant-id` → 多租户缺失即失败；`BaseFieldHandler` 只对 `TenantScoped` 实体写入；
+  - 请求：单租户下 `TenantContextFilter` 为每个请求设置默认租户上下文；多租户保持令牌/域名解析；
+  - 存储/事件/Outbox/调度/审计：移除空串与 `__system__` 业务兜底，存储 key 统一 `t/{tenantId}/` 前缀，应用事件、Outbox、消费记录、调度记录全部显式带租户；
+  - SQL：`docs/sql/init/{mysql,postgresql}/02-init-data.sql` 与 `0.2.1`–`0.2.5`、`unreleased` 的所有租户表 `INSERT` 显式写入 `tenant_id`，MySQL 使用 `@default_tenant_id`，PostgreSQL 使用 `current_setting('nebula.default_tenant_id')`，模板数据保持 `'__system__'`；PostgreSQL `ON CONFLICT` 目标同步加入 `tenant_id`；
+  - **破坏性变更**：旧数据库不能直接升级，需删除后按 `docs/sql/init/` 重建；自定义 SQL、下游实体和手写 INSERT 必须显式提供 `tenant_id`，否则被非空约束拒绝；
+  - 新增 `DefaultTenantValidator`：启动时校验默认租户存在且为 `ACTIVE`；新增 `TenantIdResolver` / `BaseFieldHandler` / SQL 契约测试。
+
 ### Added
 
 - `nebula-base` / `nebula-auth` / `nebula-notify` / `web` / `docs/sql`：**邮件与通知模板统一模板化，并支持 HTML 邮件**。此前事务邮件正文写死在 Java 里，通知模板只支持 `${key}` 字符串替换，控制平面邮件无法调整文案。本次统一改用 Thymeleaf core 渲染：纯文本 `TemplateMode.TEXT`、HTML `TemplateMode.HTML`，只引 core 不引 starter，避免把 Web 依赖带进 gateway。
