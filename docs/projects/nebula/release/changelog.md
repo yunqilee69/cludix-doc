@@ -13,6 +13,8 @@ format: md
 
 ### Changed
 
+- `web`：**路由标签页改为按完整 URL（pathname + search）标识，支持同一详情页多标签并保留请求参数**。此前标签只记录 pathname，切走再切回时会 `navigate(pathname)`，`?customerId=...` 等 query 被整体丢弃，详情页拿不到参数。现在标签的 path 同时作为唯一 key 和导航目标：完整路径相同则激活已有标签，否则新建；切换、刷新、关闭回退、新窗口打开都使用该标签自己的完整路径。新增 `useRouteTabTitle`，页面可在数据加载后覆盖标签名（例如显示客户名称），手工重命名仍然优先；个人中心与站内信改为只用组件 state 管理内页 tab / 选中消息，避免内部状态写入 URL 后不断新建标签。详见 [前端设计文档](../frontend/design-and-implementation.md#54-路由标签页)。
+
 - **单租户也启用租户读取隔离，修复系统租户模板数据污染登录、菜单和字典查询**。此前 `nebula.tenant.enabled=false` 只设置默认租户上下文、不注册 `TenantLineInnerInterceptor`，而初始化脚本把 `__system__` 的组织、角色、管理员、菜单、按钮、API、权限、字典和通知模板也写在租户表里，导致单租户登录按用户名 `getOne` 同时查到默认租户与系统租户两行并抛 `TooManyResultsException`，菜单、权限、字典等查询也会成对重复。本次调整：
   - 单租户与多租户都注册租户插件；`NebulaTenantLineHandler.getTenantId()` 改走 `TenantIdResolver`，单租户缺上下文回落 `default-tenant-id`，多租户缺上下文仍然失败；
   - `TenantTableRegistry` 启动校验按模式分流：多租户 `strict=true` 仍启动失败，单租户只汇总一条 WARN 并按全局表放行，未分类表不再逐条刷屏；

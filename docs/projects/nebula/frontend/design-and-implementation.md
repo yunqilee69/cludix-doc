@@ -198,6 +198,34 @@ frontend 模块当前最核心的设计，不是把所有前端配置都塞到�
 - 平台可以定义整体布局模式边界
 - 用户可以在允许范围内切换自己的导航和侧边栏展示风格
 
+### 5.4 路由标签页
+
+路由标签页以 **`pathname + search`（完整路径）** 作为唯一标识，同时作为切回标签时的导航目标：
+
+- 打开一个 URL：已有相同完整路径的标签则直接激活，否则新建；
+- 切换标签：导航到该标签记录的完整路径，query 参数不会丢失；
+- 同一页面不同 query（例如 `/customer/detail?customerId=A` 与 `?customerId=B`）会打开多个标签，详情页可以同时保留多个；
+- 标签的刷新、关闭回退、新窗口打开都使用该标签自己的完整路径。
+
+由于 query 参与标签身份，**页面内部 UI 状态不要写入 URL**，否则每次状态变化都会新建标签。需要深链的页面只在首次进入时读取 query（例如站内信的 `messageId`），后续选择、关闭等操作使用组件 state。
+
+页面可以在数据加载后覆盖标签名称：
+
+```tsx
+import { useRouteTabTitle } from '@/layouts/route-tab-title';
+
+export function CustomerDetailPage() {
+  const [searchParams] = useSearchParams();
+  const { data } = useCustomer(searchParams.get('customerId'));
+  useRouteTabTitle(data ? `客户 ${data.name}` : undefined);
+  // ...
+}
+```
+
+标签名优先级：手工重命名 > `useRouteTabTitle` 设置的名称 > 菜单名称。手工重命名按标签独立保存，不会被页面后续回写的名称覆盖。
+
+标签切换和刷新会重新挂载页面内容（当前未实现 keep-alive）。页面内的临时状态请使用组件 state 或全局 store；只有确实代表一个独立视图的参数（例如详情 id）才放进 URL，因为它会同时成为标签身份的一部分。
+
 ---
 
 ## 6. 用户偏好保存设计
