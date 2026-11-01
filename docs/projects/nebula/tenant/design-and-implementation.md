@@ -163,9 +163,9 @@ Web 端每个子域独立使用 `localStorage` 存令牌；Mobile 同一时刻�
 ### 6.1 MyBatis 拦截器
 
 - `TenantLineInnerInterceptor` 在 `PaginationInnerInterceptor` **之前**注册；
-- 只有 `nebula.tenant.enabled=true` 才注册租户插件；
+- **单租户也注册租户插件**：系统租户模板数据与默认租户数据同处租户表，读取隔离不能省略；
 - 租户表查询自动追加 `tenant_id = ?`；插入不依赖数据库默认值，由 `TenantIdResolver` 显式填充；
-- `TenantIdResolver` 顺序：实体已设置 → 当前 `TenantContext` → 多租户缺失即失败 → 单租户 `default-tenant-id`；
+- 拦截器的租户 ID 同样走 `TenantIdResolver`：实体已设置 → 当前 `TenantContext` → 多租户缺失即失败 → 单租户 `default-tenant-id`；
 - 无租户上下文且单租户默认值缺失时，查询/写入立即失败，不写空串、不回退系统租户。
 
 ### 6.2 表分类
@@ -175,7 +175,7 @@ Web 端每个子域独立使用 `localStorage` 存令牌；Mobile 同一时刻�
 - **GLOBAL**：`auth_tenant`、`auth_tenant_domain`、`auth_person`、`auth_person_user`、`auth_oauth2_provider`、`frontend_app_release`，以及 `QRTZ_*`；
 - **TENANT**：业务表（`auth_user`、`auth_role`、`auth_menu`、`sys_param`、`sys_dict_*`、`sys_notify_*`、`storage_*`、`scheduler_*`、`audit_record`、`event_*`、`frontend_user_preference` 等）。
 
-`strict=true` 时启动校验所有 MyBatis 实体表都已分类，未分类直接启动失败；`strict=false` 时未分类表按全局表处理并打 WARN。完整清单见 [建表与数据模型](./ddl.md)。
+多租户下 `strict=true` 时启动校验所有 MyBatis 实体表都已分类，未分类直接启动失败；`strict=false` 时未分类表按全局表处理并汇总打一条 WARN。单租户下不阻止启动，只汇总提示并按全局表放行。完整清单见 [建表与数据模型](./ddl.md)。
 
 ### 6.3 实体与手写 SQL
 

@@ -13,6 +13,12 @@ format: md
 
 ### Changed
 
+- **单租户也启用租户读取隔离，修复系统租户模板数据污染登录、菜单和字典查询**。此前 `nebula.tenant.enabled=false` 只设置默认租户上下文、不注册 `TenantLineInnerInterceptor`，而初始化脚本把 `__system__` 的组织、角色、管理员、菜单、按钮、API、权限、字典和通知模板也写在租户表里，导致单租户登录按用户名 `getOne` 同时查到默认租户与系统租户两行并抛 `TooManyResultsException`，菜单、权限、字典等查询也会成对重复。本次调整：
+  - 单租户与多租户都注册租户插件；`NebulaTenantLineHandler.getTenantId()` 改走 `TenantIdResolver`，单租户缺上下文回落 `default-tenant-id`，多租户缺上下文仍然失败；
+  - `TenantTableRegistry` 启动校验按模式分流：多租户 `strict=true` 仍启动失败，单租户只汇总一条 WARN 并按全局表放行，未分类表不再逐条刷屏；
+  - 单租户下未分类业务表（例如尚未接入多租户的 Mart 表）继续按全局表放行，无需登记 `ignore-tables`；开启 `enabled=true` 前仍要求完成分类；
+  - 行为变更：`enabled=false` 不再等于「不装租户拦截器」。规范与租户文档中的单租户描述已同步。
+
 - **租户字段收敛为单一契约：`tenant_id NOT NULL`、无数据库默认值、服务端统一解析**。此前 41 张租户表的 `tenant_id` 依赖数据库 `DEFAULT`，单租户下由数据库兜底，导致 DDL、实体填充、手写 SQL、存储 key、事件/Outbox 各自出现空串、`__system__` 或不同默认值。本次统一为：
   - DDL：租户表 `tenant_id CHAR(32) NOT NULL CHECK (tenant_id <> '')`，删除所有 `DEFAULT`；唯一键/索引以 `tenant_id` 开头；
   - 解析：新增 `TenantScoped` 标记与 `TenantIdResolver`，顺序为实体显式值 → `TenantContext` → 单租户 `nebula.tenant.default-tenant-id` → 多租户缺失即失败；`BaseFieldHandler` 只对 `TenantScoped` 实体写入；

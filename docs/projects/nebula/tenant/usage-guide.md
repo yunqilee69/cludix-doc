@@ -47,7 +47,7 @@ public class OrderEntity extends TenantBaseEntity {
 }
 ```
 
-- 查询、更新、删除由 MyBatis 拦截器自动追加 `tenant_id = ?`；
+- 查询、更新、删除由 MyBatis 拦截器自动追加 `tenant_id = ?`；单租户也生效，条件是默认租户；
 - 插入时 `tenant_id` 由 `TenantIdResolver` 显式填充：优先当前请求租户，单租户回退 `nebula.tenant.default-tenant-id`；
 - 数据库列没有 DEFAULT，也不允许 `NULL`/空串；
 - 没有继承 `TenantBaseEntity` 的租户表实体，实现 `TenantScoped` 并提供 `tenantId` 字段即可；
