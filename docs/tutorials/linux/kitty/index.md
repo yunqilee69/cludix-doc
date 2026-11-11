@@ -44,7 +44,7 @@ curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
 
 ### 设置启动快捷键
 
-GNOME 默认没有给终端分配全局快捷键，需要自己加一条自定义快捷键（`设置` → `键盘` → `查看及自定义快捷键` → `自定义快捷键`），名称填 `Kitty`，命令填 `kitty`，快捷键按需指定（例如 `Alt+T`）。
+GNOME 默认没有给终端分配全局快捷键，需要自己加一条自定义快捷键（`设置` → `键盘` → `查看及自定义快捷键` → `自定义快捷键`），名称填 `Kitty`，命令填 `kitty`，快捷键按需指定（推荐 `Super+T`）。
 
 命令行等价写法：
 
@@ -55,10 +55,19 @@ gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings \
 KEY=/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/
 gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$KEY name 'Kitty'
 gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$KEY command 'kitty'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$KEY binding '<Alt>t'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$KEY binding '<Super>t'
 ```
 
-> 💡 **注意**：`Alt+T` 在部分应用里是自带菜单键（例如浏览器），如果出现抢占，改用 `<Control><Alt>t` 或 `<Super>t`。
+> 💡 **为什么用 `Super` 而不是 `Alt`**：`Alt+T` 在部分应用里是自带菜单键（浏览器、文件管理器等），会被应用抢占；`Super`（Windows 键）组合在 GNOME 中很少被应用占用，`Super+T` 与系统默认快捷键也不冲突。
+
+验证是否写入成功：
+
+```bash
+gsettings get org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$KEY binding
+# '<Super>t'
+```
+
+若与本机已有快捷键冲突，改成 `<Control><Alt>t` 即可。
 
 ## 字体
 
