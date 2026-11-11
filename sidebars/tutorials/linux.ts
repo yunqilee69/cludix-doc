@@ -57,6 +57,11 @@ const linuxSidebar: SidebarConfig = [
         id: 'tutorials/linux/Linux安装Homebrew',
         label: '安装 Homebrew',
       },
+      {
+        type: 'doc',
+        id: 'tutorials/linux/kitty/index',
+        label: 'kitty 终端配置',
+      },
     ],
   },
   {
