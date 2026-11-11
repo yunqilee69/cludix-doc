@@ -11,6 +11,8 @@ format: md
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-11
+
 ### Changed
 
 - `web`：**路由标签页改为按完整 URL（pathname + search）标识，支持同一详情页多标签并保留请求参数**。此前标签只记录 pathname，切走再切回时会 `navigate(pathname)`，`?customerId=...` 等 query 被整体丢弃，详情页拿不到参数。现在标签的 path 同时作为唯一 key 和导航目标：完整路径相同则激活已有标签，否则新建；切换、刷新、关闭回退、新窗口打开都使用该标签自己的完整路径。新增 `useRouteTabTitle`，页面可在数据加载后覆盖标签名（例如显示客户名称），手工重命名仍然优先；个人中心与站内信改为只用组件 state 管理内页 tab / 选中消息，避免内部状态写入 URL 后不断新建标签。详见 [前端设计文档](../frontend/design-and-implementation.md#54-路由标签页)。
