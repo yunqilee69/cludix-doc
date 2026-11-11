@@ -13,4 +13,5 @@ title: Linux
 | [服务器配置 VNC](./服务器配置vnc) | 远程桌面 VNC 服务配置 |
 | [SSH 免密登录](./SSH免密登录) | SSH 公钥认证实现免密登录 |
 | [kitty 终端安装与配置](./kitty/) | 终端模拟器安装、字体、配色与快捷键配置 |
+| [Fedora 安装腾讯会议](./Fedora安装腾讯会议) | Fedora GNOME 用 Flathub 安装腾讯会议，含 Wayland 共享与常见问题 |
 

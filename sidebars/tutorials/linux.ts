@@ -66,6 +66,11 @@ const linuxSidebar: SidebarConfig = [
   },
   {
     type: 'doc',
+    id: 'tutorials/linux/Fedora安装腾讯会议',
+    label: 'Fedora 安装腾讯会议',
+  },
+  {
+    type: 'doc',
     id: 'tutorials/linux/用户与组管理',
     label: '用户与组管理',
   },
