@@ -48,6 +48,8 @@ flatpak search wemeet
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 ```
 
+国内直连 Flathub 拉运行时（几百 MB）经常很慢，建议先把 flathub 换成国内镜像，见 [Flatpak 与国内源](./Flatpak介绍与国内源)：
+
 ### 安装应用
 
 ```bash

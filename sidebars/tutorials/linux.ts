@@ -71,6 +71,11 @@ const linuxSidebar: SidebarConfig = [
   },
   {
     type: 'doc',
+    id: 'tutorials/linux/Flatpak介绍与国内源',
+    label: 'Flatpak 与国内源',
+  },
+  {
+    type: 'doc',
     id: 'tutorials/linux/用户与组管理',
     label: '用户与组管理',
   },
