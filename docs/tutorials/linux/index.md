@@ -14,6 +14,7 @@ title: Linux
 | [SSH 免密登录](./SSH免密登录) | SSH 公钥认证实现免密登录 |
 | [kitty 终端安装与配置](./kitty/) | 终端模拟器安装、字体、配色与快捷键配置 |
 | [tmux 使用指南](./tmux使用指南) | 会话/窗口/窗格概念、日常命令、快捷键全表与配置文件 |
+| [Fedora 桌面必备工具与配置](./Fedora桌面必备工具与配置) | Fedora GNOME 装机后必装的工具清单，以及窗口、触摸板、时钟、字体、截图等桌面配置 |
 | [Fedora 安装腾讯会议](./Fedora安装腾讯会议) | Fedora GNOME 用 Flathub 安装腾讯会议，含 Wayland 共享与常见问题 |
 | [Flatpak 是什么与 Fedora 国内源配置](./Flatpak介绍与国内源) | Flatpak 概念、常用命令，以及 Flathub 换 USTC / SJTU 镜像加速 |
 
