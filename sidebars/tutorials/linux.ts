@@ -62,6 +62,11 @@ const linuxSidebar: SidebarConfig = [
         id: 'tutorials/linux/kitty/index',
         label: 'kitty 终端配置',
       },
+      {
+        type: 'doc',
+        id: 'tutorials/linux/tmux使用指南',
+        label: 'tmux 使用指南',
+      },
     ],
   },
   {
