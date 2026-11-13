@@ -35,6 +35,7 @@ const sections: SectionCard[] = [
     chips: [
       { label: 'Docker', to: '/docs/troubleshooting/docker/' },
       { label: 'Java', to: '/docs/troubleshooting/java/' },
+      { label: 'MySQL', to: '/docs/troubleshooting/mysql/' },
       { label: '其他', to: '/docs/troubleshooting/other/' },
     ],
   },

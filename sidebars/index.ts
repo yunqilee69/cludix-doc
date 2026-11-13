@@ -19,6 +19,7 @@ import {
 import {
   troubleshootingDockerSidebar,
   troubleshootingJavaSidebar,
+  troubleshootingMysqlSidebar,
   troubleshootingOtherSidebar,
 } from './troubleshooting';
 import aiSidebar from './tutorials/ai';
@@ -44,6 +45,7 @@ const sidebars: SidebarsConfig = {
   troubleshootingOverviewSidebar: [{ type: 'doc', id: 'troubleshooting/index' }],
   troubleshootingDockerSidebar: troubleshootingDockerSidebar,
   troubleshootingJavaSidebar: troubleshootingJavaSidebar,
+  troubleshootingMysqlSidebar: troubleshootingMysqlSidebar,
   troubleshootingOtherSidebar: troubleshootingOtherSidebar,
 };
 
