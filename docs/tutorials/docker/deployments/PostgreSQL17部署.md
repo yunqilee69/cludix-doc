@@ -10,6 +10,8 @@ tags: [postgresql, docker, deployment]
 
 说明：本文基于 Docker Official Image `postgres:17`，适用于常规单机持久化部署场景。
 
+> 版本说明：PostgreSQL 18 已发布并作为新部署的推荐版本，18 的部署方式见 [PostgreSQL 18](./PostgreSQL18部署)。本文保留为 17 版本的部署参考。
+
 ## 1. 目录与挂载约定
 
 ```text

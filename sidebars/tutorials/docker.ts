@@ -131,6 +131,16 @@ const dockerSidebar: SidebarConfig = [
       },
       {
         type: 'doc',
+        id: 'tutorials/docker/deployments/PostgreSQL18部署',
+        label: 'PostgreSQL 18',
+      },
+      {
+        type: 'doc',
+        id: 'tutorials/docker/deployments/PostgreSQL主备复制配置说明',
+        label: 'PostgreSQL 主备配置',
+      },
+      {
+        type: 'doc',
         id: 'tutorials/docker/deployments/PostgreSQL17部署',
         label: 'PostgreSQL 17',
       },

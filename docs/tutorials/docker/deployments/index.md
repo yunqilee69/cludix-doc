@@ -12,7 +12,9 @@ date: 2026-06-17 11:29
 | 服务 | 说明 |
 | --- | --- |
 | [MySQL](./MySQL部署) | 关系型数据库 |
-| [PostgreSQL 17](./PostgreSQL17部署) | 关系型数据库 |
+| [PostgreSQL 18](./PostgreSQL18部署) | 关系型数据库（新部署推荐） |
+| [PostgreSQL 主备复制配置说明](./PostgreSQL主备复制配置说明) | 流复制参数与字段说明 |
+| [PostgreSQL 17](./PostgreSQL17部署) | 关系型数据库（历史版本） |
 | [Redis](./Redis部署) | 缓存与消息队列 |
 | [Nacos](./Nacos部署) | 服务注册与配置中心 |
 | [RocketMQ](./RocketMQ部署) | 消息队列 |
