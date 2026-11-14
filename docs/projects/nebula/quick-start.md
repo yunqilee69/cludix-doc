@@ -32,7 +32,7 @@ date: 2026-09-20
 | JDK | 21 | 后端运行 |
 | Maven | 3.9+ | 后端构建 |
 | Node.js / pnpm | 22 / 10 | 前端构建与开发 |
-| Docker | 较新版本即可 | 本机拉起 MySQL 8 + Redis 7 |
+| Docker | 较新版本即可 | 本机拉起 PostgreSQL 16 + Redis 7 |
 
 ## 第一步：Fork 并克隆
 
@@ -49,7 +49,7 @@ cd nebula-template
 ```bash
 cd backend
 
-# 1. 启动依赖：MySQL 8 + Redis 7，首次启动自动建库并导入 docs/sql/init/ 初始化脚本
+# 1. 启动依赖：PostgreSQL 16 + Redis 7，首次启动自动建库并导入 docs/sql/init/postgresql/ 初始化脚本
 docker compose up -d
 
 # 2. 启动应用（默认 http://localhost:8080）
@@ -70,7 +70,7 @@ unset NEBULA_APP_DATASOURCE_URL NEBULA_APP_DATASOURCE_USERNAME NEBULA_APP_DATASO
       NEBULA_STORAGE_TEMPORARY_TYPE NEBULA_STORAGE_FORMAL_TYPE
 ```
 
-> `backend/docker-compose.yml` 的本机依赖栈只读取 `NEBULA_LOCAL_*` 变量（`NEBULA_LOCAL_MYSQL_ROOT_PASSWORD` / `_MYSQL_DATABASE` / `_MYSQL_USER` / `_MYSQL_PASSWORD` / `_MYSQL_PORT` / `_REDIS_PORT`），与应用侧的 `NEBULA_APP_*` 隔离，不受上述导出影响。
+> `backend/docker-compose.yml` 的本机依赖栈只读取 `NEBULA_LOCAL_*` 变量（`NEBULA_LOCAL_POSTGRES_DATABASE` / `_POSTGRES_USER` / `_POSTGRES_PASSWORD` / `_POSTGRES_PORT` / `_REDIS_PORT`），与应用侧的 `NEBULA_APP_*` 隔离，不受上述导出影响。
 
 ## 第三步：启动前端
 

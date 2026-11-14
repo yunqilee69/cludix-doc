@@ -134,19 +134,19 @@ nebula:
 
 当前 `application.yml` 中还包含：
 
-- MySQL 数据源
+- PostgreSQL 数据源
 - Redis 连接配置
 - MyBatis-Plus 配置
 - Actuator 管理端点配置
 
 这些配置不专属于 param 模块本身，但在独立服务部署时必不可少。
 
-### 4.1 MySQL
+### 4.1 PostgreSQL
 
 当前示例里使用：
 
-- `com.mysql.cj.jdbc.Driver`
-- MySQL `nebula` 数据库
+- `org.postgresql.Driver`
+- PostgreSQL `nebula` 数据库（默认方言）
 - Druid 连接池
 
 ### 4.2 Redis

@@ -178,10 +178,10 @@ personBindCodeSendTimestampCache
 
 | 文件 | 说明 |
 | --- | --- |
-| `docs/sql/init/mysql/01-init-structure.sql` | MySQL 表结构（含租户字段与新增表） |
-| `docs/sql/init/mysql/02-init-data.sql` | MySQL 初始化数据（默认租户、系统租户、平台管理员等） |
-| `docs/sql/init/postgresql/01-init-structure.sql` | PostgreSQL 表结构 |
-| `docs/sql/init/postgresql/02-init-data.sql` | PostgreSQL 初始化数据 |
+| `docs/sql/init/postgresql/01-init-structure.sql` | PostgreSQL 表结构（默认方言，含租户字段与新增表） |
+| `docs/sql/init/postgresql/02-init-data.sql` | PostgreSQL 初始化数据（默认租户、系统租户、平台管理员等） |
+| `docs/sql/init/mysql/01-init-structure.sql` | MySQL 表结构（可选方言） |
+| `docs/sql/init/mysql/02-init-data.sql` | MySQL 初始化数据（可选方言） |
 
 多租户改造只修改全量初始化 SQL，不提供 `unreleased` 增量迁移脚本，也不做存量数据回填。当前数据库均为开发库，直接删库后执行初始化脚本重建即可。
 
