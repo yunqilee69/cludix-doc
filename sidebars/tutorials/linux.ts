@@ -91,6 +91,11 @@ const linuxSidebar: SidebarConfig = [
   },
   {
     type: 'doc',
+    id: 'tutorials/linux/SELinux是什么',
+    label: 'SELinux 是什么',
+  },
+  {
+    type: 'doc',
     id: 'tutorials/linux/服务器配置vnc',
     label: '服务器配置 VNC',
   },
