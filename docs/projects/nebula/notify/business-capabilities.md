@@ -8,10 +8,12 @@ tags: [nebula, notify, usage]
 
 本文按能力逐条说明「能做什么、不能做什么、对应接口组、所需权限码」。接口契约以运行时 OpenAPI 文档（`doc.html`）为准，这里给出接入所需的形状与边界。
 
-> 权限码需要在管理端「按钮管理」建行并通过 `auth_permission` 授予角色后，非超管用户才能获得；开启 `nebula.auth.permission.enforce-enabled=true` 前请先建好本模块权限码。
+> 权限码需要先在管理端登记并通过 `auth_permission` 授予角色，非超管用户才能获得：界面控件权限在「按钮管理」建行（`auth_button`），没有界面控件、只做服务端准入的接口权限在「接口管理」建行（`auth_api`）。开启 `nebula.auth.permission.enforce-enabled=true` 前请先建好本模块权限码。
 > **面向当前用户**的接口（`/announcements/current/**`、`/site-messages/**`、`/preferences/current`、`/push-devices/**` 的注册/注销/心跳/current）**刻意不加权限码**，靠登录态与 `userId` 过滤——加了反而会让普通用户看不到自己的消息。
 
-## 权限码总览（`NotifyButtonCodes`）
+## 权限码总览
+
+### 按钮权限（`NotifyButtonCodes`，登记在 `auth_button`，对应界面控件）
 
 | 权限码 | 用途 |
 | --- | --- |
@@ -21,6 +23,11 @@ tags: [nebula, notify, usage]
 | `NOTIFY_CATEGORY_CREATE` / `EDIT` / `DELETE` / `QUERY` | 通知类别增/改/删/查 |
 | `NOTIFY_SEND` | 发送通知、测试邮件 |
 | `NOTIFY_RECORD_VIEW` | 发送记录查询 |
+
+### 接口权限（`NotifyApiCodes`，登记在 `auth_api`，无界面控件）
+
+| 权限码 | 用途 |
+| --- | --- |
 | `NOTIFY_PUSH_DEVICE_QUERY` | 管理端设备分页 |
 | `NOTIFY_PUSH_TEST` | 管理端测试推送 |
 
@@ -210,7 +217,7 @@ tags: [nebula, notify, usage]
 
 **接口**：`POST /api/notify/push-devices`、`DELETE /api/notify/push-devices/{deviceId}`、`POST /api/notify/push-devices/heartbeat`、`GET /api/notify/push-devices/current`、`POST /api/notify/push-devices/page`、`POST /api/notify/push/test`
 
-**权限码**：注册/注销/心跳/current **无**；管理端分页 `NOTIFY_PUSH_DEVICE_QUERY`；测试推送 `NOTIFY_PUSH_TEST`
+**权限码**：注册/注销/心跳/current **无**；管理端分页 `NOTIFY_PUSH_DEVICE_QUERY`、测试推送 `NOTIFY_PUSH_TEST`（均为接口权限，登记在 `auth_api`）
 
 ---
 

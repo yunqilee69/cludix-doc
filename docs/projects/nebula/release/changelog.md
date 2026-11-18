@@ -11,6 +11,21 @@ format: md
 
 ## [Unreleased]
 
+### Changed
+
+- `nebula-scheduler` / `docs/sql`：**任务失败信息完整落库，列宽不再成为故障源**。`scheduler_job_run.result_message` 由 `VARCHAR(512)` 扩为 `TEXT`（MySQL `LONGTEXT`），失败时记录异常链的类名与 message（不含堆栈，完整堆栈仍只进日志），MyBatis/JDBC 的长 SQL 信息不会再让整条 `UPDATE` 失败、把运行记录卡在 `RUNNING`。
+- `nebula-auth` / `nebula-storage` / `nebula-frontend` / `nebula-notify` / `docs/sql`：**8 个「伪按钮权限」改判为接口权限**。`STORAGE_UPLOAD`、`STORAGE_FILE_DELETE`、`FRONTEND_CONFIG_SAVE`、`FRONTEND_APP_RELEASE_CREATE/EDIT/DELETE`、`NOTIFY_PUSH_DEVICE_QUERY`、`NOTIFY_PUSH_TEST` 改为 `@NebulaApiPermission`，常量迁入 `*ApiCodes` 并登记 `auth_api`。这些码没有管理端控件，此前挂在 `auth_button` 上导致管理端看不到、授不出去、启动对账持续报未登记。新增 `NotifyApiCodes`；`init/02-init-data.sql` 补 8 行种子（含 ADMIN 授权，存量库直接按运维 SQL 更新）。
+- `nebula-base-mybatis`：`TenantTableRegistry` 启动校验按模式调整日志级别——单租户未分类表仅 INFO（受支持形态，无租户越权面），多租户未分类表改为 ERROR（真实隔离缺口）；`strict=true` 仍直接启动失败。
+- `nebula-base-web`：`ExceptionHandlerAdvice` 单独处理 `AsyncRequestNotUsableException`（客户端断开 SSE/异步请求），不再落到兜底处理器写 `ApiResult`，消除 `text/event-stream` 上的 `HttpMessageNotWritableException` 与 ERROR 堆栈。
+- `nebula-notify`：SSE 心跳与实时推送对「发送失败后兜底 `complete()` 与容器异步收尾竞态」抛出的 `IllegalStateException` 只记 DEBUG，不再刷 WARN。
+- `nebula-auth`：`SecurityConfig` 去掉 `WebSecurity.ignoring()`，`/actuator/**`、`/error`、`/health` 改用独立的无状态 `permitAll` 过滤链，语义不变且不再触发 Spring Security 的过时告警。
+- `backend`（模板）：默认配置 `nebula.crypto` 开发密钥，克隆模板即可使用落库加密。**该密钥随仓库公开，只能用于本地开发；生产必须用 `NEBULA_CRYPTO_KEY_1` 覆盖**，轮换时保留旧 key 条目用于解密历史密文。
+- `backend`（模板）：启动类在代码层排除 `UserDetailsServiceAutoConfiguration`，不再生成带随机密码的内存用户（框架有自己的账号体系，Spring Security 只承担接口鉴权）。
+
+### Fixed
+
+- `nebula-notify`：`PushDeviceControllerContractTest` 的权限码收集先 `Map.entry` 再过滤 null，遇到面向当前用户的无权限码端点会直接 NPE；改为先过滤再收集。
+
 ## [0.3.0] - 2026-11-11
 
 ### Changed

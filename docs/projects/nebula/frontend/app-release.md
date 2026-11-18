@@ -95,7 +95,7 @@ curl "http://{host}/api/frontend/init?platform=ANDROID&channel=INTERNAL"
 
 **撤回**：没有独立接口——通过 `PUT` 把 `releaseStatus` 置为 `WITHDRAWN` 完成，记录保留、不再参与最新版本计算。物理删除只用于误录入。
 
-> 这些权限码需先在管理端「按钮管理」建行并授权；前端管理页菜单本批未提供。
+> 这些权限码都是接口权限（无界面控件），需先在管理端「接口管理」登记到 `auth_api` 并授权；前端管理页菜单本批未提供。
 
 ## 4. 失败取态：版本检查是 fail-open
 
