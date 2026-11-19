@@ -13,6 +13,14 @@ format: md
 
 ### Changed
 
+- `web` / `nebula-auth`：**企业 OAuth2 配置从「看起来能配」变成「配了就生效」**。此前企业设置里的第三方登录表单只有 Provider/渠道必填，Client ID、Secret、回调地址等真正必需的字段既无必填标识也无用途说明；`TenantOAuth2ProviderConfigResolver` 在单租户下直接返回 `null`，界面保存的凭据从未被读取；`frontendCallbackUri` 保存成功但 Controller 启动时固定吃 YAML，登录后的 302 仍跳 YAML 里的前端承接页。本次改造：
+  - 表单按「基本信息 / 授权与回调 / 高级端点」分组，按 Provider + 渠道只显示有效字段，字段带真实必填标识、用途说明、示例占位与明确错误提示；GitHub 渠道只剩 Web，从微信小程序切到 GitHub 自动回 Web，前后端都拒绝 `github + MINI` 等非法组合（`19005`，消息列出可用渠道）；
+  - 启用时才严格要求凭据完整（Client ID/AppID、Secret、Web 回调地址、微信 Web 的 Scope、小程序的 jscode2session / access_token / 手机号三个端点），禁用状态允许保存不完整草稿；编辑已有配置时 Secret 输入框留空表示保留原值，填入新值则覆盖，接口仍只返回 `hasClientSecret`；
+  - 单租户改为「默认租户记录优先，无记录回退 YAML」：有记录就用企业配置（含 `enabled=false` 的停用覆盖），没有记录才沿用 YAML，升级行为不突变；多租户维持「有上下文无记录即不可用」，不跨租户兜底；
+  - 登录 GET 回调的前端承接页改为运行期按 `github + WEB` / `wechat + WEB` 解析，企业值优先、空值回退 YAML，账号绑定的 `frontendRedirect` 仍优先；**前端承接页只接受站内相对路径**（以 `/` 开头且不是 `//`），`http/https` 绝对地址、`//host/xxx`、`javascript:` 一律拒绝——保存期返回 `19005`，运行期返回 GitHub `19107` / 微信 `19213` 可读配置错误，不执行跳转；
+  - 微信小程序字段 label 直接说明真实用途（`userinfoUrl` = jscode2session、`tokenUrl` = access_token、`configJson` = 手机号接口 URL），删掉「额外地址放 configJson」的错误描述；`configJson` 字段名保留以兼容历史数据，仍不是任意 JSON 配置；
+  - **行为变更**：单租户下已有的 `enabled=false` 记录从「忽略记录、继续用 YAML」变为「停用」，这是把界面开关真正落到运行时；数据库无 DDL 变更，存量 `github + MINI` 等非法记录读取侧保持不可用语义，不自动删除或迁移。
+
 - `nebula-scheduler` / `docs/sql`：**任务失败信息完整落库，列宽不再成为故障源**。`scheduler_job_run.result_message` 由 `VARCHAR(512)` 扩为 `TEXT`（MySQL `LONGTEXT`），失败时记录异常链的类名与 message（不含堆栈，完整堆栈仍只进日志），MyBatis/JDBC 的长 SQL 信息不会再让整条 `UPDATE` 失败、把运行记录卡在 `RUNNING`。
 - `nebula-auth` / `nebula-storage` / `nebula-frontend` / `nebula-notify` / `docs/sql`：**8 个「伪按钮权限」改判为接口权限**。`STORAGE_UPLOAD`、`STORAGE_FILE_DELETE`、`FRONTEND_CONFIG_SAVE`、`FRONTEND_APP_RELEASE_CREATE/EDIT/DELETE`、`NOTIFY_PUSH_DEVICE_QUERY`、`NOTIFY_PUSH_TEST` 改为 `@NebulaApiPermission`，常量迁入 `*ApiCodes` 并登记 `auth_api`。这些码没有管理端控件，此前挂在 `auth_button` 上导致管理端看不到、授不出去、启动对账持续报未登记。新增 `NotifyApiCodes`；`init/02-init-data.sql` 补 8 行种子（含 ADMIN 授权，存量库直接按运维 SQL 更新）。
 - `nebula-base-mybatis`：`TenantTableRegistry` 启动校验按模式调整日志级别——单租户未分类表仅 INFO（受支持形态，无租户越权面），多租户未分类表改为 ERROR（真实隔离缺口）；`strict=true` 仍直接启动失败。

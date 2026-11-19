@@ -228,6 +228,46 @@ POST   /api/auth/tenant/oauth2-providers           新增或更新配置
 DELETE /api/auth/tenant/oauth2-providers/{id}      删除配置
 ```
 
+OAuth 配置只有 `POST`（upsert，唯一键 `tenant_id + provider_id + channel`），没有单独的新增/更新接口。
+
+**配置企业第三方登录**
+
+入口：Web 端「系统管理 → 企业设置 → 登录与安全」页签内的第三方登录区块；也可以直接访问 `/tenant/settings/oauth-providers`。
+
+步骤：
+
+1. 新增一条配置，先选 Provider 与渠道：GitHub 只有 Web；微信可选 Web 或小程序（两者凭据独立）；
+2. 填写 Client ID / AppID 与 Client Secret / AppSecret，Secret 保存后加密存储，接口只返回「已配置」，不回显明文；
+3. Web 渠道填写 OAuth 回调地址，值必须与第三方后台登记的回调地址完全一致；
+4. 「前端承接页」只填站内相对路径（以 `/` 开头且不是 `//`，例如 `/login/github-callback`）；绝对地址一律不支持，保存时会被拒绝，留空则沿用部署级默认承接页；
+5. 打开「启用」后保存；校验失败会停在弹窗并提示具体字段，不会丢弃已填内容。
+
+字段映射：
+
+| 字段 | 含义与适用渠道 |
+| --- | --- |
+| `providerId` / `channel` | `github` / `wechat`，`web` / `mini`；服务端归一化为小写 Provider + 大写渠道 |
+| `clientId` / `clientSecret` | GitHub Client ID / Client Secret，或微信 AppID / AppSecret；Secret 留空表示保留原值 |
+| `redirectUri` | Web 渠道的 OAuth 回调地址；小程序不使用 |
+| `scope` | Web 渠道授权范围；微信 Web 启用时必填，GitHub 留空时按默认 `read:user` 授权 |
+| `authorizeUrl` / `tokenUrl` | Web 渠道的授权地址与 Token 地址；留空沿用默认端点 |
+| `userinfoUrl` | GitHub 的用户信息地址；微信小程序为授权码换会话（`jscode2session`）地址 |
+| `tokenUrl`（小程序） | 微信小程序的接口调用凭证（`access_token`）地址 |
+| `configJson` | 微信小程序的手机号接口地址；字段名沿用历史命名，只存一个 URL，不是任意 JSON |
+| `frontendCallbackUri` | Web 登录成功后的前端承接页，只能是站内相对路径（`/` 开头且非 `//`）；留空沿用默认 |
+
+校验规则：
+
+- Provider、渠道始终必填；启用时还要求 Client ID/AppID、Secret、Web 回调地址、微信 Web 的 Scope、小程序的三个端点齐全；
+- 禁用状态可以保存不完整草稿；
+- 端点必须是 `http/https` 完整地址；前端承接页只接受站内相对路径，绝对地址（含 `//host/xxx`、`javascript:`）保存时即被拒绝，返回 `19005`；
+- `github + mini` 等不支持的组合返回 `19005`，错误信息会列出可用渠道。
+
+生效范围：
+
+- 多租户：配置只在本租户生效，不继承系统租户或其他租户的凭据；没有记录即不可用；
+- 单租户：保存到默认租户的配置**同样生效**；停用即停用，不会回退 YAML；只有默认租户完全没有该组合的记录时才使用部署级 YAML 配置。
+
 ### 5.4 平台管理
 
 ```text
@@ -254,7 +294,7 @@ GET    /api/auth/persons                           分页查询平台账号
 | 19002 | `TENANT_NOT_FOUND` | 租户不存在 |
 | 19003 | `TENANT_DISABLED` | 租户已暂停或过期 |
 | 19004 | `TENANT_LOGIN_METHOD_DISABLED` | 当前租户未启用该登录方式 |
-| 19005 | `TENANT_OAUTH2_PROVIDER_NOT_CONFIGURED` | 当前租户未配置该 OAuth provider |
+| 19005 | `TENANT_OAUTH2_PROVIDER_NOT_CONFIGURED` | 当前租户未配置该 OAuth provider，或配置非法（不支持的 Provider/渠道、URL/前端承接页非站内相对路径、启用但必填缺失） |
 | 19006 | `TENANT_MISMATCH` | 令牌租户与请求租户不一致 |
 | 19007 | `PERSON_BINDING_REQUIRED` | 需要完成平台账号绑定 |
 | 19008 | `BINDING_TICKET_INVALID` | 绑定票据无效或已过期 |
@@ -280,6 +320,7 @@ GET    /api/auth/persons                           分页查询平台账号
 - [ ] 新租户创建后，管理员可以登录并完成平台账号绑定
 - [ ] 租户停用后调度任务暂停，恢复后按配置恢复
 - [ ] 文件上传、下载、秒传在租户之间不串数据
+- [ ] 企业 OAuth 配置：启用的组合凭据完整，前端承接页为站内相对路径（绝对地址被拒绝）；单租户下停用记录不再回落 YAML
 - [ ] 移动端企业码深链、切换企业、推送注销流程验证通过
 
 ## 8. 相关文档

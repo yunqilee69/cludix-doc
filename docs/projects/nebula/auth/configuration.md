@@ -145,6 +145,7 @@ nebula:
           token-url:
           redirect-uri:
           scope:
+          frontend-callback-uri:
         wechat:
           enabled: false
           mini:
@@ -237,12 +238,13 @@ nebula:
 | `web.access-token-url` | 授权码换 token 接口 | `https://api.weixin.qq.com/sns/oauth2/access_token` |
 | `web.redirect-uri` | 微信侧回调地址，须与开放平台后台授权回调域一致 | 无（启用网页应用渠道时必填） |
 | `web.scope` | 授权作用域 | `snsapi_login` |
-| `web.frontend-callback-uri` | 扫码登录完成后前端承接页地址 | `/login/wechat-callback` |
+| `web.frontend-callback-uri` | 扫码登录完成后前端承接页地址；企业配置侧只接受站内相对路径，本项作为默认值不做相对强校验 | `/login/wechat-callback` |
 
 校验规则：
 
 - `enabled=true` 时 `mini` 与 `web` 至少一个渠道配置完整，否则启动失败
 - 渠道配置完整即参与装配：仅配 `mini` 时绑定能力不可用，配齐 `web` 后个人信息页出现微信绑定入口
+- `web.frontend-callback-uri` 是部署级默认承接页，本项不做相对路径强校验（仓库默认值便于本地联调）；企业配置里的承接页由 `OAuth2FrontendCallbackUri` 强制站内相对路径，详见 §3.5
 
 环境变量参考（推荐注入方式）：
 
@@ -273,6 +275,34 @@ nebula:
 | `login.oauth2.provider.wechat.enabled` | 微信登录开关（小程序 + 扫码共用），默认 `false` |
 
 该开关可在管理端「高级配置 → 通用配置 → 第三方登录（OAuth2）」运行时切换。
+
+### 3.5 YAML 是「无企业记录时」的默认配置
+
+上面的 `providers.github.*` / `providers.wechat.*` 现在承担**默认配置**的角色：登录凭据的权威来源是企业配置表 `auth_tenant_oauth2_provider`，YAML 在解析不到企业记录时兜底。解析由 `TenantOAuth2ProviderConfigResolver` 完成，Provider Client 再用解析结果覆盖 YAML：
+
+| 场景 | 生效配置 |
+|---|---|
+| 单租户（`nebula.tenant.enabled=false`）存在默认租户记录且 `enabled=true` | 企业配置（凭据、回调、端点、前端承接页） |
+| 单租户存在默认租户记录且 `enabled=false` | 停用，**不回退 YAML** |
+| 单租户没有任何记录 | YAML 默认配置，升级行为不变 |
+| 多租户当前租户有记录 | 该租户配置，不继承系统租户或其他租户凭据 |
+| 多租户当前租户无记录 | 视为未配置即不可用（不回退 YAML） |
+| 没有租户上下文（例如多租户下的早期流程） | YAML 默认配置 |
+
+细则：
+
+- 企业记录里留空的授权地址、Token 地址、用户信息地址，运行时回退本文件的 YAML 默认端点；`frontend-callback-uri` 留空时回退 YAML 默认承接页；
+- 企业配置的 `frontendCallbackUri` 只接受**站内相对路径**：以 `/` 开头且不是 `//`；`http/https` 绝对地址、`//host/xxx`、`javascript:` 等一律拒绝，这是防开放重定向的唯一防线；
+- 判定由 `OAuth2FrontendCallbackUri` 统一裁决（纯计算），保存期与 GitHub / 微信回调 Controller 共用同一规则与同一句消息措辞，避免「保存成功、登录 302 才失败」；
+- 运行期解析：企业启用且承接页非空则用企业值；企业未配置或未启用回退 YAML 的 `frontend-callback-uri`；企业值非法**不回退**，直接以 GitHub `19107` / 微信 `19213` 的 Provider 配置缺失码报错，保存期非法值则返回 `19005`；
+- YAML 默认承接页不做相对路径强校验：`github.frontend-callback-uri` 类默认值为 `/login/github-callback`，仓库 `application.yml` 为方便本地联调覆盖成 `http://localhost:5173/login/github-callback`，强校验只作用于企业配置值；
+- 账号绑定流程的 `frontendRedirect` 优先级最高，不受上述承接页影响；
+- 只支持 `github + WEB`、`wechat + WEB`、`wechat + MINI` 三种组合，其他组合保存时返回 `19005`；启用时还会校验凭据完整性，规则见 `docs/spec/12-multitenancy.md` §7.1.3。
+
+相关源码：
+
+- `nebula-auth-core/src/main/java/cn/cloudomni/nebula/auth/service/impl/TenantOAuth2ProviderConfigResolver.java`
+- `nebula-auth-api/src/main/java/cn/cloudomni/nebula/auth/oauth2/OAuth2FrontendCallbackUri.java`
 
 ---
 
@@ -487,5 +517,6 @@ nebula:
 - 替换 JWT `secret-key`
 - 调整 token 过期时间
 - 配好 OAuth2 提供商密钥与回调地址
+- 前端承接页只支持站内相对路径：企业侧在「企业设置 → 登录与安全」填写 `/xxx`，绝对地址会被拒绝；YAML `frontend-callback-uri` 仅作为企业未配置时的默认值
 - 补齐参数中心中的 `auth.login.*` 动态参数
 - 不要同时引入 local 与 remote 两套接入层
