@@ -11,6 +11,10 @@ format: md
 
 ## [Unreleased]
 
+### Added
+
+- `nebula-storage` / `docs`：腾讯云 COS 新增 `endpoint` 配置（env `NEBULA_STORAGE_TENCENT_COS_ENDPOINT`，租户级复用 `storage.backend.endpoint`）；留空仍按 region 推导官方域名，非空时正式区读写与预签名直链统一走该自定义域名，`region` 仍必填；上传与分片只写本地临时区不受影响；无 DDL、无前端改动。
+
 ### Changed
 
 - `web` / `nebula-auth`：**企业 OAuth2 配置从「看起来能配」变成「配了就生效」**。此前企业设置里的第三方登录表单只有 Provider/渠道必填，Client ID、Secret、回调地址等真正必需的字段既无必填标识也无用途说明；`TenantOAuth2ProviderConfigResolver` 在单租户下直接返回 `null`，界面保存的凭据从未被读取；`frontendCallbackUri` 保存成功但 Controller 启动时固定吃 YAML，登录后的 302 仍跳 YAML 里的前端承接页。本次改造：
