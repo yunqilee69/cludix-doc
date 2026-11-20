@@ -33,9 +33,13 @@ format: md
 - `nebula-auth`：`SecurityConfig` 去掉 `WebSecurity.ignoring()`，`/actuator/**`、`/error`、`/health` 改用独立的无状态 `permitAll` 过滤链，语义不变且不再触发 Spring Security 的过时告警。
 - `backend`（模板）：默认配置 `nebula.crypto` 开发密钥，克隆模板即可使用落库加密。**该密钥随仓库公开，只能用于本地开发；生产必须用 `NEBULA_CRYPTO_KEY_1` 覆盖**，轮换时保留旧 key 条目用于解密历史密文。
 - `backend`（模板）：启动类在代码层排除 `UserDetailsServiceAutoConfiguration`，不再生成带随机密码的内存用户（框架有自己的账号体系，Spring Security 只承担接口鉴权）。
+- `docs`：**修正 `providers.wechat.enabled` 的错误描述，并补齐微信登录三层配置关系说明**。此前 `docs/projects/nebula/auth/configuration.md` §3.4 称该静态开关「只管『装配不装配』」，实际 `wechatOAuth2ProviderClient` 在 `WechatOAuth2AutoConfiguration` 中无条件注册，该字段只被启动期 `WechatOAuth2Properties.validate()` 读取（`false` 时连自检都跳过），对运行时可用性没有任何影响——按旧文档排查会得出「必须打开 YAML 开关才能启用微信登录」的错误结论。本次改为准确表述，并新增「三层配置的关系与判定顺序」一节：系统参数（数据库 `sys_param`）的两道门永远最先判定，企业记录整渠道覆盖凭据且命中记录后不回退 YAML，YAML 仅承担「无记录时的凭据兜底 + 端点字段级兜底」；同时点明「有记录但未启用」会让渠道彻底不可用、不要遗留未启用或不完整的记录，并说明企业配置接口新增的 `credentialComplete` / `missingFields` 两个字段只表达「记录自身是否完整」，不代表运行时可用性。
 
 ### Fixed
 
+- `nebula-auth`：**渠道取值统一按大写归一化，修复多租户 + PostgreSQL 下小程序 AppID 反查租户匹配失败、登录返回 `15002`**。此前写链已把渠道归一化为大写存入 `auth_tenant_oauth2_provider`，而 `WechatOAuth2Controller` 仍以小写字面量 `mini` 直传 DAO 做 `eq(channel, ...)` 查询，`OAuth2MiniTenantResolverImpl` 入口也没有归一化；MySQL 的大小写不敏感排序规则掩盖了差异，PostgreSQL 上按 AppID 反查租户匹配不到记录，小程序登录直接失败。本次在 `OAuth2MiniTenantResolverImpl` 入口按 `trim().toUpperCase(Locale.ROOT)` 归一化（与写链规则一致），`WechatOAuth2Controller` 的渠道常量改为引用 `OAuth2LoginParamKeys.CHANNEL_MINI` / `CHANNEL_WEB`，消除同一渠道的大小写两套常量。无接口与数据结构变更。
+- `nebula-auth`：**`getAuthConfig` 增加渠道判定诊断日志，线上可自证微信渠道为何不可用**。此前 `wechatMiniEnabled=false` 只能翻代码推断是哪一道门拦下，系统参数两个开关、provider 装配、渠道配置可用性四个门都没有任何日志。本次在 `LoginServiceImpl#getAuthConfig` 输出一条聚合 `debug` 日志，包含 `oauth2Enabled`、`wechatEnabled`、`hasWechatProvider`、`wechatWebAvailable`、`wechatMiniAvailable` 五个布尔值，键名固定便于 grep；按日志规范不输出任何凭据、密文或客户端信息。
+- `nebula-auth` / `web`：**企业 OAuth2 配置列表新增 `credentialComplete` / `missingFields`，「凭据不完整或未启用导致渠道不可用」在页面上可见**。此前列表只看得到「启用」与「Secret 已配置」，无法判断记录凭据是否齐全，而单租户下「有记录即不回退 YAML」会让一条残缺或停用的记录静默锁死渠道，用户只能靠猜。本次 `GET /api/auth/tenant/oauth2-providers` 响应项增加 `credentialComplete`（记录自身是否完整）与 `missingFields`（缺失项中文标签，停用记录为 `["未启用"]`），判定规则与保存期必填校验复用同一组标签常量，两处文案不会各自漂移；前端第三方登录列表据此展示「完整 / 不可用」状态并在提示中列出缺失项。仅新增字段，`POST` 与 `init` 契约不变。
 - `nebula-notify`：`PushDeviceControllerContractTest` 的权限码收集先 `Map.entry` 再过滤 null，遇到面向当前用户的无权限码端点会直接 NPE；改为先过滤再收集。
 
 ## [0.3.0] - 2026-11-11

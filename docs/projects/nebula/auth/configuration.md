@@ -215,7 +215,7 @@ nebula:
 
 | 配置项 | 说明 | 默认值 |
 |---|---|---|
-| `nebula.auth.oauth2.providers.wechat.enabled` | 微信登录总开关（静态装配开关） | `false` |
+| `nebula.auth.oauth2.providers.wechat.enabled` | 启动期配置完整性自检开关，**不影响装配，也不影响运行时可用性**（详见 §3.4） | `false` |
 | `nebula.auth.oauth2.providers.wechat.access-token-safety-margin-seconds` | access_token 缓存提前失效余量（秒） | `300` |
 
 小程序渠道（`mini`）：
@@ -267,14 +267,22 @@ nebula:
 
 ### 3.4 微信登录运行时开关（系统参数）
 
-静态 `enabled` 只管「装配不装配」，用户能否用微信登录以参数中心的系统参数为准：
+用户能否用微信登录，**只**由参数中心的系统参数决定，静态 `nebula.auth.oauth2.providers.wechat.enabled` 不参与运行时判定：
 
 | 参数键 | 说明 |
 |---|---|
 | `login.oauth2.enabled` | OAuth2 总开关，微信登录要求同时为 true |
-| `login.oauth2.provider.wechat.enabled` | 微信登录开关（小程序 + 扫码共用），默认 `false` |
+| `login.oauth2.provider.wechat.enabled` | 微信登录开关（小程序 + 扫码共用），默认 `false`（`SystemParamDefinitions.java:55-56`） |
 
 该开关可在管理端「高级配置 → 通用配置 → 第三方登录（OAuth2）」运行时切换。
+
+关于静态 `nebula.auth.oauth2.providers.wechat.enabled`（默认 `false`）的真实作用，需要明确三点：
+
+- 它**不控制装配**：`wechatOAuth2ProviderClient` 在 `WechatOAuth2AutoConfiguration.java:68-76` 无条件注册，没有 `@ConditionalOnProperty` 之类的条件；
+- 它**只用于启动期的配置完整性自检**：该字段仅被 `WechatOAuth2Properties.validate()`（`WechatOAuth2Properties.java:56-70`）读取，`enabled=false` 时该方法直接返回。设为 `true` 时要求 `mini` / `web` 至少一个渠道配置完整，否则启动失败；已配置完整的渠道还会继续校验其剩余必填项（`mini.access-token-url`、`mini.phone-number-url`、`web.scope`）。设为 `false` 则跳过全部校验，配置错误只会在实际登录时才暴露；
+- 它对运行时可用性**没有任何影响**：`isChannelAvailable` / `resolveMini` / `resolveWeb`（`WechatOAuth2ProviderClient.java:99-107`、`:373-391`、`:401-420`）全链路都不读该字段。
+
+因此排查口径要改过来：YAML 的 `providers.wechat.enabled` 不是微信登录可用的前提条件，「必须打开 YAML 开关才能启用微信登录」的说法不成立。回归测试 `WechatOAuth2YamlConfigIndependenceTest` 锁定了这一事实；三层配置的完整关系与判定顺序见 §3.6。
 
 ### 3.5 YAML 是「无企业记录时」的默认配置
 
@@ -283,7 +291,7 @@ nebula:
 | 场景 | 生效配置 |
 |---|---|
 | 单租户（`nebula.tenant.enabled=false`）存在默认租户记录且 `enabled=true` | 企业配置（凭据、回调、端点、前端承接页） |
-| 单租户存在默认租户记录且 `enabled=false` | 停用，**不回退 YAML** |
+| 单租户存在默认租户记录且 `enabled=false` | 停用，**不回退 YAML**（后果与排查要点见 §3.6） |
 | 单租户没有任何记录 | YAML 默认配置，升级行为不变 |
 | 多租户当前租户有记录 | 该租户配置，不继承系统租户或其他租户凭据 |
 | 多租户当前租户无记录 | 视为未配置即不可用（不回退 YAML） |
@@ -303,6 +311,80 @@ nebula:
 
 - `nebula-auth-core/src/main/java/cn/cloudomni/nebula/auth/service/impl/TenantOAuth2ProviderConfigResolver.java`
 - `nebula-auth-api/src/main/java/cn/cloudomni/nebula/auth/oauth2/OAuth2FrontendCallbackUri.java`
+
+### 3.6 三层配置的关系与判定顺序
+
+微信登录能否真正生效，由**三层配置共同决定**。三层各自的默认值不同、覆盖关系也不同，很容易得出「配了却没生效」或「没配却生效」的错误判断，因此必须按下面的顺序与兜底规则来读。
+
+| 层级 | 载体 | 关键字段 | 作用 | 默认值 |
+|---|---|---|---|---|
+| ① 系统参数 | 数据库 `sys_param`（参数中心） | `login.oauth2.enabled`、`login.oauth2.provider.wechat.enabled` | 运行时总门：两者**同时**为 `true` 才继续往下判定，任一为 `false` 直接短路，后面两层配得再全也无效 | `true` / `false`（`SystemParamDefinitions.java:55-56`） |
+| ② 企业配置 | 数据库 `auth_tenant_oauth2_provider` | `enabled`、`client_id`、`client_secret_cipher`，以及 `redirect_uri` / `userinfo_url` / `token_url` / `config_json` / `scope` / `authorize_url` / `frontend_callback_uri` | **整渠道覆盖**：命中记录即由该记录接管凭据，不再回退 YAML | 无记录 |
+| ③ 应用配置 | `application.yml` 的 `nebula.auth.oauth2.providers.wechat.*` | `mini.app-id` / `mini.app-secret`、`web.app-id` / `web.app-secret`、各端点 URL、`enabled` | 第 ② 层无记录时的凭据兜底；3 个微信端点 URL（jscode2session / access_token / 手机号）**始终**作为默认值，企业记录对应字段为空时逐字段兜底。`wechat.enabled` 只做启动期自检，见 §3.4 | 凭据默认空串；端点有内置默认值；`enabled=false` |
+
+判定顺序（对应 `LoginServiceImpl#getAuthConfig`，`LoginServiceImpl.java:826-844`）：
+
+```text
+# 门1、门2：系统参数，永远最先判定
+oauth2Enabled = 系统参数("login.oauth2.enabled")
+wechatEnabled = 系统参数("login.oauth2.provider.wechat.enabled")
+
+# 门3：provider 装配，恒为 true（无条件注册，见 WechatOAuth2AutoConfiguration.java:68-76）
+hasWechatProvider = providerRegistrar.hasProvider("wechat")
+
+if not (oauth2Enabled and wechatEnabled and hasWechatProvider):
+    wechatWebEnabled = wechatMiniEnabled = false        # 到此结束，不看第②③层
+else:
+    for channel in ("web", "mini"):
+        # 门4：企业配置解析（TenantOAuth2ProviderConfigResolver.java:36-69）
+        settings = TenantOAuth2ProviderConfigResolver.resolve("wechat", channel)
+        if settings == null:                            # 仅「单租户无记录」或「无租户上下文」
+            settings = 由YAML构造(channel)               # 第③层兜底：凭据与端点都取 YAML
+        if settings == null or not settings.isComplete():
+            该渠道不可用
+        else:                                           # WEB 渠道另要求 redirectUri 非空
+            该渠道可用                                  # 企业记录命中的端点空值逐字段回退 YAML
+```
+
+`resolve` 的返回值决定走第 ② 层还是第 ③ 层（`TenantOAuth2ProviderConfigResolver.java:48-54`）：
+
+1. 无租户上下文（多租户下的早期流程）→ 返回 `null`，回退 YAML；
+2. 单租户无记录 → 返回 `null`，回退 YAML；
+3. 多租户当前租户无记录 → 返回停用配置，**不回退** YAML；
+4. 有记录但 `enabled != true` → 返回停用配置，**不回退** YAML；
+5. 有记录且 `enabled=true`、`client_id` 与 `client_secret_cipher` 齐全 → 用企业记录接管，端点与承接页的空值逐字段回退 YAML。
+
+**运维要点：不要把未启用或不完整的记录留在库里。** 上面列表的第 4 条就是 §3.5 矩阵中「单租户存在记录但 `enabled=false`」的实际后果：该渠道**彻底不可用**，而且**不会回退 YAML**——即使 `application.yml` 里配了完整的 `mini.app-id` / `mini.app-secret`，也不会被使用。一条残缺或未启用的记录会静默覆盖 YAML 配置，症状与「什么都没配」不同（后者在单租户下反而能正常回退）。排查时先确认记录是否存在、是否启用、凭据是否完整，再怀疑 YAML。
+
+两个容易混淆的开关必须区分开：
+
+| 开关 | 载体 | 是否影响运行时 |
+|---|---|---|
+| `nebula.auth.oauth2.providers.wechat.enabled` | `application.yml` | **不影响**。仅被启动期 `WechatOAuth2Properties.validate()` 读取，`false` 时连自检都跳过 |
+| `login.oauth2.provider.wechat.enabled` | 参数中心 `sys_param` | **影响**。必须与 `login.oauth2.enabled` 同时为 `true`，否则微信登录整体关闭 |
+
+最后，企业记录与 YAML 的关系是**整渠道覆盖凭据 + 字段级兜底端点**：
+
+- 一旦命中企业记录，`app-id` / `app-secret`（即 `client_id` / `client_secret_cipher`）**只取企业记录**，不存在「记录里 AppSecret 为空就回退 YAML 的 AppSecret」这种逐字段凭据兜底；凭据不全即该渠道不可用（`OAuth2ProviderSettings.isComplete()`，`OAuth2ProviderSettings.java:22-25`）；
+- 端点类字段（`userinfo_url` / `token_url` / `config_json` / `authorize_url` / `scope` / `frontend_callback_uri`）留空时才逐字段回退 YAML 默认值（`WechatOAuth2ProviderClient.java:384-390`、`:412-419`）。
+
+### 3.7 企业配置记录接口的凭据完整性字段
+
+`GET /api/auth/tenant/oauth2-providers` 的响应项新增两个只读字段（`TenantOAuth2ProviderDto.java:26-36`），供企业设置页直接展示「这条记录自己是否可用」：
+
+| 字段 | 类型 | 含义 |
+|---|---|---|
+| `credentialComplete` | `boolean` | 记录自身是否完整。`false` 表示该记录**凭据不完整或未启用**，在当前配置下该渠道不可用 |
+| `missingFields` | `string[]` | 缺失项的中文标签，与保存期校验的报错文案同源（如 `["AppSecret", "授权码换会话地址（jscode2session）"]`）；记录已停用时为 `["未启用"]`；`credentialComplete=true` 时为空数组，不返回 `null` |
+
+判定规则（`TenantOAuth2ProviderServiceImpl.java:178-210`、`:347-349`）：
+
+- 公共前提：`enabled=true` 且 `clientId`、`clientSecretCipher` 均非空；
+- `wechat + MINI` 额外要求 `userinfoUrl`（jscode2session）、`tokenUrl`（access_token）、`configJson`（手机号接口）均非空；
+- `wechat + WEB` 额外要求 `redirectUri`、`scope` 非空；
+- `github + WEB` 额外要求 `redirectUri` 非空。
+
+**它表达的是「记录自身是否完整」，不代表运行时可用性。** 运行时可用性还要叠加 §3.6 的两道系统参数门：记录完整但 `login.oauth2.enabled` 或 `login.oauth2.provider.wechat.enabled` 为 `false` 时，渠道依然不可用。反过来，`credentialComplete=false` 时渠道一定不可用（单租户有记录即不回退 YAML，多租户本就不回退）。因此企业设置页的「凭据状态」列反映的只是记录侧问题：显示「完整」不代表渠道一定可用（还要看两道系统参数门），显示「不可用」则渠道一定不可用。
 
 ---
 
