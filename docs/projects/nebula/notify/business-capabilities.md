@@ -23,6 +23,7 @@ tags: [nebula, notify, usage]
 | `NOTIFY_CATEGORY_CREATE` / `EDIT` / `DELETE` / `QUERY` | 通知类别增/改/删/查 |
 | `NOTIFY_SEND` | 发送通知、测试邮件 |
 | `NOTIFY_RECORD_VIEW` | 发送记录查询 |
+| `NOTIFY_RECORD_DELETE` | 发送记录批量删除 |
 
 ### 接口权限（`NotifyApiCodes`，登记在 `auth_api`，无界面控件）
 
@@ -135,9 +136,16 @@ tags: [nebula, notify, usage]
 
 三者区分开，「通知没到」才能判断到底是被用户关掉了、还是发送真的失败。
 
-**接口**：`GET /api/notify/records/{id}`、`POST /api/notify/records/page`
+**能清理历史记录**
 
-**权限码**：`NOTIFY_RECORD_VIEW`
+- 管理端支持**按 ID 列表批量删除**发送记录（`DELETE /api/notify/records/batch`），用于清理积压的投递日志。
+- 删除范围只有「记录本身 + 该记录下的逐设备推送明细」（`sys_notify_push_record_detail`，明细只按 `record_id` 关联、没有外键，必须同步清理否则留下孤儿行）。
+- **已投递的站内信不随记录删除**：站内信是接收人收件箱里的消息，记录只是排障日志，删记录不该把用户的消息一起拿走（此时站内信的 `record_id` 指向已删除记录，属预期）。
+- 接口返回**实际删除条数**而非提交条数：勾选后记录可能已被其他管理员删掉，回执按提交数报会骗人。
+
+**接口**：`GET /api/notify/records/{id}`、`POST /api/notify/records/page`、`DELETE /api/notify/records/batch`
+
+**权限码**：`NOTIFY_RECORD_VIEW`（查看）、`NOTIFY_RECORD_DELETE`（批量删除）
 
 ---
 

@@ -13,6 +13,7 @@ format: md
 
 ### Added
 
+- `nebula-notify` / `web` / `docs/sql`：**通知记录支持批量删除**。此前通知记录页只能看不能清，投递日志会无限堆积。新增 `DELETE /api/notify/records/batch`（请求体 `{"ids": [...]}`，返回**实际删除条数**，不是提交条数——勾选后记录可能已被其他管理员删掉）、服务方法 `INotifyService#removeNotifyRecords`（local + remote 双实现）、前端 `notifyService.deleteNotifyRecords`，列表加勾选列与「批量删除」按钮（`Popconfirm` 二次确认，按 1~N 条如实回执）。删除范围是「记录 + 该记录下的逐设备推送明细」（`sys_notify_push_record_detail` 只按 `record_id` 关联、无外键，必须级联清理否则留孤儿行）；**已投递的站内信不随记录删除**——那是接收人收件箱里的消息，不属排障日志。新增按钮权限码 `NOTIFY_RECORD_DELETE`（菜单「通知记录」），`init/02-init-data.sql` 与 `unreleased/03-notify-record-delete-button.sql` 均已补登记并给 `ADMIN` 授权；无 DDL 变更。
 - `nebula-storage` / `docs`：腾讯云 COS 新增 `endpoint` 配置（env `NEBULA_STORAGE_TENCENT_COS_ENDPOINT`，租户级复用 `storage.backend.endpoint`）；留空仍按 region 推导官方域名，非空时正式区读写与预签名直链统一走该自定义域名，`region` 仍必填；上传与分片只写本地临时区不受影响；无 DDL、无前端改动。
 
 ### Changed
@@ -37,6 +38,8 @@ format: md
 
 ### Fixed
 
+- `web`：**公告管理的「刷新」按钮去掉**。工具栏里的按钮与表格右上角 `options.reload` 的刷新图标是同一能力（都走 `actionRef.reload()`），并排摆着只会让人猜「两个刷新有什么区别」。保留右上角那个，工具栏只留「新建公告」。
+- `web`：**新建/编辑公告抽屉的发布时间、过期时间改用 antd `DatePicker`**。此前这两个字段是原生 `<input type="datetime-local">`：面板样式与全站 antd 组件不一致（截图里就是一个浏览器原生日历弹层），且原生控件在各浏览器下的显示格式、清除方式都不同步。现在统一为 `DatePicker showTime`，`format` 固定 `YYYY-MM-DD HH:mm:ss`（与后端契约一致），表单值在 `AnnouncementFormValues` 内为 Dayjs，`toAnnouncementRequest` 提交前格式化、`toAnnouncementFormValues` 回显时解析，日期面板的月份/星期文案沿用 `NebulaProvider` 已同步的 dayjs locale。
 - `nebula-notify` / `web`：**通知模板详情补齐渠道变体的 `enabled` 字段，已启用的钉钉等渠道不再回显为「禁用」**。链路在 local 层断掉：`NotifyTemplateVariantEntity`（`is_enabled`）→ `NotifyTemplateVariantDto.enabled` 都带值，但 `NotifyTemplateVariantResp` 漏声明该字段，`NotifyLocalConverter.toResp` 的 MapStruct 映射把它静默丢弃，`GET /api/notify/templates/{id}` 的 `variants[]` 里没有 `enabled`；前端 `mergeVariantsWithDefaults` 原样透传接口数据，开关读到 `undefined` 即渲染为关闭，更严重的是再次保存时 `normalizeVariants` 的 `variant.enabled ?? false` 会把存量「已启用」直接写回 `false`，等于静默关闭渠道。本次仅在响应模型补 `enabled` 并加契约测试锁定详情接口必须透出该字段，接口其余字段与数据库不变。
 - `nebula-auth`：**渠道取值统一按大写归一化，修复多租户 + PostgreSQL 下小程序 AppID 反查租户匹配失败、登录返回 `15002`**。此前写链已把渠道归一化为大写存入 `auth_tenant_oauth2_provider`，而 `WechatOAuth2Controller` 仍以小写字面量 `mini` 直传 DAO 做 `eq(channel, ...)` 查询，`OAuth2MiniTenantResolverImpl` 入口也没有归一化；MySQL 的大小写不敏感排序规则掩盖了差异，PostgreSQL 上按 AppID 反查租户匹配不到记录，小程序登录直接失败。本次在 `OAuth2MiniTenantResolverImpl` 入口按 `trim().toUpperCase(Locale.ROOT)` 归一化（与写链规则一致），`WechatOAuth2Controller` 的渠道常量改为引用 `OAuth2LoginParamKeys.CHANNEL_MINI` / `CHANNEL_WEB`，消除同一渠道的大小写两套常量。无接口与数据结构变更。
 - `nebula-auth`：**`getAuthConfig` 增加渠道判定诊断日志，线上可自证微信渠道为何不可用**。此前 `wechatMiniEnabled=false` 只能翻代码推断是哪一道门拦下，系统参数两个开关、provider 装配、渠道配置可用性四个门都没有任何日志。本次在 `LoginServiceImpl#getAuthConfig` 输出一条聚合 `debug` 日志，包含 `oauth2Enabled`、`wechatEnabled`、`hasWechatProvider`、`wechatWebAvailable`、`wechatMiniAvailable` 五个布尔值，键名固定便于 grep；按日志规范不输出任何凭据、密文或客户端信息。

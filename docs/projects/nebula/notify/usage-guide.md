@@ -217,6 +217,17 @@ curl -X POST "http://{host}/api/notify/records/page" \
 
 排查「用户说没收到通知」时，先看是 `SUPPRESSED`（用户自己关了该类别或该渠道）还是 `FAILED`（真的发失败）。
 
+清理历史记录用批量删除（需要 `NOTIFY_RECORD_DELETE`，返回实际删除条数）：
+
+```bash
+curl -X DELETE "http://{host}/api/notify/records/batch" \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{ "ids": ["0196dbe0a6f17000a0000000000a0001", "0196dbe0a6f17000a0000000000a0002"] }'
+```
+
+删除只清记录与逐设备推送明细，已投递的站内信仍在接收人的收件箱里。
+
 ---
 
 ## 4. 站内信与公告
