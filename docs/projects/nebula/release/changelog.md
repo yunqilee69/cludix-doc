@@ -18,6 +18,13 @@ format: md
 
 ### Changed
 
+- `nebula-storage` / `nebula-auth` / `web` / `mobile` / `packages/client-sdk`：**文件绑定重构——绑定只在后端业务保存流程内完成（破坏性变更）**。此前文件绑定是「上传成功后前端立刻二次调用」的独立步骤，正确性依赖前端时序：会在业务保存成功之前就产生正式文件，且缺幂等、缺归属校验。本次改为：
+  - **删除公共端点 `POST /api/storage/upload-tasks/{taskId}/bind`**，同时删除 `StorageFeignClient` 中 `POST /files/by-source` 的声明（服务端从未实现该端点，remote 模式调用是 latent 404，按「删声明不补实现」处理）。`/api/storage/**` 其余接口不变。
+  - 业务保存接口改用 `uploadTaskIds`：`PUT /api/auth/profile` 收 `{"uploadTaskIds":{"avatar":["<taskId>"]}}`（唯一合法 key 为 `avatar`，且必须恰好 1 个）；`PUT /api/auth/tenant/profile` 收 `logo` / `login-logo` / `favicon` / `login-background` 四个资源位（各恰好 1 个）。绑定与用户/租户资料保存在同一事务内，绑定失败整单回滚；多值或未知资源位分别返回 `10033`（个人）/ `19024`（租户）。不传 `uploadTaskIds` 时行为与改造前完全一致。
+  - 归属由服务端派生，客户端不可传入：`sourceScope=USER` → `sourceId=当前用户`，`TENANT` → `sourceId=当前租户`；内部命令 `BindUploadTasksCommand` 从契约上不含 `sourceId` 字段。批量绑定走新内部端点 `POST /api/storage-internal/upload-tasks/bind`（服务间 HMAC 签名认证、不登记网关路由、不使用用户权限码），一次最多 10 个 `taskId`，返回顺序与入参一致，整批同一事务；幂等键为 `taskId`（重复绑定返回原 `fileId`，改归属 `24003`，上传人不符 `24029`，超上限 `24030`），失败不再把任务置 `FAILED`、可重试。
+  - `getStorageFileBySource` 在同一归属存在多条正式文件时不再抛 `IllegalStateException`（违反异常规范），改为返回最新一条（`create_time DESC, id DESC`）。
+  - 前端 / 移动端 / 共享包移除 bind 能力：`web/src/api/storage.ts`、`web/src/types/storage.ts`、`mobile/src/storage/upload-service.ts`、`packages/client-sdk` 中的 `bindUploadTask` 与 `BindUploadTaskReq` 全部删除；`ne-upload` 组件改为「上传后返回 `taskId` + 本地预览，业务保存时提交 `uploadTaskIds`」。
+  - **升级注意事项**：仓库内调用方已全部改造；仓库外自研前端、脚本或第三方集成若仍在调 `POST /api/storage/upload-tasks/{taskId}/bind`，**会直接 404**，必须改为在业务保存接口提交 `uploadTaskIds`（已确认仓库外无调用方，因此不做 deprecated 过渡）。remote 模式下「绑定成功但业务保存失败」会遗留无人引用的正式文件（local 模式同事务无此问题），属已知残余风险，靠上传临时区保留期与运维核对处理。
 - `web` / `nebula-auth`：**企业 OAuth2 配置从「看起来能配」变成「配了就生效」**。此前企业设置里的第三方登录表单只有 Provider/渠道必填，Client ID、Secret、回调地址等真正必需的字段既无必填标识也无用途说明；`TenantOAuth2ProviderConfigResolver` 在单租户下直接返回 `null`，界面保存的凭据从未被读取；`frontendCallbackUri` 保存成功但 Controller 启动时固定吃 YAML，登录后的 302 仍跳 YAML 里的前端承接页。本次改造：
   - 表单按「基本信息 / 授权与回调 / 高级端点」分组，按 Provider + 渠道只显示有效字段，字段带真实必填标识、用途说明、示例占位与明确错误提示；GitHub 渠道只剩 Web，从微信小程序切到 GitHub 自动回 Web，前后端都拒绝 `github + MINI` 等非法组合（`19005`，消息列出可用渠道）；
   - 启用时才严格要求凭据完整（Client ID/AppID、Secret、Web 回调地址、微信 Web 的 Scope、小程序的 jscode2session / access_token / 手机号三个端点），禁用状态允许保存不完整草稿；编辑已有配置时 Secret 输入框留空表示保留原值，填入新值则覆盖，接口仍只返回 `hasClientSecret`；
@@ -45,6 +52,16 @@ format: md
 - `nebula-auth`：**`getAuthConfig` 增加渠道判定诊断日志，线上可自证微信渠道为何不可用**。此前 `wechatMiniEnabled=false` 只能翻代码推断是哪一道门拦下，系统参数两个开关、provider 装配、渠道配置可用性四个门都没有任何日志。本次在 `LoginServiceImpl#getAuthConfig` 输出一条聚合 `debug` 日志，包含 `oauth2Enabled`、`wechatEnabled`、`hasWechatProvider`、`wechatWebAvailable`、`wechatMiniAvailable` 五个布尔值，键名固定便于 grep；按日志规范不输出任何凭据、密文或客户端信息。
 - `nebula-auth` / `web`：**企业 OAuth2 配置列表新增 `credentialComplete` / `missingFields`，「凭据不完整或未启用导致渠道不可用」在页面上可见**。此前列表只看得到「启用」与「Secret 已配置」，无法判断记录凭据是否齐全，而单租户下「有记录即不回退 YAML」会让一条残缺或停用的记录静默锁死渠道，用户只能靠猜。本次 `GET /api/auth/tenant/oauth2-providers` 响应项增加 `credentialComplete`（记录自身是否完整）与 `missingFields`（缺失项中文标签，停用记录为 `["未启用"]`），判定规则与保存期必填校验复用同一组标签常量，两处文案不会各自漂移；前端第三方登录列表据此展示「完整 / 不可用」状态并在提示中列出缺失项。仅新增字段，`POST` 与 `init` 契约不变。
 - `nebula-notify`：`PushDeviceControllerContractTest` 的权限码收集先 `Map.entry` 再过滤 null，遇到面向当前用户的无权限码端点会直接 NPE；改为先过滤再收集。
+- `nebula-notify` / `web`：**通知发送记录恢复可读：详情不再必然 500、名称在微服务架构下能回填、群机器人接收人落库即脱敏**。三个问题此前同时暴露在同一个页面上：
+  - **详情接口对每条记录都 500**：`target_id` 与 `receiver_user_id` 在写记录时互斥（用户型渠道无 `targetId`、群机器人渠道无 `receiverUserId`），而 `GET /api/notify/records/{id}` 用 `List.of(...)` 包住可能为 `null` 的值，必然抛 `NullPointerException`，被全局异常兜底成 500，前端只能显示「发送记录详情加载失败」。改为先过滤空值再复用既有的批量名称解析（详情与列表两条路径由此统一），用户型记录、群机器人记录、两者皆空的历史脏数据都能正常返回，名称缺失时为 `null` 而不是异常。
+  - **微服务部署下接收人名称恒为空**：原链路逐用户调用 `/api/auth/users/{id}`，而唯一的 Feign 拦截器从不透传 `Authorization`，该端点又被安全链要求登录 → 401 → 异常被吞成一条不带堆栈的 WARN。现改为对整页去重后的 ID **一次**调用 auth 服务的内部批量用户查询端点（`/api/auth/internal/users/batch`，服务间签名认证），预期分支（用户已删除/不存在）安静跳过，其它异常按 ERROR 带堆栈记录但不阻断列表与详情。
+  - **群机器人接收人泄露 webhook 地址**：此前把 `target.getEndpointUrl()` 原样写入 `sys_notify_record.receiver`，前端在 `targetName` 为空时又回退显示 `receiver`，页面因此出现带 `access_token` 的完整机器人地址。现改为**写入时就脱敏**（保留 `scheme://host/path`，`access_token` / `key` / `hook_id` / `sign` 等查询参数值替换为 `***`），前端不再回退 `receiver`（缺名时显示渠道名或 `-`）。
+  - 升级注意事项：不做历史数据迁移，改造前落库的记录 `receiver` 可能仍是完整地址——页面已不回退显示，但直接查库/导出仍可见，需要清理请另开脚本；接口响应字段与结构不变（无新增字段）。
+- `nebula-notify` / `docs/sql`：**钉钉群机器人渠道从「必然发送失败」修复为可用：列宽 + 加签 + 错误诊断**。
+  - **列宽**：`sys_notify_record.channel_type` 由 `VARCHAR(20)` 加宽到 `VARCHAR(32)`（与 `sys_notify_template_variant` / `sys_notify_channel_target` 对齐）。钉钉渠道类型 `DINGTALK_GROUP_WEBHOOK` 有 22 个字符，而发送流程是「先落记录、再发请求」，20 位宽让钉钉发送在落库阶段就失败（MySQL 严格模式 `1406 Data too long` / PostgreSQL `22001 value too long`），请求根本发不出去；企业微信（19）与飞书（20）恰好通过。
+  - **加签**：`sys_notify_channel_target` 新增密文列 `sign_secret_cipher`；渠道目标接口新增**只写** `signSecret` / `clearSignSecret` 与**只读** `hasSignSecret`，任何响应都不回显密钥明文或密文。密钥由 `nebula-base-crypto` 以「表 + 列 + 行 id + 租户」为作用域加密（`enc:` 前缀，密文搬到别的行解不开）；发送时按钉钉规则 `HmacSHA256(key=secret, data=timestamp + "\n" + secret)` → Base64 → URL 编码，把 `timestamp` / `sign` 附加到 webhook 地址；**未配置密钥的机器人按未加签发送**（钉钉安全设置的关键词/IP 形态）。编辑表单留空即保留原值，清除用 `clearSignSecret=true`（前端本轮未提供清除入口，契约已支持），两者同时为真返回 `22049` 且不落库。
+  - **错误诊断**：按渠道区分失败码——企业微信 `22023`（文案本来就正确）、钉钉 `22047`、飞书 `22048`，另新增 `22049` 覆盖加签密钥加解密失败与参数冲突。`fail_reason` 写入 `渠道: http=…, errcode=…, errmsg=…`（飞书 `code` / `msg` 统一映射），平台消息先脱敏再截断；日志与 `fail_reason` 都不含完整地址、`access_token` 或密钥。
+  - **升级注意事项（存量库必须先执行脚本）**：先执行 `docs/sql/unreleased/{mysql,postgresql}/04-notify-record-channel-type-width.sql`（列宽）与 `05-notify-channel-target-sign-secret.sql`（密文列），否则钉钉发送仍会在落库阶段失败、保存加签密钥会因缺列报错。加签还需 `nebula.crypto.keys`（独立部署的 `nebula-notify-service` 必配），未配置时保存密钥 fail-closed 返回 `22049`，不会退化成存明文。回滚代码可保留新增列（不生效、不丢密钥）；把 `channel_type` 改回 20 位宽前须确认存量值均 ≤ 20 字符，否则缩窄会失败或截断数据。
 
 ## [0.3.0] - 2026-11-11
 

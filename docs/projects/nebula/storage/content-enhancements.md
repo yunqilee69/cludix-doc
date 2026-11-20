@@ -95,7 +95,7 @@ nebula:
 
 ### 2.3 生成与去重
 
-- 生成时机：`bindUploadTask` 保存正式文件后调用 `generateVariants`；已存在 `thumb` 派生则跳过。
+- 生成时机：绑定（`bindUploadTasks`）保存正式文件后调用 `generateVariants`；已存在 `thumb` 派生则跳过。
 - 内容按 `(fileHash, variant)` 寻址去重：多个业务引用同一张图只存一份缩略图，`contentKey` 形如 `variant/thumb/<fileHash>.jpg`。
 
 ### 2.4 防解压炸弹
@@ -137,7 +137,7 @@ nebula:
 
 ### 3.2 迁移期间拒写
 
-`StorageMigrationGuard` 在迁移进行中拒绝**正式写入**（`bindUploadTask` 开头 `requireWritable()`，命中抛 `MIGRATION_IN_PROGRESS`，`24024`）。上传到临时区（简单上传 / 分片 / complete）不经过该闸门，只有正式写入被拒。守卫是**进程内状态**（`AtomicBoolean`），不跨实例共享——迁移的前提是迁移期间应用单实例运行；多实例部署需自行安排整体停写。
+`StorageMigrationGuard` 在迁移进行中拒绝**正式写入**（`bindUploadTasks` 开头 `requireWritable()`，命中抛 `MIGRATION_IN_PROGRESS`，`24024`）。上传到临时区（简单上传 / 分片 / complete）不经过该闸门，只有正式写入被拒。守卫是**进程内状态**（`AtomicBoolean`），不跨实例共享——迁移的前提是迁移期间应用单实例运行；多实例部署需自行安排整体停写。
 
 ### 3.3 分阶段步骤
 

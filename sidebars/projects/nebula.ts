@@ -28,6 +28,7 @@ const nebulaSidebar: SidebarConfig = [
           'projects/nebula/design/layered-design',
           'projects/nebula/design/package-design',
           'projects/nebula/design/crypto',
+          'projects/nebula/design/internal-service-auth',
           'projects/nebula/design/multitenancy-plan',
           'projects/nebula/design/observability-plan',
         ],

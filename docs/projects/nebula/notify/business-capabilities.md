@@ -90,10 +90,23 @@ tags: [nebula, notify, usage]
 
 - 维护群机器人投递端点（`target_name` / `channel_type` / `endpoint_url` / `config_json`），供三种群机器人通道使用。
 - 创建、更新、删除、查询、分页。
+- **钉钉群机器人支持加签**：请求体可提交 `signSecret`（新密钥，只写）与 `clearSignSecret`（显式清除，只写），响应只返回 `hasSignSecret`（布尔），任何响应都不回显密钥明文或密文。
+
+**怎么配加签密钥（三条语义，缺一条就会误操作）**
+
+| 入参组合 | 行为 |
+| --- | --- |
+| `signSecret` 有值、`clearSignSecret` 空或 `false` | 加密后写入密钥列（覆盖原值） |
+| `signSecret` 为 `null` 或空白、`clearSignSecret` 空或 `false` | **保留原值**——编辑表单留空即「不改动已配密钥」 |
+| `signSecret` 为 `null` 或空白、`clearSignSecret=true` | 清除密钥，之后按未加签发送 |
+| `signSecret` 有值、`clearSignSecret=true` | 参数冲突，返回 `CHANNEL_TARGET_SIGN_SECRET_INVALID`（`22049`）且不落库 |
 
 **不能做什么**
 
 - **`PUSH` 不能建为渠道目标**——推送是用户维度通道，不走渠道目标；提交会得到 `CHANNEL_TARGET_CHANNEL_UNSUPPORTED`（22039）。
+- **只有钉钉渠道接受密钥**：企业微信 / 飞书提交非空 `signSecret` 返回 `22049`，不会「存下来但永远用不上」。
+- **密钥配不进去时不要绕过**：加密依赖 `nebula.crypto.keys`（见[配置说明](./configuration)），未配置时保存失败并返回 `22049`，不会退化成存明文。
+- `config_json` 不是密钥容器：它会被详情/分页接口原样返回，加签密钥只能走专用密文列。
 
 **接口**：`POST /api/notify/channel-targets`、`PUT /{id}`、`DELETE /{id}`、`GET /{id}`、`POST /page`
 
@@ -115,6 +128,13 @@ tags: [nebula, notify, usage]
 - 被偏好抑制的通道不投递；但会**照常落一条记录**并标注原因。
 - `SendNotifyCommand.categoryCode` **已废弃并被忽略**（传了只打 WARN）：类别只认模板上的值，临时改判定请改模板。
 
+**群机器人发送失败怎么读**
+
+- 错误码按渠道区分，不再共用一条文案：企业微信 `WEBHOOK_SEND_FAILED`（`22023`）、钉钉 `DINGTALK_SEND_FAILED`（`22047`）、飞书 `FEISHU_SEND_FAILED`（`22048`）。看到哪条码就知道是哪个渠道发不出去。
+- `fail_reason` 带平台诊断信息，形如 `DINGTALK_GROUP_WEBHOOK: http=200, errcode=310000, errmsg=sign not match`：`http` 是平台返回的 HTTP 状态，`errcode` / `errmsg` 是平台错误码与错误消息（飞书为 `code` / `msg`，统一映射到 `errcode` / `errmsg` 展示），平台消息超长会先脱敏再截断。
+- **`fail_reason` 与日志都不含 webhook 地址、`access_token`、`sign` 或密钥**：钉钉加签不通过要看 `errcode=310000` 而不是去翻地址；密钥配错时按渠道区分处理（配置无效 `22049`）。
+- 钉钉渠道配置了加签密钥时会自动附加 `timestamp` / `sign` 查询参数，未配置则按未加签发送——「配了密钥才验签」是钉钉侧安全设置的两种形态，不是代码开关。
+
 **接口**：`POST /api/notify/send`（`INotifyService.sendNotify`）
 
 **权限码**：`NOTIFY_SEND`
@@ -127,14 +147,21 @@ tags: [nebula, notify, usage]
 
 - 按记录 ID 查详情、分页查询，看到每个通道/接收人的 `send_status`、`fail_reason`、`subject_text` / `content_text`。
 - 记录状态 `NotifyRecordStatus`：`SUCCESS` / `FAILED` / `SUPPRESSED`。
+- 列表与详情都会回填两个只读展示字段：`receiverUserName`（用户型渠道）与 `targetName`（群机器人渠道）。单体部署由本地用户服务解析；微服务部署走 auth 服务的内部批量用户查询端点（`/api/auth/internal`，服务间签名认证，见[服务间认证设计](../design/internal-service-auth)）。用户已被删除等预期情况只留空名、不中断查询。
+- **群机器人渠道的 `receiver` 落库即脱敏**：只保留 `scheme://host/path`，`access_token` / `key` / `hook_id` / `sign` 等查询参数的值替换为固定掩码 `***`。原始地址只存在于渠道目标表里，接口与页面都拿不到带凭据的地址。
 
 **怎么读这些状态**
 
 - `SUCCESS`：实际投递成功。
-- `FAILED`：投递失败（发送异常、厂商拒绝等）。
+- `FAILED`：投递失败（发送异常、厂商拒绝等），`fail_reason` 形如 `渠道: http=…, errcode=…, errmsg=…`。
 - `SUPPRESSED`：**被订阅偏好抑制**，`fail_reason` 取值见 `NotifyPreferenceReasons`（`USER_DISABLED` / `CHANNEL_NOT_ALLOWED` / `RESOLVE_FAILED`）。
 
 三者区分开，「通知没到」才能判断到底是被用户关掉了、还是发送真的失败。
+
+**展示名缺失时的行为（不要当成缺陷）**
+
+- 名称为 `null` 时前端显示渠道名或 `-`，**不会回退显示 `receiver`**：群机器人记录的 `receiver` 是脱敏地址，回退只会把地址怼到页面上。
+- 历史记录（本次改造前落库）里的 `receiver` 可能仍是完整地址，本次不做数据迁移，靠「前端不回退」消除页面暴露；需要清理历史数据请另开脚本。
 
 **能清理历史记录**
 

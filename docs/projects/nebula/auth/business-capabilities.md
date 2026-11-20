@@ -214,9 +214,53 @@ GET /api/auth/current-user
 
 ---
 
-## 8. 典型业务场景
+## 8. 个人资料与企业资料保存（资源位绑定）
 
-### 8.1 管理后台统一登录入口
+个人资料与租户资料里的图片字段（头像、Logo、favicon、登录页背景）都走「先上传拿 `taskId`、保存时由后端绑定」的流程，**前端不再有单独的绑定步骤**。
+
+### 8.1 头像：`PUT /api/auth/profile`
+
+```json
+{
+  "nickname": "张三",
+  "email": "zhangsan@example.com",
+  "uploadTaskIds": { "avatar": ["<taskId>"] }
+}
+```
+
+- `uploadTaskIds` 的**唯一合法 key 是 `avatar`**，且其 value 必须**恰好 1 个** `taskId`（头像资源位是单值）。
+- 后端在保存流程内绑定（归属由服务端按登录态派生为当前用户），用正式文件的下载地址覆盖 `avatar` 字段；绑定与用户保存同一次事务，绑定失败整单回滚。
+- 不传 `uploadTaskIds` 时行为与改造前一致（`avatar` 字段按请求体原样保存）。
+- 多值、空值或未知 key 返回 `PROFILE_ASSET_TASK_INVALID`（`10033`，文案「该资源位只能上传一个文件」），`user.avatar` 与正式文件均不变更。
+
+### 8.2 企业资料图：`PUT /api/auth/tenant/profile`
+
+```json
+{
+  "name": "示例科技有限公司",
+  "uploadTaskIds": {
+    "logo": ["<taskId-1>"],
+    "login-logo": ["<taskId-2>"],
+    "favicon": ["<taskId-3>"],
+    "login-background": ["<taskId-4>"]
+  }
+}
+```
+
+- 合法 key 恰为四个资源位：`logo`、`login-logo`、`favicon`、`login-background`，**每个 key 必须恰好 1 个** `taskId`；四个 key 可只传其中一部分。
+- 绑定归属由服务端从租户上下文派生（不读请求体里的任何 `sourceId`），回填到 `tenant.logo` / `branding.loginLogo` / `branding.favicon` / `branding.loginBackground`。
+- 任一资源位传多个、传空或出现未知 key → `TENANT_PROFILE_INVALID`（`19024`），且**先整批校验再绑定**：任一资源位非法时不会产生任何正式文件。
+- 需要 `TENANT_PROFILE_UPDATE` 权限码。
+
+### 8.3 为什么由后端绑定
+
+绑定的正确性依赖「与业务保存同一次用户操作」，因此公共绑定端点 `POST /api/storage/upload-tasks/{taskId}/bind` 已删除（破坏性变更）：前端只提交 `taskId`，绑定由后端在保存流程内完成，归属由服务端派生，客户端无法通过传 `sourceId` 把文件绑到别人名下。上传任务的幂等、上限与错误码见[存储绑定转正](../storage/business-capabilities)。
+
+---
+
+## 9. 典型业务场景
+
+### 9.1 管理后台统一登录入口
 
 例如：
 
@@ -224,7 +268,7 @@ GET /api/auth/current-user
 - 登录后加载当前用户、菜单和权限
 - 页面按权限控制菜单和按钮显隐
 
-### 8.2 多主体资源授权
+### 9.2 多主体资源授权
 
 例如：
 
@@ -232,7 +276,7 @@ GET /api/auth/current-user
 - 给角色授权，再把角色分配给用户
 - 给组织授权，让组织下成员继承资源范围
 
-### 8.3 微信扫码登录后台
+### 9.3 微信扫码登录后台
 
 例如：
 
@@ -241,7 +285,7 @@ GET /api/auth/current-user
 - 前端轮询登录状态直到拿到 token
 - 管理员在个人信息页扫码绑定微信，小程序端免绑定直接互通
 
-### 8.4 安全治理与运维
+### 9.4 安全治理与运维
 
 例如：
 

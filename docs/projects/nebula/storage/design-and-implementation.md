@@ -166,17 +166,20 @@ storage 模块最关键的实现设计，是把上传拆成两个阶段。
 
 ### 4.4 绑定正式文件
 
-`StorageServiceImpl#bindUploadTask` 的核心逻辑是：
+`StorageServiceImpl#bindUploadTasks`（批量，业务保存流程实际调用的入口）的核心逻辑是：
 
-1. 读取上传任务并确认状态为 `COMPLETED`
-2. 校验 `sourceEntity` 和 `sourceId`
-3. 检查该任务是否已经绑定过正式文件
-4. 按 `fileHash + fileSize` 查询是否已有可复用正式文件
-5. 若可复用，则复用已有 `storageKey`
-6. 若不可复用，则将 temp 内容 promote 到 formal 区
-7. 创建 `storage_file` 记录
-8. 回填上传任务的业务归属与结果文件 ID
-9. 发布 `StorageUploadTaskBoundEvent`
+1. 归一化并去重 `taskIds`（保持入参顺序，超过 10 个抛 `24030`）
+2. 按 `sourceScope` 派生 `sourceId`（`USER → operatorUserId`、`TENANT → tenantId`），命令里没有 `sourceId` 字段
+3. 逐个 `taskId` 判定幂等：先查正式文件——命中且 `(sourceEntity, sourceId, sourceType)` 一致则返回既有 `fileId`；三元组不一致抛 `24003`
+4. 未命中才读取上传任务，确认状态为 `COMPLETED` 且上传人与操作人一致（否则 `24029`）
+5. 按 `fileHash + fileSize` 查询是否已有可复用正式文件
+6. 若可复用，则复用已有 `storageKey`
+7. 若不可复用，则将 temp 内容 promote 到 formal 区
+8. 创建 `storage_file` 记录
+9. 回填上传任务的业务归属与结果文件 ID
+10. 发布 `StorageUploadTaskBoundEvent`
+
+整批在同一事务内：任一任务失败即整批回滚，且**不把任务置 `FAILED`**（任务保持 `COMPLETED` 可重试），残留临时内容交给上传临时区保留期清理。对外不再暴露公共绑定端点，服务间通过签名保护的 `POST /api/storage-internal/upload-tasks/bind` 调用。
 
 其中一个很重要的实现点是：
 

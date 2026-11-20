@@ -6,12 +6,13 @@ tags: [nebula, notify, configuration]
 
 # Nebula Notify 配置说明
 
-`nebula-notify` 的配置分四类：
+`nebula-notify` 的配置分五类：
 
 1. **静态配置** `nebula.notify.*`（`NotifyProperties`）：运行模式、缓存、推送。
 2. **系统参数** `notify.email.*`：邮件发送配置，运行期从参数中心读取。
 3. **模板渲染配置** `nebula.template.*`：模板目录、后缀、编码、缓存与启动校验，与事务邮件共用。
 4. **远程配置** `nebula.notify.remote.*`：微服务消费者使用。
+5. **跨服务依赖配置**：`nebula.internal-auth.*`（服务间内部调用签名）与 `nebula.crypto.keys`（落库加密密钥，钉钉加签密钥的前置条件），见 §5、§6。
 
 > **凭据只走环境变量**：APNs 私钥、邮件密码等一律从环境变量注入，**禁止写入配置库、仓库或日志**。
 
@@ -164,7 +165,50 @@ nebula:
 
 ---
 
-## 5. 独立服务示例
+## 5. 服务间内部调用认证（`nebula.internal-auth.*`）
+
+`nebula-base-cloud` 的 `InternalSignatureProperties`（前缀 `nebula.internal-auth`）供**所有会发起或接收内部调用的服务**共用——当前是 `nebula-notify-service`、`nebula-auth-service`、`nebula-storage-service` 三个服务，**三处必须配成同一个密钥**，否则内部调用一律被拒。通知模块用到它是因为「发送记录接收人名称」在远程架构下走 auth 服务的内部批量用户查询端点。
+
+```yaml
+nebula:
+  internal-auth:
+    # 只能由环境变量 NEBULA_INTERNAL_AUTH_SECRET 注入；此处只允许空默认占位
+    secret: ${NEBULA_INTERNAL_AUTH_SECRET:}
+    clock-skew-seconds: 300
+```
+
+| 配置项 | 默认值 | 说明 |
+| --- | --- | --- |
+| `nebula.internal-auth.secret` | 空（未配置） | HMAC 签名密钥，**只走环境变量 `NEBULA_INTERNAL_AUTH_SECRET`**；`application.yml` 里只允许写 `${NEBULA_INTERNAL_AUTH_SECRET:}` 占位，禁止落具体密钥值、禁止给非空默认值 |
+| `nebula.internal-auth.clock-skew-seconds` | `300` | 时间戳允许的偏移窗口（秒），配合 `X-Nebula-Internal-Timestamp` 防重放 |
+
+**缺省即 fail-closed**：密钥为空时应用照常启动，但签名方拒绝发送内部请求、校验方拒绝**全部**内部端点请求，并在启动日志打一条 WARN：「内部调用认证未配置，内部端点将拒绝所有请求」。这不是缺陷而是有意设计——宁可内部能力不可用，也不允许内部端点裸奔。远程架构下的表现是「通知记录接收人名称恒为空」「头像/企业资料图保存直接失败」，排查时先确认该环境变量是否下发。
+
+密钥禁止入库、入仓、入日志；轮换时三个服务需同时更换（没有双密钥过渡期）。签名串与头部契约见[服务间认证设计](../design/internal-service-auth)。
+
+---
+
+## 6. 加密密钥（`nebula.crypto.keys`）——钉钉加签密钥的必配前置
+
+钉钉群机器人的加签密钥以**密文**存储（`sys_notify_channel_target.sign_secret_cipher`，`enc:` 前缀），加解密走 `nebula-base-crypto`。因此**独立部署的 `nebula-notify-service` 必须配置 `nebula.crypto.keys`**（与 `nebula-auth-service`、参数中心同一套密钥管理）：
+
+```yaml
+nebula:
+  crypto:
+    algorithm: aes-gcm
+    active-key-id: "1"
+    keys:
+      - id: "1"
+        secret: ${NEBULA_CRYPTO_KEY_1:}   # 生产密钥只走环境变量，禁止写进仓库/数据库/日志
+```
+
+不配的后果是 **fail-closed**：保存加签密钥时加密失败，接口返回 `CHANNEL_TARGET_SIGN_SECRET_INVALID`（`22049`）并提示检查 `nebula.crypto` 配置——既不会退化成「悄悄存明文」，也不会把明文当密文落库。未配置加签密钥的机器人仍可按未加签方式正常发送，所以「加密密钥没配」表现为「加签配不进去」而不是「通知发不出」。
+
+单体应用由 `nebula-app-starter` 的 `application.yml` 统一配置（模板工程内置开发默认密钥，生产必须用 `NEBULA_CRYPTO_KEY_1` 覆盖）；密钥轮换时保留旧 `key` 条目用于解密历史密文。详见[敏感字段落库加密](../design/crypto)。
+
+---
+
+## 7. 独立服务示例
 
 `nebula-notify-service/src/main/resources/application.yml` 的关键项：
 
@@ -172,12 +216,14 @@ nebula:
 - `nebula.architecture.mode: remote`
 - `nebula.notify.mode: local`
 - `nebula.cache.type: caffeine`、`nebula.cache.default-ttl: 300`
+- `nebula.internal-auth.secret: ${NEBULA_INTERNAL_AUTH_SECRET:}`、`clock-skew-seconds: 300`（与 auth / storage 服务同值）
 
 ---
 
-## 6. 生产环境注意事项
+## 8. 生产环境注意事项
 
 - 推送默认关闭：启用需同时打开总开关并配齐四项 APNs 凭据（只走环境变量）。
-- 邮件密码、APNs 私钥禁止入库入仓入日志。
+- 邮件密码、APNs 私钥、内部调用签名密钥、加签密钥与 `nebula.crypto` 密钥一律禁止入库入仓入日志。
 - 偏好开关默认关闭：分阶段灰度时可用它先落 `category_code` 观察数据，确认后再打开判定。注意关闭是**整体放行**——渠道校验（`CHANNEL_NOT_ALLOWED`）在开关关闭时同样不生效。
 - 关闭总开关是**回退杠杆**：线上推送出问题时关闭 `nebula.notify.push.enabled` 即停止一切推送投递与设备注册，站内信与邮件不受影响。
+- 部署必配项：远程架构下 `NEBULA_INTERNAL_AUTH_SECRET`（三个服务同值）；需要钉钉加签时 `nebula.crypto.keys`。两项缺失都是 fail-closed 而非功能降级。

@@ -181,7 +181,77 @@ curl -X POST "http://{host}/api/notify/send" \
 
 > **`PUSH` 不能配成渠道目标**，它走 `receiverUserIds` 逐用户扇出。
 
-### 2.3 Java 调用
+### 2.3 创建带加签的钉钉群机器人
+
+钉钉群机器人有三种安全设置（自定义关键词 / IP 地址段 / 加签），选**加签**时发送方必须带上 `timestamp` + `sign` 参数，否则钉钉返回 `errcode=310000 sign not match`。平台侧准备步骤：
+
+1. 钉钉群 → 群设置 → 智能群助手 → 添加机器人 → 自定义（通过 Webhook 接入）；
+2. 安全设置勾选**加签**，复制 Webhook 地址与 `SEC` 开头的密钥（密钥只显示一次，先存到密码管理器）；
+3. 把地址与密钥配成通知的渠道目标：
+
+```bash
+curl -X POST "http://{host}/api/notify/channel-targets" \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "targetName": "运维告警群",
+    "channelType": "DINGTALK_GROUP_WEBHOOK",
+    "endpointUrl": "https://oapi.dingtalk.com/robot/send?access_token=xxx",
+    "signSecret": "SECxxxxxxxxxxxxxxxx"
+  }'
+```
+
+- `signSecret` **只写**：提交后接口只回 `hasSignSecret: true`，任何响应都不会回显密钥明文或密文；发送时由后端解密并附加 `timestamp` / `sign`。
+- 安全设置只选关键词或 IP 的机器人**不要传 `signSecret`**（未配置密钥即按未加签发送，与改造前行为一致）。
+- 前置条件：保存密钥依赖 `nebula.crypto.keys`，未配置时返回 `CHANNEL_TARGET_SIGN_SECRET_INVALID`（`22049`）并提示检查加密配置——不会退化成存明文（见[配置说明](./configuration)）。
+
+**编辑时不改密钥**：留空即保留原值。
+
+```bash
+# 只改名称/地址，密钥留空 → signSecret 不传（或传空串），原密钥保持不变
+curl -X PUT "http://{host}/api/notify/channel-targets/{id}" \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "targetName": "运维告警群（新）",
+    "channelType": "DINGTALK_GROUP_WEBHOOK",
+    "endpointUrl": "https://oapi.dingtalk.com/robot/send?access_token=xxx"
+  }'
+```
+
+**清除密钥**（改用关键词或 IP 安全设置时）：
+
+```bash
+curl -X PUT "http://{host}/api/notify/channel-targets/{id}" \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "targetName": "运维告警群",
+    "channelType": "DINGTALK_GROUP_WEBHOOK",
+    "endpointUrl": "https://oapi.dingtalk.com/robot/send?access_token=xxx",
+    "clearSignSecret": true
+  }'
+```
+
+`signSecret` 有值同时又传 `clearSignSecret: true` 属参数冲突，返回 `22049` 且库中密钥不变；清除后 `hasSignSecret` 变为 `false`。
+
+发一条测试消息确认链路：
+
+```bash
+curl -X POST "http://{host}/api/notify/send" \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "channelTypes": ["DINGTALK_GROUP_WEBHOOK"],
+    "templateCode": "ALERT",
+    "templateParams": { "message": "加签链路测试" },
+    "channelTargetIds": { "DINGTALK_GROUP_WEBHOOK": "target-001" }
+  }'
+```
+
+失败时看发送记录的 `failReason`：钉钉渠道失败码是 `22047`，原因形如 `DINGTALK_GROUP_WEBHOOK: http=200, errcode=310000, errmsg=sign not match`——`errcode=310000` 通常意味着密钥与平台上那条机器人的密钥不匹配（重新保存密钥即可），`http=4xx` 看地址是否拼错。记录与日志里都不会出现完整地址和密钥。
+
+### 2.4 Java 调用
 
 业务代码注入 `INotifyService`，构造 `SendNotifyCommand`：
 

@@ -172,9 +172,10 @@ nebula:
 1. 前端选择文件
 2. 调用 `/api/storage/upload`
 3. 后端根据最终文件名推导扩展名与 MIME，并返回临时上传任务详情 `taskId`
-4. 业务表单保存成功
-5. 调用 `/api/storage/upload-tasks/{taskId}/bind`
-6. 保存返回的正式 `fileId`
+4. 业务表单保存时把 `taskId` 放进业务接口的 `uploadTaskIds`（例如个人资料 `PUT /api/auth/profile` 的 `{"avatar":["<taskId>"]}`）
+5. 后端在业务保存流程内完成绑定，用返回的下载地址回填业务字段
+
+> **公共绑定端点 `POST /api/storage/upload-tasks/{taskId}/bind` 已删除**：绑定只在后端业务保存流程内完成，前端不再有「上传后立刻绑定」这一步。自己写业务模块时，请在保存流程里调 `IStorageService#bindUploadTasks`（remote 架构自动走签名保护的 `/api/storage-internal/upload-tasks/bind`），不要指望前端调端点绑定。
 
 适合：
 
@@ -190,8 +191,8 @@ nebula:
 1. 先创建上传任务
 2. 前端循环上传分片
 3. 调用 complete 合并分片，并由后端按最终文件名补齐 MIME
-4. 业务保存成功后调用 bind
-5. 持久化 `fileId`
+4. 业务保存时提交 `uploadTaskIds`，由后端在保存流程内绑定
+5. 持久化业务字段（正式文件的下载地址或 `fileId`）
 
 适合：
 

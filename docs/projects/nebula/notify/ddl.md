@@ -26,7 +26,19 @@ tags: [nebula, notify, configuration]
 | 12 | `sys_notify_push_device` | 移动推送设备 | ✅ 新增 |
 | 13 | `sys_notify_push_record_detail` | 逐设备推送明细 | ✅ 新增 |
 
-增量脚本位于 `docs/sql/unreleased/{mysql,postgresql}/` 下的 `01-notify-category-preference.sql`、`03-notify-push-device.sql` 与 `05-notify-template-thymeleaf-html.sql`，全量脚本已同步进 `docs/sql/init/`。`01` 脚本同时带 `DROP TABLE IF EXISTS sys_notify_user_setting`（免打扰功能已整体下线）；`05` 脚本负责加 HTML 列、校验字段编码并把 `${key}` 迁移为 `[(${key})]`。
+本批涉及的增量脚本已随版本发出：`01-notify-category-preference.sql` 与 `03-notify-push-device.sql` 位于 `docs/sql/0.2.4/{mysql,postgresql}/`，`05-notify-template-thymeleaf-html.sql` 位于 `docs/sql/0.3.0/{mysql,postgresql}/`；全量脚本已同步进 `docs/sql/init/`。`01` 脚本同时带 `DROP TABLE IF EXISTS sys_notify_user_setting`（免打扰功能已整体下线）；`05` 脚本负责加 HTML 列、校验字段编码并把 `${key}` 迁移为 `[(${key})]`。
+
+尚未发版的脚本在 `docs/sql/unreleased/{mysql,postgresql}/`，两侧同名成对，升级时按方言整目录执行：
+
+| 脚本 | 内容 |
+| --- | --- |
+| `01-boolean-column-types.sql` | 布尔列类型修正：PostgreSQL 侧把 `SMALLINT` / `VARCHAR(1)` 改为 `BOOLEAN`（`auth_login_record`、`scheduler_job`、`qrtz_*`），MySQL 侧列本来正确，同名脚本为空操作 |
+| `02-quartz-indexes.sql` | Quartz 索引对齐 2.5.2 官方 DDL：补 `qrtz_job_details` 的 `idx_qrtz_j_grp`，并修正 PG 侧 `idx_qrtz_t_jg` 的列 |
+| `03-notify-record-delete-button.sql` | 属并行开发的通知记录批量删除：向 `auth_button` 登记 `NOTIFY_RECORD_DELETE` 按钮码，并给 ADMIN 补授权 |
+| `04-notify-record-channel-type-width.sql` | 本批：`sys_notify_record.channel_type` 由 `VARCHAR(20)` 加宽到 `VARCHAR(32)`，避免 22 字符的 `DINGTALK_GROUP_WEBHOOK` 在落库阶段失败 |
+| `05-notify-channel-target-sign-secret.sql` | `sys_notify_channel_target` 新增 `sign_secret_cipher` 密文列，详见下文 2.4 节 |
+
+> `unreleased/` 的 `03`、`05` 与上面已发版的脚本只是编号相同：脚本目录在发版时整体更名为新版本号，编号会重新分配，两者内容无关。
 
 ---
 
@@ -56,13 +68,17 @@ tags: [nebula, notify, configuration]
 `id`、`template_id`（NOT NULL）、`channel_type`（NOT NULL）、`subject_template`、`content_template`（NOT NULL）、`html_content_template`（TEXT，可空，仅 EMAIL）、`is_enabled`（NOT NULL DEFAULT FALSE）、`remark`、时间列。
 
 - `html_content_template` 为本批新增：配置后 EMAIL 变体以 `multipart/alternative` 同时发送纯文本与 HTML；其它渠道写入该列会被业务层拒绝。
-- `content_template` 与 `html_content_template` 使用 Thymeleaf 语法，旧的 `${key}` 不再兼容。升级脚本见 `docs/sql/unreleased/{mysql,postgresql}/05-notify-template-thymeleaf-html.sql`。
+- `content_template` 与 `html_content_template` 使用 Thymeleaf 语法，旧的 `${key}` 不再兼容。升级脚本见 `docs/sql/0.3.0/{mysql,postgresql}/05-notify-template-thymeleaf-html.sql`。
 
 索引：`uk_notify_template_variant_channel` UNIQUE(`template_id`,`channel_type`)、`idx_notify_template_variant_template`(`template_id`)、`idx_notify_template_variant_channel`(`channel_type`)。
 
 ### 2.4 `sys_notify_channel_target`
 
-`id`、`target_name`（NOT NULL）、`channel_type`（NOT NULL）、`endpoint_url`（varchar(1000) NOT NULL）、`config_json`（TEXT）、`remark`、时间列。
+`id`、`target_name`（NOT NULL）、`channel_type`（NOT NULL）、`endpoint_url`（varchar(1000) NOT NULL）、`config_json`（TEXT）、`remark`、`sign_secret_cipher`（varchar(1024)，可空）、时间列。
+
+- `sign_secret_cipher` 为钉钉群机器人加签密钥的**密文**列（`enc:` 前缀，由 `nebula-base-crypto` 以「表 + 列 + 行 id + 租户」为作用域加密），升级脚本见 `docs/sql/unreleased/{mysql,postgresql}/05-notify-channel-target-sign-secret.sql`。
+- 密钥的读写契约：写接口只收 `signSecret`（明文，`null`/空白表示保留原值）与 `clearSignSecret`（`true` 表示清除）；读接口只有 `hasSignSecret` 布尔位，**任何响应都不返回明文或密文**。未配置密钥的机器人按未加签发送（保持原有行为）。
+- 只有钉钉群机器人接受密钥：其它渠道传非空 `signSecret` 会被拒绝（`22049`）。
 
 索引：`idx_notify_channel_target_channel`(`channel_type`)。**`PUSH` 不允许建渠道目标。**
 
@@ -75,7 +91,7 @@ tags: [nebula, notify, configuration]
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
 | `id` | varchar(64) PK | 主键 |
-| `channel_type` | varchar(20) NOT NULL | 渠道类型 |
+| `channel_type` | varchar(32) NOT NULL | 渠道类型（与 `sys_notify_template_variant` / `sys_notify_channel_target` 对齐的 32 位宽；钉钉 `DINGTALK_GROUP_WEBHOOK` 为 22 字符，20 位宽会直接写入失败） |
 | `template_code` | varchar(100) | 模板编码 |
 | `template_variant_id` | varchar(64) | 模板变体 ID |
 | `target_id` | varchar(64) | 渠道目标 ID |
@@ -83,9 +99,9 @@ tags: [nebula, notify, configuration]
 | `category_code` | varchar(32) | 通知类别，历史记录为空（本批新增） |
 | `subject_text` | varchar(255) | 标题文本 |
 | `content_text` | TEXT NOT NULL | 内容文本 |
-| `receiver` | varchar(255) NOT NULL | 接收人 |
+| `receiver` | varchar(255) NOT NULL | 接收人。用户型渠道为用户 ID；群机器人渠道为**脱敏后的端点地址**（保留 `scheme://host/path`，`access_token` / `key` / `hook_id` / `sign` 等查询参数的值替换为 `***`），原始地址只存在于 `sys_notify_channel_target.endpoint_url` |
 | `send_status` | varchar(20) | `SUCCESS` / `FAILED` / `SUPPRESSED` |
-| `fail_reason` | varchar(500) | 失败或被抑制原因 |
+| `fail_reason` | varchar(500) | 失败或被抑制原因。群机器人发送失败形如 `DINGTALK_GROUP_WEBHOOK: http=200, errcode=310000, errmsg=sign not match`（平台消息先脱敏再截断到 200 字符，不含 webhook 地址与凭据） |
 | `send_time` | timestamp | 发送时间 |
 | `ext_json` | TEXT | 扩展信息 |
 

@@ -309,7 +309,7 @@ init 响应中的实际形状：
 1. `storage.ts` 增加 `createUploadTask` / `uploadPart` / `completeUploadTask`（策略本身从 §5.2 的 init 缓存读取，不新增策略请求）
 2. 上传器按策略选路：`file.size > upload.chunkThreshold` → 分片流程，否则整文件
 3. 分片串行/并发上传 + 真实进度 + 失败重试（`uploadPart` 对同序号重传是幂等的：同 hash 直接返回，异 hash 报 `PART_HASH_MISMATCH`）
-4. `completeUploadTask` 后再 `bindUploadTask`
+4. `completeUploadTask` 后由**业务保存接口**提交 `uploadTaskIds`，绑定在后端保存流程内完成（公共 `POST /api/storage/upload-tasks/{taskId}/bind` 已删除，前端不再有独立绑定步骤）
 5. 按 `upload.allowedExtensions` 设置上传控件的 `accept`，并在提交前做一次本地校验（服务端仍会再校验）
 
 ---

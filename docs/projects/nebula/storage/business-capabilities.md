@@ -72,7 +72,7 @@
 
 - 可以看见上传任务详情
 - 还不能把它当成长期业务附件
-- 仍需要业务在自己的保存流程成功后调用 bind 转正
+- 仍需要业务在自己的保存流程内（同一次提交、同一事务）完成 bind 转正
 
 这样做特别适合以下业务：
 
@@ -134,31 +134,62 @@ bind 是 storage 模块里最关键的业务动作。
 - 补齐文件归属信息
 - 让文件进入长期可查询、可下载状态
 
-### 5.2 当前绑定字段
+**触发位置只有一个：后端业务保存流程内部。** 公共端点 `POST /api/storage/upload-tasks/{taskId}/bind` 已删除（破坏性变更，见 [changelog](../release/changelog)）：绑定的正确性依赖「与业务保存同一次用户操作、同一事务」，把它开成公共端点等于把内部步骤暴露给任意登录用户，也让「绑定成功但业务没保存」这类不一致可以由前端制造。
 
-当前绑定时要求业务方提供：
+因此现在的分工是：
 
-- `sourceEntity`
-- `sourceId`
-- `sourceType`（可选，默认 `default`）
+- 前端只负责上传，拿到 `taskId` 与本地预览；
+- 业务保存接口（如 `PUT /api/auth/profile` 的 `uploadTaskIds`）在保存流程内调用 storage 完成绑定，并用返回的下载地址回填业务字段；
+- 服务端到服务端之间走内部端点 `POST /api/storage-internal/upload-tasks/bind`，**由服务间 HMAC 签名保护、不登记网关路由、不使用用户权限码**（普通用户没有 `STORAGE_UPLOAD` 也能保存头像，靠的是这个内部通道而不是放开公共端点）。
 
-这三个字段的业务含义可以理解为：
+### 5.2 归属与绑定字段
 
-- `sourceEntity`：文件属于哪个业务对象类型，例如 `contract`、`notice`、`invoice`
-- `sourceId`：具体是哪条业务记录
-- `sourceType`：进一步区分来源类型、分组或上下文
+绑定要求业务方提供：
 
-### 5.3 业务价值
+- `sourceScope`：`USER` / `TENANT`，决定 `sourceId` 从哪个上下文派生
+- `sourceEntity`：文件属于哪个业务对象类型，例如 `contract`、`notice`、`user-profile`
+- `sourceType`（可选，默认 `default`）：资源位或来源分组，例如 `avatar`、`logo`、`login-logo`
+- `taskIds`：待绑定的上传任务 ID 列表
+
+`sourceId` **由服务端派生，不接受客户端传入**：
+
+- `sourceScope=USER` → `sourceId = 当前操作人`；
+- `sourceScope=TENANT` → `sourceId = 当前租户`。
+
+内部命令 `BindUploadTasksCommand` 从契约上不含 `sourceId` 字段，请求体里额外传 `sourceId` 会被忽略——伪造归属在契约层面就不成立。
+
+### 5.3 批量绑定语义
+
+- 一次可绑定多个 `taskId`：同一 `(sourceEntity, sourceId, sourceType)` **允许多条正式文件**（通用多文件能力，单值资源位的约束由业务层自己保证，例如头像只允许 1 个）。
+- **返回结果顺序 = 入参 `taskIds` 顺序**，调用方可按位置对应。
+- **单次上限 10 个**，超出抛 `BIND_TASK_LIMIT_EXCEEDED`（`24030`）；同批重复 ID 只处理一次并保持首次出现的位置。
+- 整批在同一事务内：任一任务失败则整批回滚，且**不修改任何任务状态**（任务保持 `COMPLETED` 可重试）。
+
+### 5.4 幂等与归属校验
+
+幂等键是 `taskId`，判定顺序是「先查正式文件、后查上传任务」：
+
+| 情况 | 行为 |
+| --- | --- |
+| 该 `taskId` 已有正式文件，且 `(sourceEntity, sourceId, sourceType)` 一致 | 直接返回**既有 `fileId`**（重试幂等，不会因为任务行已被清理而报「上传任务不存在」） |
+| 该 `taskId` 已有正式文件，但 source 三元组不一致 | 抛 `UPLOAD_TASK_ALREADY_BOUND`（`24003`）——改绑会被拒绝，不会静默返回旧文件 |
+| 该 `taskId` 未绑定，但任务不存在 | 抛 `UPLOAD_TASK_NOT_FOUND`（`24001`） |
+| 任务的上传人与 `operatorUserId` 不一致 | 抛 `UPLOAD_TASK_UPLOADER_MISMATCH`（`24029`）；历史任务未记上传人时不拦截 |
+| 批量接口签名不通过 | 抛 `INTERNAL_SIGNATURE_INVALID`（`24028`，响应不含密钥与期望值） |
+
+绑定成功后上传任务行会被清理（由任务清理监听器删除），这正是「必须先查正式文件」的原因。并发双请求仍可能落两条正式文件（本次不补 `(tenant_id, upload_task_id)` 唯一索引，按已知残余风险接受），常规重试由幂等语义吸收。
+
+### 5.5 业务价值
 
 bind 把“文件内容”变成“业务附件”。
 
 因此它适合放在：
 
-- 单据保存成功之后
-- 公告创建成功之后
-- 业务流程真正落库之后
+- 单据保存事务内
+- 公告创建事务内
+- 业务流程真正落库的同一次操作里
 
-而不建议在“文件刚上传完、业务还没成功”时就直接视为正式附件。
+而不建议在“文件刚上传完、业务还没成功”时就直接视为正式附件——这正是本次删除公共 bind 端点的原因。
 
 ---
 
@@ -171,6 +202,8 @@ bind 把“文件内容”变成“业务附件”。
 - 回显附件详情
 - 查询文件基本元数据
 - 下载前先取信息
+
+**按业务归属查单条**（`IStorageService#getStorageFileBySource`）的语义是**返回最新一条**（`create_time DESC, id DESC`）：同一资源位允许多条正式文件（例如换过头像），取最新即当前生效的那条。此前多条时直接抛 `IllegalStateException`（违反 `docs/spec/07-exception.md`），也已一并修正。需要全集请用 `POST /api/storage/files/list-by-source`。
 
 当前可查询内容包括：
 
@@ -347,11 +380,10 @@ bind 把“文件内容”变成“业务附件”。
 
 推荐流程：
 
-1. 前端直接上传普通文件
-2. 拿到临时上传任务详情
-3. 业务表单提交成功
-4. 后端调用 bind，把任务和业务记录关联
-5. 返回正式文件 ID
+1. 前端直接上传普通文件，拿到临时上传任务的 `taskId`（不绑定、不落正式文件）
+2. 业务表单提交时把 `taskId` 放进 `uploadTaskIds`
+3. 后端在业务保存流程内绑定，把任务和业务记录关联
+4. 用返回的下载地址回填业务字段，返回正式文件信息
 
 ### 11.2 大文件上传
 
@@ -366,7 +398,7 @@ bind 把“文件内容”变成“业务附件”。
 1. 创建上传任务
 2. 分片上传
 3. 调用 complete
-4. 业务保存成功后 bind
+4. 业务保存时提交 `uploadTaskIds`，由后端在保存流程内 bind
 5. 后续使用正式文件 ID 查询与下载
 
 ### 11.3 平台内下载
