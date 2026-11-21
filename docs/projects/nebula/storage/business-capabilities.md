@@ -264,7 +264,8 @@ bind 把“文件内容”变成“业务附件”。
 `GET /api/storage/download-location` 让客户端不必判断后端类型：
 
 - `mode=DIRECT`：`url` 是对象存储预签名直链，客户端直接把它当裸 URL 使用（不附加 `Authorization`），有效期内可用；
-- `mode=PROXY`：`url` 指回 `/api/storage/download`，客户端照常带 `Authorization` 拉取。
+- `mode=PROXY`：`url` 是**同源相对路径**（形如 `/api/storage/download?fileId=...&variant=...`），指回
+  `/api/storage/download`，客户端按自身 origin 解析后照常带 `Authorization` 拉取。
 
 定位方式二选一：给 `fileId` 解析单个文件；给 `sourceEntity` + `sourceId`（可选 `sourceType`）一次解析该业务实体下全部附件。响应恒为**数组**，客户端可以直接遍历渲染多项（例如一次拿到某单据的全部签名照片）。
 

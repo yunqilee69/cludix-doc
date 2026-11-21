@@ -180,8 +180,8 @@ nebula:
 | `fileName` | 文件名，供列表页直接展示 |
 | `fileMimeType` | 文件 MIME；请求派生版本时为该派生内容的类型 |
 | `fileSize` | 文件字节数 |
-| `mode` | `DIRECT`（`url` 是对象存储预签名直链）或 `PROXY`（`url` 指回 `/api/storage/download`） |
-| `url` | `DIRECT` 为临时直链；`PROXY` 为带好 `fileId`/`variant` 的服务端下载地址 |
+| `mode` | `DIRECT`（`url` 是对象存储预签名直链）或 `PROXY`（`url` 是同源相对路径 `/api/storage/download?...`） |
+| `url` | `DIRECT` 为临时直链（绝对地址）；`PROXY` 为带好 `fileId`/`variant` 的同源相对路径，调用方按自身 origin 请求 |
 | `expiresAtEpochSecond` | 仅 `DIRECT` 有值，直链过期时间 |
 
 `filename` 有值 ⇒ 附件下载（`attachment`）；为空 ⇒ 内联预览（`inline`）。预览场景不传 `filename`。

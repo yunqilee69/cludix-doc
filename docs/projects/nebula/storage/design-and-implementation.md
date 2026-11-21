@@ -352,7 +352,9 @@ storage 模块把二进制内容存储抽象为两层。
 1. 查询正式文件并调用 `StoragePermissionChecker`；
 2. 解析内容键（`variant` 缺省或派生缺失时回退原图）；
 3. `StorageContentRepository.supportsDirectAccess()` 为真时调用 `presignFormal(...)` 签发直链，返回 `mode=DIRECT`；
-4. 否则返回 `mode=PROXY`，由控制层按当前请求上下文补全 `/api/storage/download` 地址（带好 `fileId`/`variant`）。
+4. 否则返回 `mode=PROXY`，由控制层补全为**同源相对路径** `/api/storage/download?...`（带好 `fileId`/`variant`）。
+   理由：服务端不知道客户端看到的 origin（网关 / 反向代理会终结 TLS 并改写 host+port），且 remote 模式下
+   请求上下文是服务间调用的内网地址，按它拼绝对地址客户端必然访问不到。
 
 接口**恒返回数组**：按 `fileId` 解析是单元素数组，按业务归属解析是全部附件；每项带上 `fileId` / `fileName` / `fileMimeType` / `fileSize`，客户端列表页可直接渲染。按业务归属解析时按预览语义处理，不把 `filename` 套到批量结果上。两个定位方式都不给时抛 `DOWNLOAD_LOCATION_PARAM_INVALID`（24027）。
 

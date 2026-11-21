@@ -215,7 +215,9 @@ nebula:
 
 1. `GET /api/storage/download-location?fileId=...`（可带 `filename`、`variant`）
 2. `mode=DIRECT`：把 `url` 当作裸 URL 直接取文件，不附加 `Authorization`
-3. `mode=PROXY`：`GET /api/storage/download?fileId=...`，带 `Authorization`
+3. `mode=PROXY`：`GET /api/storage/download?fileId=...`，带 `Authorization`。返回的 `url` 是**同源相对路径**
+   （形如 `/api/storage/download?fileId=file-1&variant=thumb`，不含 scheme / host / port），调用方按自身 origin
+   请求即可；服务端刻意不猜客户端看到的 host 与协议，因此在网关、反向代理、remote 模式下都成立。
 
 也可以跳过第 1 步直接调用 `/api/storage/download`——服务端代理路径始终可用；`download-location` 只是让客户端在对象存储开启直连时少走一趟应用带宽。
 
