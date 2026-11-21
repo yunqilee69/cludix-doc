@@ -74,9 +74,10 @@ nebula-frontend/
 
 ### 3.3 动态缓存治理能力
 
-- 查看所有动态缓存
+- 查看全部缓存命名空间（含当前没有条目的）与各自实际生效的缓存模式
 - 查看缓存组下每个缓存键的值、类型、TTL 与剩余 TTL
-- 删除指定缓存项
+- 删除指定缓存项，或按命名空间整组清空
+- 受保护命名空间（系统参数、会话/令牌、验证码等）只暴露名称与条目数，不暴露 Key 与值
 
 因此 `nebula-frontend` 同时承担了两类职责：
 
@@ -147,6 +148,7 @@ nebula-frontend/
 
 - `GET /api/frontend/caches`
 - `DELETE /api/frontend/caches/entries`
+- `DELETE /api/frontend/caches`（按命名空间整组清空）
 
 其中：
 

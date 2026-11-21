@@ -535,7 +535,7 @@ WHERE is_encrypted = 1 AND param_value <> '' AND param_value NOT LIKE 'enc:%';
 
 | # | 问题 | 位置 | 处置 |
 |---|---|---|---|
-| 1 | `GET /api/frontend/caches` **无权限码**且序列化**全部**缓存条目，含 `systemParamByKey`（解密后实体）与 `authSessionCache`（含原始 token） | `FrontendServiceImpl.java:254-298` | 加权限码 + 缓存名**拒绝清单**（`systemParamByKey`、`authSessionCache`、验证码/忘记密码/在线用户缓存） |
+| 1 | `GET /api/frontend/caches` **无权限码**且序列化**全部**缓存条目，含 `systemParamByKey`（缓存的 DAO 层实体，加密列仍是密文）与 `authSessionCache`（含原始 token） | `FrontendServiceImpl.java:254-298` | 加权限码 + 缓存名**保护清单**：`systemParamByKey`、`authSessionCache`、验证码/忘记密码/在线用户缓存只回名称与条目数，不回 Key 与值（Key 就是令牌），清理走整组清空 |
 | 2 | 审计默认脱敏字段含 `phone` 但**不含** `email`/`receiver`/`loginAccount` | `AuditProperties.java:14-16` | 补入默认脱敏清单 |
 | 3 | `UserPasswordResetEvent` 载荷含 `defaultPassword` **明文**，且入 `event_outbox.payload_json`（该列**完全无脱敏**） | — | 载荷去掉 `defaultPassword` |
 | 4 | `nebula.auth.code.log-enabled` 会把验证码打进日志 | — | 生产环境启动期强制关闭（启动检查） |

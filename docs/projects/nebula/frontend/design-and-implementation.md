@@ -296,17 +296,16 @@ export function CustomerDetailPage() {
 
 frontend 模块当前还承担了一项很实用的后台治理能力：
 
-- 动态缓存查看与删除
+- 动态缓存查看（含全员命名空间清单与缓存模式）、按项删除与按命名空间整组清空
 
 ### 8.1 缓存列表
 
 `listCaches()` 当前会：
 
-1. 从 `DynamicCacheService` 获取所有缓存名称
-2. 读取每个缓存的默认 TTL
-3. 读取每个缓存下的所有 entry
-4. 把缓存值序列化为 JSON
-5. 返回 `FrontendCacheDto`
+1. 从 `DynamicCacheService` 获取**全部**缓存命名空间（动态注册的 + 只在底层 `CacheManager` 上承载的），没有条目的命名空间同样返回
+2. 读取每个命名空间实际生效的缓存模式（`redis` / `caffeine`）与默认 TTL
+3. 受保护命名空间（系统参数、会话/令牌、验证码等，按关键词匹配）只取条目数，**不读取 Key 与值**；其余命名空间读取全部 entry 并把值序列化为 JSON
+4. 返回 `FrontendCacheDto`
 
 因此前端拿到的不只是“有哪些缓存”，还包括：
 
@@ -315,6 +314,9 @@ frontend 模块当前还承担了一项很实用的后台治理能力：
 - 原始 TTL 是多少
 - 剩余 TTL 还剩多少
 - 缓存值对应的 Java 类型是什么
+- 整份清单落在哪个缓存后端上
+
+第 1、3 步是两处刻意的取舍：只返回有数据的缓存会让「没注册」和「注册了但为空」在页面上无法区分；而把会话缓存的 Key 回传等于回传令牌（`authSessionCache::rt_xxx`），所以受保护命名空间只给数量、只允许整组清空。
 
 ### 8.2 缓存删除
 
@@ -328,10 +330,13 @@ frontend 模块当前还承担了一项很实用的后台治理能力：
 
 - `dynamicCacheService.evict(cacheName, cacheKey)`
 
+`clearCache(cacheName)` 走同一套名称校验，然后调用 `dynamicCacheService.clear(cacheName)` 整组清空。
+
 这种设计避免了：
 
 - 用户误传缓存名称时误删未知数据
 - 用空 key 或空 cacheName 触发不明确行为
+- 动态缓存服务对未知命名空间的“按需兜底注册”被调用方顺手触发（传错名字会创建空缓存，且拼错的名字看起来像清空成功）
 
 ### 8.3 设计价值
 
