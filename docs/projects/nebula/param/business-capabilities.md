@@ -31,7 +31,8 @@
 - `auth.login.username.login-fail-max-count`
 - `frontend.project-name`
 - `notify.mail.default-from-name`
-- `storage.signed-download.default-expire-seconds`
+- `storage.upload.max-file-size`
+- `storage.backend.type`（`application` 表示跟随 `application.yml`）
 
 业务价值：
 

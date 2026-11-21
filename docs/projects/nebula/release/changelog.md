@@ -13,11 +13,29 @@ format: md
 
 ### Added
 
+- `nebula-storage` / `nebula-param` / `web` / `docs/sql`：**存储配置有了在线入口，并且默认行为改为「跟随 application.yml」**。此前存储后端只能改 `application.yml` 重启，或去参数管理页把 `storage.backend.*` 当普通字符串改；更隐蔽的问题是参数中心这组参数的默认值是 `filesystem`，建租户时会被物化成行，于是把 `application.yml` 里的 `content.type`（默认 `db`）静默覆盖掉——页面显示一套、实际写入另一套。
+  - **哨兵取值 `application`**：`storage.backend.type` 的代码默认值由 `filesystem` 改为 `application`，语义是「跟随 `application.yml` 的 `nebula.storage.content.*`」，此时其余 `storage.backend.*` 参数一律不参与解析。判定集中在 `ConfigurableStorageContentRepository#resolveTenantSettings`（空值同样视为跟随），并删掉了原先「有没有参数行」的分支——值决定一切。
+  - **「高级配置」页成为唯一配置入口：企业设置整体并入，独立菜单（`/system/settings/tenant`）删除**。落地为「企业信息 / 认证 / 存储」三个 tab（外加原有的审计、通知等参数 tab），每个 tab 各带自己的保存动作与接口：
+    - **企业信息**：企业资料 + 登录页品牌 + 企业标识合到一块，一次保存覆盖 `PUT /api/auth/tenant/profile` 的全部字段；资源位（Logo / 登录页 Logo / favicon / 背景图）上传后仍只提交 `uploadTaskIds`，组件重新挂载时按表单值恢复「待保存生效」提示。
+    - **认证**：企业第三方登录（`/api/auth/tenant/oauth2-providers`，列表内弹窗保存）与原「登录与注册」参数（参数中心，脏值批量保存）同屏——两者回答的是同一个问题，分成两个 tab 要来回找。
+    - **存储**：`/api/storage/settings`，见下一条。
+    - tab 可见性按权限收口：无 `TENANT_PROFILE_QUERY` 不显示企业信息且不发请求，无 `STORAGE_SETTINGS_QUERY` 不显示存储 tab。
+    - 组件拆分：`pages/tenant/settings/*` 整体迁到 `pages/system/config/general/tenant-settings/`（`TenantProfileProvider` 共享表单与加载状态 + 企业信息/认证 tab + OAuth2 组件）。
+    - `TENANT_PROFILE_QUERY/UPDATE` 按钮改挂「高级配置」菜单（code 不变，已授权角色不受影响），`TENANT_ENTERPRISE_SETTINGS` 菜单及其 MENU 授权删除（`unreleased/07` 双方言）；头像菜单的「企业设置」入口改跳 `/system/config/general`，可见性判 `MENU:GENERAL_CONFIG`。
+    - 注意：**未给角色单独授权过「高级配置」菜单的租户需补授权**，否则原企业设置用户进不了新页面。
+  - **「高级配置」页新增「存储」tab**（`web/src/pages/system/config/general/storage`）：存储参数本来就落在参数中心，与这个页面上的其它参数同源，因此合到一处维护，不再单独占一个入口。面板内两块内容——后端存储（类型下拉、按类型显隐的字段、AK/SK 走加密字段三态）与上传策略（单文件上限/分片阈值/分片大小/扩展名/临时任务保留天数）。选「跟随 application.yml」时只读展示 yml 里实际生效的配置（脱敏），不再是黑箱；切换后端前若存在不属于当前后端的文件会显式告警。
+  - **新接口** `GET /api/storage/settings`（接口码 `STORAGE_SETTINGS_QUERY`）与 `PUT /api/storage/settings`（按钮码 `STORAGE_SETTINGS_UPDATE`，进审计且请求快照排除凭据）。保存前统一校验：类型必须是 `application` 或已安装后端、对象存储必填项齐备、直链有效期 ≤ 3600、上传策略满足 `分片大小 ≤ 分片阈值 ≤ 单文件上限 ≤ multipart 静态口径`。新增错误码 `STORAGE_SETTINGS_INVALID`（`24031`）。
+  - **SPI 扩展**：`StorageContentProvider` 新增 `startupSettings()`（让配置页读到启动配置）与 `requiredSettingFields()`（声明必填项，core 里不再按类型名写 if 分支）；`StorageContentProviders` 新增 `APPLICATION` 哨兵与 `installedTypes(...)`。
+  - **行为变更**：新建租户的存储后端默认从 `filesystem` 变为「跟随 `application.yml`」（app-runner 默认 `db`）；**存量租户的参数行不动**——正在用 `filesystem` 存文件的租户若被自动改成 `application`，读取会立刻指向新后端、旧文件读不到，需要跟随的租户请在页面上显式切换。`docs/sql/unreleased/06-storage-settings-permission.sql`（双方言）只登记两个权限码与 ADMIN 授权，不改存量参数。
+  - **入口收敛**：`storage.upload.*` 五项从 `PUT /api/general-config` 的 DTO 中移除，改由上述存储面板统一提交（`/api/storage/settings`）。参数仍在同一个页面的「存储」tab 里，但不再有第二个入口——通用配置的批量保存不做「分片大小 ≤ 分片阈值 ≤ 单文件上限 ≤ multipart 静态口径」校验，从那里能配出一个必然被收敛或必然 413 的值。
+  - **存储 tab 打开失败的问题修复**：面板在 tab 里，接口失败时原先只剩顶部两个按钮、正文空白，看不出发生了什么。现在失败会就地展示原因 + 「重试」，并提示检查是否已执行 `docs/sql/unreleased` 的权限脚本；后端同时加固两处会连累整页的异常——上传策略参数被写脏时按默认策略展示（原先 `INVALID_PARAM_VALUE` 会让 `GET /api/storage/settings` 直接 500），以及 `countNotInBackend` 的 `OR` 条件包成一组，避免多租户插件拼出 `tenant_id = ? AND provider <> ? OR bucket <> ?` 跨租户统计。
+  - 顺带修复：`ConfigurableStorageContentRepository` 的按租户缓存用 `TenantIdResolver.resolve()` 结果作 key，解析为 `null` 时会抛 NPE，现回退到既有的空串键。
 - `nebula-notify` / `web` / `docs/sql`：**通知记录支持批量删除**。此前通知记录页只能看不能清，投递日志会无限堆积。新增 `DELETE /api/notify/records/batch`（请求体 `{"ids": [...]}`，返回**实际删除条数**，不是提交条数——勾选后记录可能已被其他管理员删掉）、服务方法 `INotifyService#removeNotifyRecords`（local + remote 双实现）、前端 `notifyService.deleteNotifyRecords`，列表加勾选列与「批量删除」按钮（`Popconfirm` 二次确认，按 1~N 条如实回执）。删除范围是「记录 + 该记录下的逐设备推送明细」（`sys_notify_push_record_detail` 只按 `record_id` 关联、无外键，必须级联清理否则留孤儿行）；**已投递的站内信不随记录删除**——那是接收人收件箱里的消息，不属排障日志。新增按钮权限码 `NOTIFY_RECORD_DELETE`（菜单「通知记录」），`init/02-init-data.sql` 与 `unreleased/03-notify-record-delete-button.sql` 均已补登记并给 `ADMIN` 授权；无 DDL 变更。
 - `nebula-storage` / `docs`：腾讯云 COS 新增 `endpoint` 配置（env `NEBULA_STORAGE_TENCENT_COS_ENDPOINT`，租户级复用 `storage.backend.endpoint`）；留空仍按 region 推导官方域名，非空时正式区读写与预签名直链统一走该自定义域名，`region` 仍必填；上传与分片只写本地临时区不受影响；无 DDL、无前端改动。
 
 ### Changed
 
+- `docs`：存储模块文档按现状重写。`storage/configuration.md` 从「静态 yml 清单」改为「两层配置 + `application` 哨兵语义 + 配置页 + 切换风险」；`content-enhancements.md` 删掉已不存在的 S3 兼容实现（`content.type=s3`、`StorageStoreFactory`、path-style-access 等），改为按厂商独立的对象存储模块（minio / aliyun-oss / tencent-cos）；`overview` / `design-and-implementation` / `usage-guide` / `quick-start` / `nebula-storage/README.md` / `param/business-capabilities.md` 同步清理 `s3` 与已废弃的 `storage.signed-download.default-expire-seconds` 表述。
 - 构建 / 测试：**接入 `maven-failsafe-plugin`，`*IT` 集成测试首次真正进入构建**。仓库此前只配置了 surefire，而 surefire 默认只匹配 `*Test` / `Test*` / `*Tests` / `*TestCase`，因此 5 个 `*IT` 类（`SystemParamPostgresRedisIT`、`DictPostgresRedisIT`、`NotifyPostgresRedisIT`、`StorageAliyunOssIT`、`TencentCosStorageLiveIT`）在任何命令下都不会执行——Redis 动态缓存 `clear()` 的集合删除缺陷能做到「有集成测试却全程无人发现」，根因就在这里。现在 failsafe 绑定 `integration-test` + `verify`：`mvn verify` 会执行 `*IT`，并在 `verify` 阶段让失败真正中断构建（`integration-test` 阶段先跑完，surefire / failsafe 两份报告都能落盘）。需要外部基础设施的用例自带跳过条件：云端凭据类沿用 `@EnabledIfEnvironmentVariable` 校验凭据，数据库 / 缓存类统一用 `NEBULA_IT_POSTGRES_REDIS` 显式声明基础设施就绪。因此**无基础设施的机器与发布流水线仍为绿色**，集成测试显示为 skipped 而不是静默消失；临时跳过全部集成测试用 `-DskipITs=true`。命名分工、门禁写法与常用命令写入 `docs/spec/11-development.md` 第七章「测试执行」，其中明确「能用 mock 表达的关键行为不得只由 `*IT` 覆盖」，避免同类缺陷再次落在默认构建的盲区里。
 - `nebula-storage` / `nebula-auth` / `web` / `mobile` / `packages/client-sdk`：**文件绑定重构——绑定只在后端业务保存流程内完成（破坏性变更）**。此前文件绑定是「上传成功后前端立刻二次调用」的独立步骤，正确性依赖前端时序：会在业务保存成功之前就产生正式文件，且缺幂等、缺归属校验。本次改为：
   - **删除公共端点 `POST /api/storage/upload-tasks/{taskId}/bind`**，同时删除 `StorageFeignClient` 中 `POST /files/by-source` 的声明（服务端从未实现该端点，remote 模式调用是 latent 404，按「删声明不补实现」处理）。`/api/storage/**` 其余接口不变。

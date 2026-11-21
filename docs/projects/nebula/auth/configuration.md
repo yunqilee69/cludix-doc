@@ -370,7 +370,7 @@ else:
 
 ### 3.7 企业配置记录接口的凭据完整性字段
 
-`GET /api/auth/tenant/oauth2-providers` 的响应项新增两个只读字段（`TenantOAuth2ProviderDto.java:26-36`），供企业设置页直接展示「这条记录自己是否可用」：
+`GET /api/auth/tenant/oauth2-providers` 的响应项新增两个只读字段（`TenantOAuth2ProviderDto.java:26-36`），供「登录与安全」页直接展示「这条记录自己是否可用」：
 
 | 字段 | 类型 | 含义 |
 |---|---|---|
@@ -384,7 +384,7 @@ else:
 - `wechat + WEB` 额外要求 `redirectUri`、`scope` 非空；
 - `github + WEB` 额外要求 `redirectUri` 非空。
 
-**它表达的是「记录自身是否完整」，不代表运行时可用性。** 运行时可用性还要叠加 §3.6 的两道系统参数门：记录完整但 `login.oauth2.enabled` 或 `login.oauth2.provider.wechat.enabled` 为 `false` 时，渠道依然不可用。反过来，`credentialComplete=false` 时渠道一定不可用（单租户有记录即不回退 YAML，多租户本就不回退）。因此企业设置页的「凭据状态」列反映的只是记录侧问题：显示「完整」不代表渠道一定可用（还要看两道系统参数门），显示「不可用」则渠道一定不可用。
+**它表达的是「记录自身是否完整」，不代表运行时可用性。** 运行时可用性还要叠加 §3.6 的两道系统参数门：记录完整但 `login.oauth2.enabled` 或 `login.oauth2.provider.wechat.enabled` 为 `false` 时，渠道依然不可用。反过来，`credentialComplete=false` 时渠道一定不可用（单租户有记录即不回退 YAML，多租户本就不回退）。因此「登录与安全」页的「凭据状态」列反映的只是记录侧问题：显示「完整」不代表渠道一定可用（还要看两道系统参数门），显示「不可用」则渠道一定不可用。
 
 ---
 
@@ -599,6 +599,6 @@ nebula:
 - 替换 JWT `secret-key`
 - 调整 token 过期时间
 - 配好 OAuth2 提供商密钥与回调地址
-- 前端承接页只支持站内相对路径：企业侧在「企业设置 → 登录与安全」填写 `/xxx`，绝对地址会被拒绝；YAML `frontend-callback-uri` 仅作为企业未配置时的默认值
+- 前端承接页只支持站内相对路径：企业侧在「高级配置 → 登录与安全」填写 `/xxx`，绝对地址会被拒绝；YAML `frontend-callback-uri` 仅作为企业未配置时的默认值
 - 补齐参数中心中的 `auth.login.*` 动态参数
 - 不要同时引入 local 与 remote 两套接入层

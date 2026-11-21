@@ -233,7 +233,7 @@ OAuth 配置只有 `POST`（upsert，唯一键 `tenant_id + provider_id + channe
 
 **配置企业第三方登录**
 
-入口：Web 端「系统管理 → 企业设置 → 登录与安全」页签内的第三方登录区块；也可以直接访问 `/tenant/settings/oauth-providers`。
+入口：Web 端「系统管理 → 高级配置 → 登录与安全」页签内的第三方登录区块；也可以直接访问 `/tenant/settings/oauth-providers`。
 
 步骤：
 

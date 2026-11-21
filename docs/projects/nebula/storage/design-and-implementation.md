@@ -46,7 +46,7 @@ storage 模块遵循 Nebula 的标准分层。
 - `StorageUploadTaskEntity` / `StorageUploadPartEntity` / `StorageFileEntity`
 - `StorageContentRepository`
 - `RoutingStorageContentRepository`
-- `FileSystemStorageBinaryStore` / `DatabaseStorageBinaryStore` / `MinioStorageBinaryStore` / `S3StorageBinaryStore`
+- `FileSystemStorageBinaryStore` / `DatabaseStorageBinaryStore` / `MinioStorageBinaryStore` / `AliyunOssStorageBinaryStore` / `TencentCosStorageBinaryStore`
 - `NebulaStorageAutoConfiguration`
 - `NebulaStorageProperties`
 
@@ -217,8 +217,9 @@ storage 模块把二进制内容存储抽象为两层。
 
 - `FileSystemStorageBinaryStore`
 - `DatabaseStorageBinaryStore`
-- `MinioStorageBinaryStore`
-- `S3StorageBinaryStore`
+- `MinioStorageBinaryStore`（`nebula-storage-provider-minio`）
+- `AliyunOssStorageBinaryStore`（`nebula-storage-provider-aliyun-oss`）
+- `TencentCosStorageBinaryStore`（`nebula-storage-provider-tencent-cos`）
 
 ### 5.2 `StorageContentRepository`
 
@@ -276,9 +277,10 @@ storage 模块把二进制内容存储抽象为两层。
 - `type=filesystem`
 - `type=db`
 - `type=minio`
-- `type=s3`（S3 兼容，覆盖 OSS / COS / 七牛等）
+- `type=aliyun-oss`
+- `type=tencent-cos`
 
-其中对象存储（`minio` / `s3`）还需要：
+其中对象存储还需要：
 
 - `endpoint`
 - `accessKey`
@@ -361,8 +363,8 @@ storage 模块把二进制内容存储抽象为两层。
 能力由存储实现自行声明，不需要在 service 层写 if-else 判断类型：
 
 - `StorageBinaryStore` 默认 `supportsDirectAccess()` 返回 `false`、`presignGet(...)` 返回 `Optional.empty()`；
-- `S3StorageBinaryStore` / `MinioStorageBinaryStore` 仅在「开关开启 + 客户端支持预签名」时返回 `true`；
-- `S3ObjectClient` 以 `supportsPresign()` / `presignGetObject(...)` 暴露预签名；MinIO 走 `getPresignedObjectUrl`。
+- 对象存储实现（MinIO / 阿里云 OSS / 腾讯云 COS）在「直连开关开启」时返回 `true`，
+  并通过各自的 `presignGet(...)` 签发直链（MinIO 走 `getPresignedObjectUrl`，OSS / COS 走原生 SDK 的预签名接口）。
 
 `filename` 有值 ⇒ `attachment`（下载）；为空 ⇒ `inline`（预览）。有效期由 `direct-download-expire-seconds` 决定并被截断到上限。预签名 URL 属于凭据，只回传给调用方，不写日志与审计。
 

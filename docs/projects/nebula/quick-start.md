@@ -127,7 +127,9 @@ git merge upstream/main
 常用能力开关：
 
 - 任务调度 `nebula.scheduler.engine`（默认 quartz，可选 xxl；引擎脚本选型见 `docs/sql/README.md`）
-- 文件存储 `nebula.storage.*.type`（filesystem / db / minio / s3；图片处理 `nebula.storage.image.enabled` 默认关闭）
+- 文件存储：启动配置 `nebula.storage.content.type`（filesystem / db / minio / aliyun-oss / tencent-cos），
+  在线配置在系统配置 → 高级配置 → 存储 tab（`storage.backend.*`，`type=application` 表示跟随 `application.yml`）；
+  图片处理 `nebula.storage.image.enabled` 默认关闭
 - 移动推送 `nebula.notify.push.enabled`（默认关闭；启用需配齐 APNs 凭据，仅 iOS）；通知订阅偏好**无开关、永远生效**，类别在「系统管理 → 通知管理 → 通知类别」维护
 - 客户端接口面准入 `nebula.auth.client-scope.*`（默认不改变现有行为，可 dry-run 灰度）
 - GitHub 登录 `NEBULA_AUTH_GITHUB_ENABLED=true` + client-id / secret

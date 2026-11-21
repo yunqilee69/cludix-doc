@@ -140,7 +140,8 @@ nebula:
 - `filesystem`
 - `db`
 - `minio`
-- `s3`（S3 兼容，覆盖阿里云 OSS / 腾讯云 COS / 七牛等）
+- `aliyun-oss`
+- `tencent-cos`
 
 它决定的是**正式文件内容区**如何保存，而不是业务元数据表落在哪里。
 

@@ -11,6 +11,7 @@
 | 参数上限约束 | 建议写进 `sys_param.max_value = 2047` | `sys_param` 无 `min_value`/`max_value` 列，改由 `StorageUploadPolicyResolver.MAX_CONFIGURABLE_MEGABYTES` 读取时兜底（越界回退默认值并告警），约束写入参数 `description` |
 | 启动自检读不到参数中心 | 未说明 | 建表脚本由外部迁移执行时启动期读不到参数，按**默认策略继续断言**（而非跳过）；跳过只保留给「未接入 multipart」与「容器声明不限制」两种情况 |
 | 默认值静态兜底位置 | 可选加 `NebulaStorageProperties.Upload` | 收敛为 `StorageUploadPolicyResolver` 的常量与 `defaultPolicy()`，不新增配置类 |
+| 配置入口 | 高级配置页「存储 → 上传配置」（走 `PUT /api/general-config`） | 位置不变（高级配置页「存储」tab），但改由独立面板提交 `PUT /api/storage/settings`，与后端选型一起校验；`GeneralConfigDto` 不再承载这 5 个字段。见[配置说明](./configuration)第 4.1 节 |
 | 内部端点 | `StorageController` 补一个供 Feign 调用的端点 | `GET /api/storage/upload-policy`，仅在 `mode=remote` 时由 Feign 调用，浏览器不访问 |
 
 ---
@@ -372,8 +373,8 @@ init 响应中的实际形状：
 | `nebula-frontend-core/.../service/impl/FrontendServiceImpl.java` | 注入 `IStorageService`，`getInit()` 把策略映射进 `storage.upload` |
 | `nebula-frontend-api/.../model/dto/` | **新建** `FrontendStorageInitDto`（→ `storage`）+ `FrontendUploadConfigDto`（→ `upload`）；`FrontendInitDto` 加 `storage` 字段 |
 | `nebula-frontend-local/.../model/resp/` + `.../converter/FrontendLocalConverter.java` | 新建对应 Resp 类型，`FrontendInitResp` 加 `storage`，补映射 |
-| `nebula-param/.../GeneralConfigDto.java` + `GeneralConfigController.java` | 加 5 个新字段的读写，供高级配置页使用 |
-| `web/.../advance-config-data.ts` + `types/param.ts` | 加 5 个新字段 |
+| `nebula-param/.../GeneralConfigDto.java` + `GeneralConfigController.java` | ~~加 5 个新字段的读写~~ **已回退**：改由 `nebula-storage` 的 `/api/storage/settings` 统一读写 |
+| `web/.../advance-config-data.ts` + `types/param.ts` | ~~加 5 个新字段~~ **已回退**：改由存储配置面板提交 |
 | `web/src/types/auth.ts` + `web/src/api/auth.ts` | `FrontendInitResp` 加嵌套 `storage.upload`；init 响应取一次并缓存（见 §5.2） |
 | `web/src/api/storage.ts` | 加 §5.3 的三个分片方法（策略从 init 缓存读取，不新增策略请求） |
 | `web/src/components/ne-upload/` | 接入策略选路与分片流程 + 真实进度 |
@@ -446,7 +447,7 @@ PostgreSQL 脚本同理（`DELETE FROM sys_param WHERE param_key IN (...)`）。
 | `Integer` 字节溢出 | 参数单位 MB 且 `max_value ≤ 2047`；转字节时用 `Math.toIntExact` 显式防御 |
 | **阈值强制先于前端分片上线 → `(threshold, max]` 上传全挂** | §6 的硬顺序：步骤 3 必须在步骤 2 验证通过后才打开 |
 | 扩展名白名单误配（如只填 `jpg` 却上传 `jpeg`）→ 全量拒绝 | 配置非空即生效，属预期行为；靠「配置为空=不限制」的默认值兜底，并在高级配置页 description 写明格式与示例 |
-| `GeneralConfigController` 持续膨胀 | 本次接受；建议后续单独重构（见 §7.2 备注） |
+| `GeneralConfigController` 持续膨胀 | 已按此风险处置：5 个存储参数字段从通用配置 DTO 移除，改由存储配置面板提交 |
 
 ---
 

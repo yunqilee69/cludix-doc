@@ -66,7 +66,10 @@ nebula-storage/
    - `filesystem`
    - `db`
    - `minio`
-   - `s3`（S3 兼容，覆盖阿里云 OSS / 腾讯云 COS / 七牛等）
+   - `aliyun-oss`
+   - `tencent-cos`
+   （对象存储按厂商独立成模块，各用原生 SDK；取值由已安装的 provider 决定，新增厂商只加模块）
+   - 在线配置里 `type=application` 表示跟随 `application.yml` 的启动配置（默认）
 
 5. **临时区与正式区解耦**
    - 临时区用于上传中间态；
