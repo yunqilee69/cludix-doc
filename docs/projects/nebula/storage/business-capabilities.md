@@ -264,7 +264,7 @@ bind 把“文件内容”变成“业务附件”。
 `GET /api/storage/download-location` 让客户端不必判断后端类型：
 
 - `mode=DIRECT`：`url` 是对象存储预签名直链，客户端直接把它当裸 URL 使用（不附加 `Authorization`），有效期内可用；
-- `mode=PROXY`：`url` 是**同源相对路径**（形如 `/api/storage/download?fileId=...&variant=...`），指回
+- `mode=PROXY`：`url` 是**同源相对路径**（形如 `/api/storage/download?fileId=...`），指回
   `/api/storage/download`，客户端按自身 origin 解析后照常带 `Authorization` 拉取。
 
 定位方式二选一：给 `fileId` 解析单个文件；给 `sourceEntity` + `sourceId`（可选 `sourceType`）一次解析该业务实体下全部附件。响应恒为**数组**，客户端可以直接遍历渲染多项（例如一次拿到某单据的全部签名照片）。
@@ -335,6 +335,45 @@ bind 把“文件内容”变成“业务附件”。
 - 同一个文件重复上传后复用了已有 `storageKey`
 
 这种情况下删掉其中一个业务引用，不应该导致其他业务记录失效。
+
+### 9.3 释放（解绑）与内容回收
+
+业务保存流程里的删除走**释放引用**，而不是删文件：
+
+| 项 | 说明 |
+| --- | --- |
+| 语义 | 只删 `storage_file` 记录，**不动二进制内容**；内容按 `storageKey` 引用计数回收，零引用才真正删除 |
+| 选择器 | ① 按 `fileIds` 逐条释放；② 按 `sourceEntity` + `sourceId` 释放该归属**全部类型**；③ 再加 `sourceType` 只释放该资源位 |
+| 归属校验 | **宽松**：给了 `sourceEntity` 就逐条校验，不符的那条返回 `SOURCE_MISMATCH` 且不删（不整批失败）；没给则只按租户边界——租户条件由多租户插件在 SQL 上附加，调用方无法跨租户释放 |
+| 幂等 | 重复释放返回 `NOT_FOUND`，不算错误（并发删除、重试都会出现） |
+| 事务 | 行删除在业务保存的同一事务内；**内容回收在提交后由事件触发**，因此回滚不会丢内容 |
+| 顺序 | 必须先 `bind` 新文件、再释放旧文件：正式内容是 `(fileHash, fileName)` 确定性寻址，先删会让引用归零并回收内容，随后绑定同一份内容就会指向空 |
+
+入口两个：
+
+- `POST /api/storage-internal/files/release`（HMAC 签名，服务间调用）：业务保存在自己的事务里调用，普通用户不因缺 `STORAGE_FILE_DELETE` 被拒；
+- `DELETE /api/storage/files/{fileId}`（`STORAGE_FILE_DELETE` + 审计）：后台文件管理使用，内部复用同一实现。
+
+业务侧契约：保存请求同时携带**新增**（`uploadTaskIds`，临时任务 ID）与**删除**（`deletedFileIds`，正式文件 ID），
+两者在同一事务里处理。单值资源位的“换图”由前端上传组件把被顶掉的旧文件 ID 一并放进删除列表，
+因此不会留下“每次换图多一条旧记录”的残留。
+
+内容回收是**尽力而为**的轻量实现（不建表、不排队）：处理失败只记日志，结果是内容成为孤儿（可人工清理），
+不会产生坏数据。已知窗口：复查计数与删除之间若有并发绑定复用了同一内容键，可能删掉刚写回的内容——窗口窄，当前选择接受。
+
+### 9.4 存储管理页面
+
+数据平面的「系统管理 → 存储管理」以表格列出当前租户的正式文件（`POST /api/storage/files/page`），
+行内提供三个操作，全部走后端既有接口、全部进审计：
+
+| 操作 | 接口 | 准入码 | 审计动作 |
+| --- | --- | --- | --- |
+| 下载 | `GET /api/storage/download`（经鉴权客户端取字节流后落盘） | `STORAGE_FILE_QUERY` | — |
+| 分享 | `POST /api/storage/generate-signed-url` → 复制返回的短时地址 | `STORAGE_FILE_QUERY` | `GENERATE_SIGNED_URL` |
+| 删除 | `DELETE /api/storage/files/{fileId}` | `STORAGE_FILE_DELETE` | `DELETE_FILE` |
+
+菜单与 ADMIN 授权见 `docs/sql/unreleased/{mysql,postgresql}/09-storage-file-management-menu.sql`
+（菜单码 `STORAGE_FILE_MANAGEMENT`，组件 `StorageFileManagementPage`，路径 `/system/storage`）。
 
 ---
 

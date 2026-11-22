@@ -313,7 +313,7 @@ storage 模块把二进制内容存储抽象为两层。
 3. 调用 `StoragePermissionChecker`
 4. 权限通过后打开正式内容流
 
-接口层可选带 `filename`（有值 ⇒ `attachment` 下载，为空 ⇒ `inline` 预览）与 `variant`（派生版本，缺失回退原图）。同样的鉴权与回退逻辑被 `resolveDownloadLocation` 复用（见 7.4）。
+接口层可选带 `filename`（有值 ⇒ `attachment` 下载，为空 ⇒ `inline` 预览）。同样的鉴权逻辑被 `resolveDownloadLocation` 复用（见 7.4）。
 
 ### 7.2 签名下载
 
@@ -346,15 +346,15 @@ storage 模块把二进制内容存储抽象为两层。
 
 下载位置解析与 `openFileContent` 共用鉴权与派生回退逻辑，但不返回内容流，只回答「这次下载应该问谁要文件」。服务层提供两个方法，控制层按入参分派：
 
-- `resolveDownloadLocation(fileId, filename, variant)`：解析单个文件；
-- `resolveDownloadLocationsBySource(query, variant)`：按 `sourceEntity` / `sourceId`（可选 `sourceType`）复用 `StorageFileDao.listBySource` 拿到全部附件，逐条解析。
+- `resolveDownloadLocation(fileId, filename)`：解析单个文件；
+- `resolveDownloadLocationsBySource(query)`：按 `sourceEntity` / `sourceId`（可选 `sourceType`）复用 `StorageFileDao.listBySource` 拿到全部附件，逐条解析。
 
 单个文件的解析步骤：
 
 1. 查询正式文件并调用 `StoragePermissionChecker`；
-2. 解析内容键（`variant` 缺省或派生缺失时回退原图）；
+2. 取内容键（即正式文件的 `storageKey`）；
 3. `StorageContentRepository.supportsDirectAccess()` 为真时调用 `presignFormal(...)` 签发直链，返回 `mode=DIRECT`；
-4. 否则返回 `mode=PROXY`，由控制层补全为**同源相对路径** `/api/storage/download?...`（带好 `fileId`/`variant`）。
+4. 否则返回 `mode=PROXY`，由控制层补全为**同源相对路径** `/api/storage/download?...`（带好 `fileId`）。
    理由：服务端不知道客户端看到的 origin（网关 / 反向代理会终结 TLS 并改写 host+port），且 remote 模式下
    请求上下文是服务间调用的内网地址，按它拼绝对地址客户端必然访问不到。
 

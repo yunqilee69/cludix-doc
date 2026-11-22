@@ -191,18 +191,7 @@ spring:
 
 下载次数计数走 `nebula.cache.*` 的缓存后端，多实例部署应配统一缓存，否则计数只在单节点内存中。
 
-### 6.2 图片处理（`nebula.storage.image.*`）
-
-| 配置项 | 默认值 | 说明 |
-| --- | --- | --- |
-| `enabled` | `false` | 开启缩略图派生与尺寸上限校验 |
-| `thumb-width` / `thumb-height` | `320` / `320` | 缩略图目标尺寸（不放大） |
-| `thumb-quality` | `0.8` | 缩略图压缩质量，输出固定 jpeg |
-| `max-width` / `max-height` | `0` | 原图尺寸上限，`0` 表示不限制 |
-
-关闭时行为与未引入图片处理时完全一致；派生内容按 `(fileHash, variant)` 去重，读取端缺派生时回退原图。
-
-### 6.3 下载响应缓存（`nebula.storage.download.*`）
+### 6.2 下载响应缓存（`nebula.storage.download.*`）
 
 | 配置项 | 默认值 | 说明 |
 | --- | --- | --- |
@@ -215,7 +204,7 @@ spring:
 
 ## 7. 与缓存协作
 
-签名下载的下载次数计数、部分派生元数据依赖 `nebula.cache.*`：
+签名下载的下载次数计数依赖 `nebula.cache.*`：
 
 ```yaml
 nebula:

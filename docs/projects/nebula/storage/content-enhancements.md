@@ -1,14 +1,14 @@
 ---
-title: 存储增强（对象存储与图片处理）
+title: 存储增强（对象存储与直连下载）
 date: 2026-10-02 11:15
 tags: [nebula, storage, configuration]
 ---
 
-# 存储增强（对象存储与图片处理）
+# 存储增强（对象存储与直连下载）
 
-`nebula-storage` 的增强能力共四块：**按厂商独立的对象存储后端**、**图片派生版本（缩略图）**、
-**存储后端迁移工具**、**对象存储直连下载**。四者的默认行为都**不改变既有部署**：
-对象存储需显式选择后端类型，图片处理默认关闭，迁移工具需主动调用，直连下载默认关闭。
+`nebula-storage` 的增强能力共三块：**按厂商独立的对象存储后端**、**存储后端迁移工具**、
+**对象存储直连下载**。三者的默认行为都**不改变既有部署**：
+对象存储需显式选择后端类型，迁移工具需主动调用，直连下载默认关闭。
 
 ## 1. 对象存储后端（按厂商独立成模块）
 
@@ -43,60 +43,7 @@ tags: [nebula, storage, configuration]
 
 ---
 
-## 2. 图片派生版本（缩略图）
-
-### 2.1 定位
-
-`storage_file_variant` 表保存图片的派生版本（当前只有 `thumb`）。上传后按配置生成；
-派生是「可选存在」——未开启或处理失败时没有派生行，**读取端回退原图**。
-
-### 2.2 配置
-
-```yaml
-nebula:
-  storage:
-    image:
-      enabled: false        # 默认关闭，关闭时行为与未引入图片处理时完全一致
-      thumb-width: 320
-      thumb-height: 320
-      thumb-quality: 0.8
-      max-width: 0          # 原图宽度上限，0 表示不限制
-      max-height: 0         # 原图高度上限，0 表示不限制
-```
-
-| 配置项 | 默认值 | 说明 |
-| --- | --- | --- |
-| `enabled` | `false` | 是否开启图片处理（缩略图派生与尺寸上限校验） |
-| `thumb-width` / `thumb-height` | `320` / `320` | 缩略图目标尺寸（不放大：`scale = min(target/src, 1.0)`） |
-| `thumb-quality` | `0.8` | 缩略图压缩质量（0~1），输出固定为 jpeg |
-| `max-width` / `max-height` | `0` | 原图尺寸上限，`0` 不限制 |
-
-### 2.3 生成与去重
-
-- 生成时机：绑定（`bindUploadTasks`）保存正式文件后调用 `generateVariants`；已存在 `thumb` 派生则跳过。
-- 内容按 `(fileHash, variant)` 寻址去重：多个业务引用同一张图只存一份缩略图，
-  `contentKey` 形如 `variant/thumb/<fileHash>.jpg`。
-
-### 2.4 防解压炸弹
-
-解码前先读图片头部尺寸：
-
-- 格式白名单：`jpeg` / `jpg` / `png` / `bmp` / `gif`。
-- 像素总数硬上限 `50_000_000`；字节上限 `64 MiB`。
-- 超过像素或字节上限直接拒绝（`IMAGE_DIMENSION_EXCEEDED`，`24021`）；非图片或畸形输入返回「无派生」而不是硬试。
-
-### 2.5 读取与回退
-
-- `GET /api/storage/download` 支持可选 `variant` 参数：缺省/空白 → 原图；`variant=thumb` → 缩略图。
-- `GET /api/storage/download-location` 同样接受 `variant`，直连模式下发的是该派生的预签名直链。
-- **请求的派生版本不存在时回退原图并记 WARN，不抛 `VARIANT_NOT_FOUND`**——避免移动端列表页因缺少缩略图而整块空白。
-- 文件详情响应包含 `variants`（可用派生版本与尺寸）。
-- 签名下载 `download-signed` **不带** `variant`，恒返回原图。
-- 删除文件时会删除派生行，若某 `contentKey` 不再被任何行引用则删除正式内容。
-
----
-
-## 3. 存储后端迁移工具
+## 2. 存储后端迁移工具
 
 ### 3.1 能力
 
@@ -125,7 +72,7 @@ nebula:
 2. 启动迁移：源后端 → 目标后端，逐项 MD5 校验
 3. 迁移完成（migrated + skipped 覆盖全部正式文件）
 4. 切换后端（application.yml 或 高级配置 → 存储 tab）并生效
-5. 抽样校验读取（原图 + 派生）
+5. 抽样校验读取（服务端代理 + 直连两条路径）
 6. 确认无误后清理旧后端内容
 ```
 
@@ -136,7 +83,7 @@ nebula:
 
 ---
 
-## 4. 对象存储直连下载
+## 3. 对象存储直连下载
 
 ### 4.1 定位
 
@@ -149,7 +96,7 @@ nebula:
 - 给 `fileId`：解析单个文件的下载位置；
 - 给 `sourceEntity` + `sourceId`（可选 `sourceType`）：一次解析该业务实体下**全部附件**。
 
-响应恒为**数组**（单文件解析只有一个元素），客户端可直接遍历渲染多项。`variant` 两种方式都支持。
+响应恒为**数组**（单文件解析只有一个元素），客户端可直接遍历渲染多项。
 
 ### 4.2 响应
 
@@ -157,10 +104,10 @@ nebula:
 | --- | --- |
 | `fileId` | 正式文件ID |
 | `fileName` | 文件名，供列表页直接展示 |
-| `fileMimeType` | 文件 MIME；请求派生版本时为该派生内容的类型 |
+| `fileMimeType` | 文件 MIME |
 | `fileSize` | 文件字节数 |
 | `mode` | `DIRECT`（`url` 是对象存储预签名直链）或 `PROXY`（`url` 是同源相对路径 `/api/storage/download?...`） |
-| `url` | `DIRECT` 为临时直链（绝对地址）；`PROXY` 为带好 `fileId`/`variant` 的同源相对路径 |
+| `url` | `DIRECT` 为临时直链（绝对地址）；`PROXY` 为带好 `fileId` 的同源相对路径 |
 | `expiresAtEpochSecond` | 仅 `DIRECT` 有值，直链过期时间 |
 
 `filename` 有值 ⇒ 附件下载（`attachment`）；为空 ⇒ 内联预览（`inline`）。
@@ -209,7 +156,7 @@ nebula:
 | `GET /api/storage/settings` | `STORAGE_SETTINGS_QUERY`（接口码） | 读取存储配置：生效来源、两层配置（脱敏）、上传策略、切换风险 |
 | `PUT /api/storage/settings` | `STORAGE_SETTINGS_UPDATE`（按钮码） | 保存存储配置；审计排除凭据字段 |
 | `GET /api/storage/download-location` | `STORAGE_FILE_QUERY` | 解析下载位置，返回数组 |
-| `GET /api/storage/download` | `STORAGE_FILE_QUERY` | 支持可选 `variant` 参数 |
+| `GET /api/storage/download` | `STORAGE_FILE_QUERY` | 登录态下载 / 预览 |
 | `POST /api/storage/files/list-by-source` | `STORAGE_FILE_QUERY` | 按业务实体查附件，供列表页取图 |
 | `DELETE /api/storage/files/{fileId}` | `STORAGE_FILE_DELETE` | 删除正式文件 |
 | 其余上传/查询接口 | `STORAGE_UPLOAD` / `STORAGE_FILE_QUERY` | 见[业务功能](./business-capabilities) |
@@ -221,7 +168,7 @@ nebula:
 | `24020` | `STORAGE_PROVIDER_CONFIG_INCOMPLETE` | 对象存储后端配置不完整 |
 | `24021` | `IMAGE_DIMENSION_EXCEEDED` | 图片尺寸超过上限 |
 | `24022` | `IMAGE_PROCESS_FAILED` | 图片处理失败 |
-| `24023` | `VARIANT_NOT_FOUND` | 请求的派生版本不存在（当前实现走回退原图，未抛出） |
+| `24021` / `24022` / `24023` | `IMAGE_*` / `VARIANT_NOT_FOUND` | 保留码：图片派生（缩略图）能力已下线，编号不回收 |
 | `24024` | `MIGRATION_IN_PROGRESS` | 存储后端迁移进行中，暂不接受写入 |
 | `24025` | `MIGRATION_CHECKSUM_MISMATCH` | 迁移校验失败，内容哈希不一致 |
 | `24026` | `STORAGE_BACKEND_MISMATCH` | 文件不属于当前存储后端，拒绝删除 |
@@ -229,4 +176,5 @@ nebula:
 
 ## 7. 数据表
 
-`storage_file_variant` 的字段与索引见 [Storage 数据表](./ddl)。
+表结构变更：派生版本表 `storage_file_variant` 已随能力下线删除，升级脚本见
+`docs/sql/unreleased/{mysql,postgresql}/08-drop-storage-file-variant.sql`。

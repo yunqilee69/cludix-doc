@@ -214,10 +214,10 @@ nebula:
 
 推荐先解析下载位置，再按返回的 `mode` 取文件：
 
-1. `GET /api/storage/download-location?fileId=...`（可带 `filename`、`variant`）
+1. `GET /api/storage/download-location?fileId=...`（可带 `filename`）
 2. `mode=DIRECT`：把 `url` 当作裸 URL 直接取文件，不附加 `Authorization`
 3. `mode=PROXY`：`GET /api/storage/download?fileId=...`，带 `Authorization`。返回的 `url` 是**同源相对路径**
-   （形如 `/api/storage/download?fileId=file-1&variant=thumb`，不含 scheme / host / port），调用方按自身 origin
+   （形如 `/api/storage/download?fileId=file-1`，不含 scheme / host / port），调用方按自身 origin
    请求即可；服务端刻意不猜客户端看到的 host 与协议，因此在网关、反向代理、remote 模式下都成立。
 
 也可以跳过第 1 步直接调用 `/api/storage/download`——服务端代理路径始终可用；`download-location` 只是让客户端在对象存储开启直连时少走一趟应用带宽。
@@ -225,7 +225,7 @@ nebula:
 接口**恒返回数组**。要一次拿到某个业务单据下的全部附件，改用业务归属定位，省掉「先 list-by-source 再逐个解析」：
 
 ```text
-GET /api/storage/download-location?sourceEntity=deliveryOrder&sourceId=1870000000000000001&sourceType=signPhoto&variant=thumb
+GET /api/storage/download-location?sourceEntity=deliveryOrder&sourceId=1870000000000000001&sourceType=signPhoto
 ```
 
 响应每项带 `fileId` / `fileName` / `fileMimeType` / `fileSize` / `mode` / `url`，列表页可直接遍历渲染。`fileId` 与 `sourceEntity`+`sourceId` 二选一，都不给报 `DOWNLOAD_LOCATION_PARAM_INVALID`（24027）。
@@ -234,7 +234,7 @@ GET /api/storage/download-location?sourceEntity=deliveryOrder&sourceId=187000000
 
 - 已登录后台用户下载
 - 平台前端自己下载
-- 移动端图片预览（`variant=thumb`，直连时用直链、否则走 blob）
+- 移动端图片预览（直连时用直链、否则走 blob）
 - 业务单据的全部附件/签名照片一次性取下载位置
 
 > **注意**：`filesystem` / `db` 后端恒返回 `PROXY`；对象存储的直连开关默认关闭。预览场景**不要传 `filename`**，否则语义会从 `inline` 变成 `attachment`；按业务归属批量解析本身即按预览语义处理，传了也会被忽略。
@@ -354,22 +354,26 @@ public class ContractStoragePermissionChecker implements StoragePermissionChecke
 
 ### 8.1 上传侧
 
-前端一般需要保存：
+前端一般只需要保存 `taskId`（上传进度与本地预览由组件自己维护；`fileId` 由后端绑定后返回）。
 
-- `taskId`
-- 上传进度
-- `fileId`（bind 成功后）
+`web/src/components/ne-upload` 已经把这条链路封成组件：`NeUpload`（文件列表）与 `NeImageUpload`（缩略图）。
+组件的初始文件来源**二选一**，业务直传优先：
 
-建议区分两类组件：
+| 优先级 | 入参 | 行为 |
+| --- | --- | --- |
+| 1 | `downloadLocations`（业务给数组） | 直接用数组当初始列表，**不发请求**；元素与 `download-location` 响应同构 |
+| 2 | `sourceEntity` + `sourceId`（+ `sourceType`） | 组件内部调 `GET /api/storage/download-location` 解析下载地址 |
 
-1. **普通上传组件**
-   - 直接走 `/api/storage/upload`
-   - 适合图片、文档、小文件
+典型用法：
 
-2. **分片上传组件**
-   - 先申请 task
-   - 再逐片上传
-   - 最后 complete + bind
+- 单值资源位（头像、企业 Logo）：给 `downloadLocations: [{ url: profile.avatar }]`，
+  地址变了组件会自动重新装载；业务保存成功后可用 `refreshToken` 触发重新解析。
+- 一个业务对象多附件（单据签名照片、合同附件）：只给 `sourceEntity + sourceId + sourceType`，
+  业务不关心地址，组件一次拿到全部附件（服务端按 `create_time DESC` 返回，`maxCount` 截断取最新）。
+- 两者都传时以 `downloadLocations` 为准（业务数据优先，且零请求）。
+
+上传本身仍由 `uploadRequest` 注入（内部走 `uploadFileWithPolicy`：超过分片阈值自动切片），
+组件**不负责 bind**——绑定发生在后端业务保存流程内。
 
 ### 8.2 下载侧
 
@@ -377,6 +381,7 @@ public class ContractStoragePermissionChecker implements StoragePermissionChecke
 
 1. **下载附件**
    - 先调 `/api/storage/download-location` 解析位置：`DIRECT` 用返回的裸 URL，`PROXY` 走 `/api/storage/download`
+   - 直链带有效期（默认 300 秒），页面长期停留时图片可能失效；组件在 `<img>` 加载失败时会用 `fileId` 重新解析一次
 
 2. **复制分享链接**
    - 先调用 `/api/storage/generate-signed-url`
