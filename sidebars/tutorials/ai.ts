@@ -8,6 +8,24 @@ const aiSidebar: SidebarConfig = [
   },
   {
     type: 'category',
+    label: '基础概念',
+    collapsible: true,
+    collapsed: true,
+    items: [
+      {
+        type: 'doc',
+        id: 'tutorials/ai/concepts/index',
+        label: 'AI 协议与概念',
+      },
+      {
+        type: 'doc',
+        id: 'tutorials/ai/concepts/A2UI与AG-UI',
+        label: 'A2UI、AG-UI 与 ChatGPT Apps',
+      },
+    ],
+  },
+  {
+    type: 'category',
     label: 'AI 应用',
     collapsible: true,
     collapsed: true,

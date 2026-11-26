@@ -29,6 +29,7 @@ tags: [ai, agent, tutorial]
 | 执行循环 | LLM loop 逐环节拆解：上下文构造、推理、工具执行、observation 回填、终止条件 | 规划中 |
 | tool-calling机制 | 模型如何表达调用意图、JSON 参数校验、引擎侧执行、工具描述设计 | 规划中 |
 | context与memory | 上下文窗口即工作内存、压缩与摘要、短期上下文 vs 长期外部存储 | 规划中 |
+| [A2UI、AG-UI 与 ChatGPT Apps](./concepts/A2UI与AG-UI) | A2UI 的界面描述、AG-UI 的事件通信、MCP Apps 与 ChatGPT Apps 的关系 | ✅ 已落地 |
 
 ### frameworks
 
