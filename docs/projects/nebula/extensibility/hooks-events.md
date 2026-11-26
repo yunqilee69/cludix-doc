@@ -100,7 +100,6 @@ public interface PushChannelSender {
 | Auth | `auth-userCreated` | `UserCreatedEvent` | 用户创建事件（用户名注册、手机号 / 邮箱首次登录建号、OAuth2 自动开通、后台建号，payload 带 `source` 区分来源） |
 | Auth | `auth-passwordReset` | `UserPasswordResetEvent` | 用户密码重置事件 |
 | Auth | `auth-permissionChanged` | `UserPermissionChangedEvent` | 用户权限变更事件 |
-| Storage | `storage-upload-task-bound` | `StorageUploadTaskBoundEvent` | 上传任务绑定完成 |
 | Audit | `audit-recorded` | `AuditRecordedEvent` | 审计记录事件 |
 
 注意 Dict 的事件 code 是**驼峰**（`typeCreated`），拼出来的 eventType 是 `dict-typeCreated` 而不是 `dict-type-created`，写监听器时不要漏掉大小写。

@@ -33,6 +33,7 @@ format: md
   - 顺带修复：`ConfigurableStorageContentRepository` 的按租户缓存用 `TenantIdResolver.resolve()` 结果作 key，解析为 `null` 时会抛 NPE，现回退到既有的空串键。
 - `nebula-notify` / `web` / `docs/sql`：**通知记录支持批量删除**。此前通知记录页只能看不能清，投递日志会无限堆积。新增 `DELETE /api/notify/records/batch`（请求体 `{"ids": [...]}`，返回**实际删除条数**，不是提交条数——勾选后记录可能已被其他管理员删掉）、服务方法 `INotifyService#removeNotifyRecords`（local + remote 双实现）、前端 `notifyService.deleteNotifyRecords`，列表加勾选列与「批量删除」按钮（`Popconfirm` 二次确认，按 1~N 条如实回执）。删除范围是「记录 + 该记录下的逐设备推送明细」（`sys_notify_push_record_detail` 只按 `record_id` 关联、无外键，必须级联清理否则留孤儿行）；**已投递的站内信不随记录删除**——那是接收人收件箱里的消息，不属排障日志。新增按钮权限码 `NOTIFY_RECORD_DELETE`（菜单「通知记录」），`init/02-init-data.sql` 与 `unreleased/03-notify-record-delete-button.sql` 均已补登记并给 `ADMIN` 授权；无 DDL 变更。
 - `nebula-storage` / `docs`：腾讯云 COS 新增 `endpoint` 配置（env `NEBULA_STORAGE_TENCENT_COS_ENDPOINT`，租户级复用 `storage.backend.endpoint`）；留空仍按 region 推导官方域名，非空时正式区读写与预签名直链统一走该自定义域名，`region` 仍必填；上传与分片只写本地临时区不受影响；无 DDL、无前端改动。
+- `nebula-storage` / `web` / `docs`：**临时上传任务管理生命周期已确认**。绑定成功后保留上传任务、分片记录和 temp 内容，并把任务 `updateTime` 更新为新的保留期基线；不再发布 `StorageUploadTaskBoundEvent`，也不再由绑定处理器立即清理。`storage.upload.task.cleanup` 后续扫描过期的 `COMPLETED` 任务，删除 temp 主内容、分片内容及任务/分片元数据；管理页面支持查看任务元数据并手动删除临时任务，但删除永远不触碰 `storage_file` 或正式文件内容。绑定阶段已有的正式内容复用不等于“秒传”，上传前按哈希跳过传输仍是未来范围。
 
 ### Changed
 

@@ -181,8 +181,9 @@ chunk-size  ≤  chunk-threshold  ≤  max-file-size
 清理入口为调度任务 `storage.upload.task.cleanup`（`StorageUploadTaskCleanupJobHandler`，
 `@NebulaScheduledJob`，默认 cron `0 0 */6 * * ?`，即每 6 小时整点），由 `nebula-scheduler`
 统一注册到定时任务管理，支持页面手动触发立即清理；手动触发时可传参数
-`{"taskId":"..."}` 只清理指定任务。绑定成功后的实时清理仍走
-`storage-upload-task-bound` 事件（`StorageUploadTaskCleanupHandler`）。
+`{"taskId":"..."}` 只清理指定任务。绑定成功不触发实时清理：任务和临时内容继续保留，绑定流程只更新任务 `updateTime`，以绑定时刻刷新保留期基线；调度器之后只清理已过期的 `COMPLETED` 任务。
+
+调度清理或手动删除任务时，会删除任务的 temp 主内容、分片 temp 内容、`storage_upload_part` 和 `storage_upload_task` 元数据，但**不会删除 `storage_file` 或正式文件内容**。任务管理页面只展示任务元数据（状态、绑定状态、文件信息、哈希、分片进度和时间字段），不提供临时内容的预览或下载。按哈希在绑定阶段复用已有正式内容不等于上传前“秒传”；秒传仍是未来范围。
 
 > 现有实现 `listByTaskId` 已 `orderByAsc(partNumber)`，分片合并顺序正确，无需改动。
 
@@ -366,7 +367,7 @@ init 响应中的实际形状：
 | `nebula-storage-core/.../config/NebulaStorageProperties.java` | 若需静态兜底默认值，加 `public static class Upload`；javadoc 按 `10-config.md` §7.1 写清单位与默认值 |
 | `nebula-storage-core/.../config/NebulaStorageAutoConfiguration.java` | 加入 §2.1 启动期断言 |
 | `nebula-storage-core/.../service/impl/StorageServiceImpl.java` | 实现 `getUploadPolicy()`；§4 各强制点；重算 `chunkCount` |
-| `nebula-storage-core/.../support/StorageUploadTaskCleanupHandler.java` | 保留天数参数化 |
+| `nebula-storage-core/.../support/StorageUploadTaskCleanupJobHandler.java` | 按保留天数清理过期 `COMPLETED` 任务；绑定时刷新任务 `updateTime`，不再通过绑定事件实时清理 |
 | `nebula-storage-remote/.../impl/StorageRemoteServiceImpl.java` + `.../feign/StorageFeignClient.java` | 同步补 `getUploadPolicy()`（远程模式必需） |
 | `nebula-storage-local/.../controller/StorageController.java` | 补内部端点供 Feign 调用；**仅供 `mode=remote`，浏览器不访问** |
 | `nebula-frontend/nebula-frontend-core/pom.xml` | 新增依赖 `nebula-storage-api`（仅 api 层） |
