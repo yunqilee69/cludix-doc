@@ -37,6 +37,7 @@ format: md
 
 ### Changed
 
+- `nebula-auth` / `nebula-frontend` / `nebula-storage` / `web` / `docs/spec`：**公开品牌资源与租户解析边界收紧**。`/api/frontend/init` 与 `/api/frontend/brand-assets/{slot}` 仅在精确公开路径上允许匿名品牌兜底，裸基域或未知子域只使用 ACTIVE 的配置默认租户；显式无效租户选择不回退，普通 API 严格要求有效租户上下文。品牌资源只通过 `logo`、`login-logo`、`favicon`、`login-background` 四个固定槽位 URL 提供，缺失或非法资源返回真实 HTTP `404`；通用 `/api/storage/download` 继续要求登录态、`STORAGE_FILE_QUERY` 权限和当前租户归属校验，不因品牌接口而公开任意文件。
 - `nebula-base-cache` / `nebula-frontend` / `web` / `docs`：**缓存管理页不再「只显示一条缓存」——清单补齐、缓存模式可见、受保护命名空间改为只藏值不藏名**。此前页面只列出「当前有数据」的非敏感缓存：`GET /api/frontend/caches` 把系统参数、会话令牌、验证码等命名空间整条剔除，前端又把 `entries` 为空的分组整组隐藏，于是实际跑着 `systemParamByKey`（20+ 参数）、`authSessionCache`（7 条会话）的实例上只显示 1 条 `authUserPermTsCache`，且看不出缓存落在 Redis 还是 Caffeine。本次调整：
   - **清单范围**：`DynamicCacheService.listCacheNames()` 由「已注册的动态缓存」扩为「动态注册 + 底层 `CacheManager` 承载」的全集，且不再按有无条目过滤；`FrontendServiceImpl.listCaches()` 对所有命名空间都产出分组。空白状态由「没有缓存」变成「注册了但当前为空」，而后者正是排障时最需要区分的情况。只在底层 `CacheManager` 承载的命名缓存（无 `CacheDefinition`）TTL 取全局默认值；Redis 命名缓存无法枚举条目时 `entryCount` 返回 `null`，页面展示「条目数未知」而不是 0。
   - **缓存模式**：`GET /api/frontend/caches` 的每个分组新增 `cacheMode`（`redis` / `caffeine`，按缓存实例类型判定、租户包装类回退到 `nebula.cache.type`）与 `protectedCache`，页面顶部展示缓存模式标签，可直接确认缓存有没有真的进 Redis。
