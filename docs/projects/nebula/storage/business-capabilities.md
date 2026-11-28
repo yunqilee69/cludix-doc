@@ -148,7 +148,7 @@ bind 是 storage 模块里最关键的业务动作。
 
 - `sourceScope`：`USER` / `TENANT`，决定 `sourceId` 从哪个上下文派生
 - `sourceEntity`：文件属于哪个业务对象类型，例如 `contract`、`notice`、`user-profile`
-- `sourceType`（可选，默认 `default`）：资源位或来源分组，例如 `avatar`、`logo`、`login-logo`
+- `sourceType`（可选，默认 `default`）：资源位或来源分组，例如 `avatar`、`logo`、`favicon`
 - `taskIds`：待绑定的上传任务 ID 列表
 
 `sourceId` **由服务端派生，不接受客户端传入**：

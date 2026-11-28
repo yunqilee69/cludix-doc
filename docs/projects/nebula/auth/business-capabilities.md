@@ -240,15 +240,14 @@ GET /api/auth/current-user
   "name": "示例科技有限公司",
   "uploadTaskIds": {
     "logo": ["<taskId-1>"],
-    "login-logo": ["<taskId-2>"],
-    "favicon": ["<taskId-3>"],
-    "login-background": ["<taskId-4>"]
+    "favicon": ["<taskId-2>"],
+    "login-background": ["<taskId-3>"]
   }
 }
 ```
 
-- 合法 key 恰为四个资源位：`logo`、`login-logo`、`favicon`、`login-background`，**每个 key 必须恰好 1 个** `taskId`；四个 key 可只传其中一部分。
-- 绑定归属由服务端从租户上下文派生（不读请求体里的任何 `sourceId`），回填到 `tenant.logo` / `branding.loginLogo` / `branding.favicon` / `branding.loginBackground`。
+- 合法 key 恰为三个资源位：`logo`、`favicon`、`login-background`，**每个 key 必须恰好 1 个** `taskId`；三个 key 可只传其中一部分。
+- 绑定归属由服务端从租户上下文派生（不读请求体里的任何 `sourceId`），回填到 `tenant.logo` / `branding.favicon` / `branding.loginBackground`；登录页 Logo 直接复用 `tenant.logo`，不再有独立资源位。
 - 任一资源位传多个、传空或出现未知 key → `TENANT_PROFILE_INVALID`（`19024`），且**先整批校验再绑定**：任一资源位非法时不会产生任何正式文件。
 - 需要 `TENANT_PROFILE_UPDATE` 权限码。
 
